@@ -1,5 +1,9 @@
 # Changelog for DP3T-SDK Android
 
+## Version 0.01 (2.6.2020)
+- Frok to get prestandard DP-3T to work like Google/Apple protocoll.
+- Rename to CoraLibre-android-sdk
+
 ## Version 0.2.6 (8.5.2020)
 
 - Change signing of test calibration app
