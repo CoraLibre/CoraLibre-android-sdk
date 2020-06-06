@@ -32,9 +32,9 @@ public class PaddedData {
         return (new String(extracted_rpiinfo, StandardCharsets.UTF_8)).equals(RPI_INFO);
     }
 
-    public ENNumber getTimestamp() {
-        byte[] rawTimestamp = new byte[ENNumber.INT_BYTES];
-        System.arraycopy(data, TIMESTAMP_POS, rawTimestamp, 0, ENNumber.INT_BYTES);
-        return new ENNumber(rawTimestamp);
+    public ENNumber getInterval() {
+        byte[] rawInterval = new byte[ENNumber.INT_BYTES];
+        System.arraycopy(data, TIMESTAMP_POS, rawInterval, 0, ENNumber.INT_BYTES);
+        return new ENNumber(rawInterval);
     }
 }

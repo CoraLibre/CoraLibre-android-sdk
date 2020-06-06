@@ -27,7 +27,7 @@ public class PaddingDataTests {
     };
 
     @Test
-    public void testSetTimestamp() {
+    public void testSetInterval() {
         PaddedData pd = new PaddedData(TIMESTAMP_1);
         assertArrayEquals(PADDED_DATA_1, pd.getData());
     }
@@ -35,7 +35,7 @@ public class PaddingDataTests {
     @Test
     public void testSetRawPaddedData() {
         PaddedData pd = new PaddedData(PADDED_DATA_1);
-        assertEquals(TIMESTAMP_1.get(), pd.getTimestamp().get());
+        assertEquals(TIMESTAMP_1.get(), pd.getInterval().get());
     }
 
     @Test
