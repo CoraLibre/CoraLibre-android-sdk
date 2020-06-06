@@ -9,6 +9,7 @@ import org.coralibre.android.sdk.internal.crypto.ppcp.AssociatedEncryptedMetadat
 import org.coralibre.android.sdk.internal.crypto.ppcp.AssociatedEncryptedMetadataKey;
 import org.coralibre.android.sdk.internal.crypto.ppcp.AssociatedMetadata;
 import org.coralibre.android.sdk.internal.crypto.ppcp.CryptoModule;
+import org.coralibre.android.sdk.internal.crypto.ppcp.ENNumber;
 import org.coralibre.android.sdk.internal.crypto.ppcp.PaddedData;
 import org.coralibre.android.sdk.internal.crypto.ppcp.RollingProximityIdentifier;
 import org.coralibre.android.sdk.internal.crypto.ppcp.RollingProximityIdentifierKey;
@@ -132,7 +133,8 @@ public class CryptoModuleTests {
     @Test
     public void testEncryptDecryptAEM() throws Exception {
         AssociatedMetadata am = new AssociatedMetadata(AM_VAL_V3_2_MINUS16db);
-        RollingProximityIdentifier rpi = new RollingProximityIdentifier(RPI_VAL1);
+        RollingProximityIdentifier rpi = new RollingProximityIdentifier(RPI_VAL1,
+                new ENNumber(0));
         AssociatedEncryptedMetadataKey aemk = new AssociatedEncryptedMetadataKey(AEMK_VAL1);
 
         AssociatedEncryptedMetadata aem = CryptoModule.encryptAM(am, rpi, aemk);

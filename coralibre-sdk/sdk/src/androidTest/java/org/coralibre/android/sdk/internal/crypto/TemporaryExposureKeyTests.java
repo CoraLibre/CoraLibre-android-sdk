@@ -36,25 +36,27 @@ public class TemporaryExposureKeyTests {
     public static final long RAW_OUTPUT_ENNUMBER_VAL1 = 305419824;
 
     @Test
-    public void testSetTEKWithENNumberTimestamp() {
+    public void testSetTEKWithENNumberInterval() {
         ENNumber i = new ENNumber(RAW_INPUT_ENNUMBER_VAL1);
         TemporaryExposureKey tek = new TemporaryExposureKey(i, TEK_VAL1);
         assertArrayEquals(TEK_VAL1, tek.getKey());
-        assertEquals(RAW_OUTPUT_ENNUMBER_VAL1, tek.getTimestamp().get());
+        assertEquals(RAW_OUTPUT_ENNUMBER_VAL1, tek.getInterval().get());
     }
 
     @Test
     public void testSetTEKFromRawData() {
         TemporaryExposureKey tek = new TemporaryExposureKey(new Pair<>(RAW_INPUT_ENNUMBER_VAL1, TEK_VAL1));
         assertArrayEquals(TEK_VAL1, tek.getKey());
-        assertEquals(RAW_OUTPUT_ENNUMBER_VAL1, tek.getTimestamp().get());
+        assertEquals(RAW_OUTPUT_ENNUMBER_VAL1, tek.getInterval().get());
     }
 
     @Test
-    public void testSetExactTimestamp() {
+    public void testSetExactInterval() {
         TemporaryExposureKey tek = new TemporaryExposureKey(new Pair<>(RAW_OUTPUT_ENNUMBER_VAL1, TEK_VAL1));
         assertArrayEquals(TEK_VAL1, tek.getKey());
-        assertEquals(RAW_OUTPUT_ENNUMBER_VAL1, tek.getTimestamp().get());
+        assertEquals(RAW_OUTPUT_ENNUMBER_VAL1, tek.getInterval().get());
     }
+
+
 
 }
