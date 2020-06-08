@@ -14,7 +14,7 @@ This sdk should become part of the CoraLibre app which should become compatible 
 
 ## Documentation
 
-The Bluetoth Specification as well ex Cryptography Specification is documented here:
+The Bluetoth specification as well es the cryptography specification is documented here:
 https://www.apple.com/covid19/contacttracing/
 
 The Android API is documented here:
