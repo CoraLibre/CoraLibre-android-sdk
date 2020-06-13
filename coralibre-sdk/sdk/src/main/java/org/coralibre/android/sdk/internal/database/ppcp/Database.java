@@ -1,17 +1,23 @@
 package org.coralibre.android.sdk.internal.database.ppcp;
 
+import org.coralibre.android.sdk.internal.crypto.ppcp.BluetoothPayload;
 import org.coralibre.android.sdk.internal.crypto.ppcp.ENNumber;
+import org.coralibre.android.sdk.internal.crypto.ppcp.RollingProximityIdentifier;
 import org.coralibre.android.sdk.internal.crypto.ppcp.TemporaryExposureKey;
-import org.coralibre.android.sdk.internal.database.ppcp.models.CollectedPayload;
-import org.coralibre.android.sdk.internal.database.ppcp.models.GeneratedTEK;
 
+import java.util.List;
 import java.util.Set;
 
 public interface Database {
-    void addCollectedPayload(CollectedPayload collectedPayload);
-    void addGeneratedTEK(GeneratedTEK generatedTEK);
+    void addCollectedPayload(BluetoothPayload collectedPayload);
+    void addGeneratedTEK(TemporaryExposureKey generatedTEK);
 
-    Set<CollectedPayload> getCollectedPayloadByInterval(ENNumber enNumber);
-    GeneratedTEK getGeneratedTEKByInterval(ENNumber enNumber);
+    Set<BluetoothPayload> getCollectedPayloadByInterval(ENNumber enNumber);
+    TemporaryExposureKey getGeneratedTEKByInterval(ENNumber enNumber);
     boolean doesTEKExist(ENNumber enNumber);
+    List<TemporaryExposureKey> getAllGeneratedTEKs();
+    List<Set<BluetoothPayload>> getAllCollectedPayload();
+
+
+    void truncateLast14Days();
 }

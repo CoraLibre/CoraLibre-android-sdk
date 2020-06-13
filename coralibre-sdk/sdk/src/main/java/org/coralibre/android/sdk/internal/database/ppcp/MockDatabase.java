@@ -1,8 +1,9 @@
 package org.coralibre.android.sdk.internal.database.ppcp;
 
+import org.coralibre.android.sdk.internal.BluetoothAdvertiseMode;
+import org.coralibre.android.sdk.internal.crypto.ppcp.BluetoothPayload;
 import org.coralibre.android.sdk.internal.crypto.ppcp.ENNumber;
-import org.coralibre.android.sdk.internal.database.ppcp.models.CollectedPayload;
-import org.coralibre.android.sdk.internal.database.ppcp.models.GeneratedTEK;
+import org.coralibre.android.sdk.internal.crypto.ppcp.TemporaryExposureKey;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -11,24 +12,24 @@ import java.util.Map;
 import java.util.Set;
 
 public class MockDatabase implements Database {
-    private Map<ENNumber, Set<CollectedPayload>> collectedPayloadByInterval = new HashMap<>();
-    private Map<ENNumber, GeneratedTEK> generatedTEKs = new HashMap<>();
+    private Map<ENNumber, Set<BluetoothPayload>> collectedPayloadByInterval = new HashMap<>();
+    private Map<ENNumber, TemporaryExposureKey> generatedTEKs = new HashMap<>();
 
     @Override
-    public void addCollectedPayload(CollectedPayload collectedPayload) {
-        ENNumber interval = collectedPayload.getEnNumber();
-        Set<CollectedPayload> slot = collectedPayloadByInterval.get(interval);
-        if(slot == null) {
-            slot = new HashSet<>();
-            collectedPayloadByInterval.put(interval, slot);
+    public void addCollectedPayload(BluetoothPayload collectedPayload) {
+        ENNumber interval = collectedPayload.getInterval();
+        Set<BluetoothPayload> payloadPerInterval = collectedPayloadByInterval.get(interval);
+        if(payloadPerInterval == null) {
+            payloadPerInterval = new HashSet<>();
+            collectedPayloadByInterval.put(interval, payloadPerInterval);
         }
-        slot.add(collectedPayload);
+        payloadPerInterval.add(collectedPayload);
     }
 
     @Override
-    public void addGeneratedTEK(GeneratedTEK generatedTEK) {
-        ENNumber interval = generatedTEK.getTek().getInterval();
-        GeneratedTEK storedTek = generatedTEKs.get(interval);
+    public void addGeneratedTEK(TemporaryExposureKey generatedTEK) {
+        ENNumber interval = generatedTEK.getInterval();
+        TemporaryExposureKey storedTek = generatedTEKs.get(interval);
         if(storedTek == null) {
             generatedTEKs.put(interval, generatedTEK);
         } else {
@@ -37,8 +38,8 @@ public class MockDatabase implements Database {
     }
 
     @Override
-    public Set<CollectedPayload> getCollectedPayloadByInterval(ENNumber enNumber) {
-        Set<CollectedPayload> interval = collectedPayloadByInterval.get(enNumber);
+    public Set<BluetoothPayload> getCollectedPayloadByInterval(ENNumber enNumber) {
+        Set<BluetoothPayload> interval = collectedPayloadByInterval.get(enNumber);
         if(interval == null) {
             return Collections.emptySet();
         }
@@ -46,8 +47,8 @@ public class MockDatabase implements Database {
     }
 
     @Override
-    public GeneratedTEK getGeneratedTEKByInterval(ENNumber enNumber) {
-        GeneratedTEK genTEK = generatedTEKs.get(enNumber);
+    public TemporaryExposureKey getGeneratedTEKByInterval(ENNumber enNumber) {
+        TemporaryExposureKey genTEK = generatedTEKs.get(enNumber);
         if(genTEK == null) {
             throw new StorageException("TEK for interval does not exist");
         }
@@ -58,4 +59,6 @@ public class MockDatabase implements Database {
     public boolean doesTEKExist(ENNumber enNumber) {
         return generatedTEKs.get(enNumber) != null;
     }
+
+
 }
