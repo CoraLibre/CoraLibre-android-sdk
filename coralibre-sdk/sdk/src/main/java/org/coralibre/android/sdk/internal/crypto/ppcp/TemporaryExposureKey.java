@@ -24,8 +24,8 @@ public class TemporaryExposureKey {
         System.arraycopy(value, 0, key, 0, TEK_LENGTH);
     }
 
-    public TemporaryExposureKey(Pair<Long, byte[]> rawKey) {
-        this(new ENNumber(rawKey.first), rawKey.second);
+    public TemporaryExposureKey(long timestamp, byte[] rawKey) {
+        this(new ENNumber(timestamp), rawKey);
     }
 
     public ENNumber getInterval() {

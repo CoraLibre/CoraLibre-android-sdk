@@ -45,14 +45,14 @@ public class TemporaryExposureKeyTests {
 
     @Test
     public void testSetTEKFromRawData() {
-        TemporaryExposureKey tek = new TemporaryExposureKey(new Pair<>(RAW_INPUT_ENNUMBER_VAL1, TEK_VAL1));
+        TemporaryExposureKey tek = new TemporaryExposureKey(RAW_INPUT_ENNUMBER_VAL1, TEK_VAL1);
         assertArrayEquals(TEK_VAL1, tek.getKey());
         assertEquals(RAW_OUTPUT_ENNUMBER_VAL1, tek.getInterval().get());
     }
 
     @Test
     public void testSetExactInterval() {
-        TemporaryExposureKey tek = new TemporaryExposureKey(new Pair<>(RAW_OUTPUT_ENNUMBER_VAL1, TEK_VAL1));
+        TemporaryExposureKey tek = new TemporaryExposureKey(RAW_OUTPUT_ENNUMBER_VAL1, TEK_VAL1);
         assertArrayEquals(TEK_VAL1, tek.getKey());
         assertEquals(RAW_OUTPUT_ENNUMBER_VAL1, tek.getInterval().get());
     }
