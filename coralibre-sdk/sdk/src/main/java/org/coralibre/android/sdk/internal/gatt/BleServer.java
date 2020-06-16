@@ -14,23 +14,36 @@ import android.bluetooth.BluetoothManager;
 import android.bluetooth.le.AdvertiseCallback;
 import android.bluetooth.le.AdvertiseData;
 import android.bluetooth.le.AdvertiseSettings;
+import android.bluetooth.le.AdvertisingSet;
+import android.bluetooth.le.AdvertisingSetCallback;
+import android.bluetooth.le.AdvertisingSetParameters;
 import android.bluetooth.le.BluetoothLeAdvertiser;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.ParcelUuid;
+
+import androidx.annotation.RequiresApi;
 
 import java.util.UUID;
 
+import org.coralibre.android.sdk.BuildConfig;
 import org.coralibre.android.sdk.internal.AppConfigManager;
-import org.coralibre.android.sdk.internal.crypto.CryptoModule;
+import org.coralibre.android.sdk.internal.crypto.ppcp.AssociatedMetadata;
+import org.coralibre.android.sdk.internal.crypto.ppcp.CryptoModule;
 import org.coralibre.android.sdk.internal.logger.Logger;
+
+import static android.bluetooth.le.AdvertisingSetParameters.INTERVAL_MEDIUM;
 
 public class BleServer {
 
 	private static final String TAG = "BleServer";
 
-	private static final String DP3T_16_BIT_UUID = "FD68";
-	public static final UUID SERVICE_UUID = UUID.fromString("0000" + DP3T_16_BIT_UUID + "-0000-1000-8000-00805F9B34FB");
+	private static final String PPCP_16_BIT_UUID = "FD6F";
+	private static final int PPCP_VERSION_MAJOR = 1;
+	private static final int PPCP_VERSION_MINOR = 0;
+
+	public static final UUID SERVICE_UUID = UUID.fromString("0000" + PPCP_16_BIT_UUID + "-0000-1000-8000-00805F9B34FB");
 	public static final UUID TOTP_CHARACTERISTIC_UUID = UUID.fromString("8c8494e3-bab5-1848-40a0-1b06991c0001");
 
 	private final Context context;
@@ -47,6 +60,7 @@ public class BleServer {
 			BluetoothServiceStatus.getInstance(context).updateAdvertiseStatus(BluetoothServiceStatus.ADVERTISE_OK);
 		}
 	};
+
 	private BluetoothAdapter mAdapter;
 	private BluetoothLeAdvertiser mLeAdvertiser;
 
@@ -56,20 +70,9 @@ public class BleServer {
 
 	private byte[] getAdvertiseData() {
 		CryptoModule cryptoModule = CryptoModule.getInstance(context);
-		byte[] advertiseData = cryptoModule.getCurrentEphId().getData();
-		String calibrationTestDeviceName = AppConfigManager.getInstance(context).getCalibrationTestDeviceName();
-		if (calibrationTestDeviceName != null) {
-			byte[] nameBytes = calibrationTestDeviceName.getBytes();
-			for (int i = 0; i < AppConfigManager.CALIBRATION_TEST_DEVICE_NAME_LENGTH; i++) {
-				advertiseData[i] = nameBytes[i];
-			}
-			long curMinInEpoch = ((System.currentTimeMillis() - cryptoModule.getCurrentEpochStart()) / (60 * 1000));
-			byte[] minData = Long.toString(curMinInEpoch).getBytes();
-			advertiseData[AppConfigManager.CALIBRATION_TEST_DEVICE_NAME_LENGTH] = minData[0];
-			if (minData.length > 1) {
-				advertiseData[AppConfigManager.CALIBRATION_TEST_DEVICE_NAME_LENGTH + 1] = minData[1];
-			}
-		}
+		byte[] advertiseData = cryptoModule.getCurrentPayload().getRawPayload();
+		//TODO: add data described in here:
+		// https://covid19-static.cdn-apple.com/applications/covid19/current/static/contact-tracing/pdf/ExposureNotification-BluetoothSpecificationv1.2.pdf
 		return advertiseData;
 	}
 
@@ -88,32 +91,27 @@ public class BleServer {
 
 		AppConfigManager appConfigManager = AppConfigManager.getInstance(context);
 
+		//TODO: ADD REAL POWERLEVEL !!!! THIS IS JUST A PLACEHOLDER
+		CryptoModule.getInstance(context).setMetadata(
+				new AssociatedMetadata(PPCP_VERSION_MAJOR, PPCP_VERSION_MINOR, 0));
+
 		AdvertiseSettings.Builder settingBuilder = new AdvertiseSettings.Builder();
 		settingBuilder.setAdvertiseMode(appConfigManager.getBluetoothAdvertiseMode().getSystemValue());
 		settingBuilder.setTxPowerLevel(appConfigManager.getBluetoothTxPowerLevel().getSystemValue());
-		settingBuilder.setConnectable(true);
+		settingBuilder.setConnectable(false);
 		settingBuilder.setTimeout(0);
 		AdvertiseSettings settings = settingBuilder.build();
 
 		AdvertiseData.Builder advBuilder = new AdvertiseData.Builder();
-		advBuilder.setIncludeTxPowerLevel(true);
+		advBuilder.setIncludeTxPowerLevel(false);
 		advBuilder.setIncludeDeviceName(false);
 		advBuilder.addServiceUuid(new ParcelUuid(SERVICE_UUID));
 
-		if (appConfigManager.isScanResponseEnabled()) {
-			AdvertiseData.Builder scanResponse = new AdvertiseData.Builder();
-			scanResponse.setIncludeTxPowerLevel(false);
-			scanResponse.setIncludeDeviceName(false);
-			scanResponse.addServiceData(new ParcelUuid(SERVICE_UUID), getAdvertiseData());
-			mLeAdvertiser.startAdvertising(settings, advBuilder.build(), scanResponse.build(), advertiseCallback);
-			Logger.d(TAG, "started advertising (with scanResponse), advertiseMode " + settings.getMode() + " powerLevel " +
-					settings.getTxPowerLevel());
-		} else {
-			advBuilder.addServiceData(new ParcelUuid(SERVICE_UUID), getAdvertiseData());
-			mLeAdvertiser.startAdvertising(settings, advBuilder.build(), advertiseCallback);
-			Logger.d(TAG, "started advertising (only advertiseData), advertiseMode " + settings.getMode() + " powerLevel " +
-					settings.getTxPowerLevel());
-		}
+		advBuilder.addServiceData(new ParcelUuid(SERVICE_UUID), getAdvertiseData());
+
+		mLeAdvertiser.startAdvertising(settings, advBuilder.build(), advertiseCallback);
+		Logger.d(TAG, "started advertising (only advertiseData), advertiseMode " + settings.getMode() + " powerLevel " +
+				settings.getTxPowerLevel());
 
 		return BluetoothState.ENABLED;
 	}

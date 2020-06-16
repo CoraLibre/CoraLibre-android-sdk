@@ -36,41 +36,38 @@ public class CryptoModule {
     public static final String RPIK_INFO = "EN-RPIK";
     public static final String AEMK_INFO = "EN-AEMK";
 
-    private static final String TEK_LIST_JSON = "TEK_LIST_JSON";
-    private static final String RPIAEM_TODAY_JSON = "RPIAEM_TODAY_JSON";
-
-
     private static CryptoModule instance;
 
     private SharedPreferences esp;
+    private ENNumber currentTekDay;
+    private RollingProximityIdentifierKey currentRPIK;
+    private AssociatedEncryptedMetadataKey currentAEMK;
+    private BluetoothPayload currentPayload;
+    private AssociatedMetadata metadata = null;
 
-    public static CryptoModule getInstance(Context context) throws IOException, GeneralSecurityException {
-        if(instance == null) {
-            instance = new CryptoModule();
-            String KEY_ALIAS = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC);
-            instance.esp = EncryptedSharedPreferences.create("coralibre_store",
-                    KEY_ALIAS,
-                    context,
-                    EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-                    EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM);
+    public static CryptoModule getInstance(Context context) {
+        try {
+            if (instance == null) {
+                instance = new CryptoModule();
+                String KEY_ALIAS = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC);
+                instance.esp = EncryptedSharedPreferences.create("coralibre_store",
+                        KEY_ALIAS,
+                        context,
+                        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM);
+                //TODO: load current RPIK and AEMK
+            }
+            return instance;
+        } catch(Exception e) {
+            throw new CryptoException("could not crate new CryptoModule instance", e);
         }
-        return instance;
-    }
-
-    protected RawTeKList getTEKList() {
-        String tekListJson = esp.getString(TEK_LIST_JSON, null);
-        return Json.safeFromJson(tekListJson, RawTeKList.class, RawTeKList::new);
-    }
-
-    private void storeTeKList(RawTeKList tekListRaw) {
-        esp.edit().putString(TEK_LIST_JSON, Json.toJson(tekListRaw)).apply();
     }
 
     public static ENNumber getCurrentENNumber() {
         return new ENNumber(System.currentTimeMillis() / 1000L, true);
     }
 
-    public static TemporaryExposureKey getNewRandomKey() {
+    private static TemporaryExposureKey getNewRandomTEK() {
         try {
             KeyGenerator keyGenerator = KeyGenerator.getInstance("HmacSHA256");
             SecretKey secretKey = keyGenerator.generateKey();
@@ -170,5 +167,39 @@ public class CryptoModule {
                                                 RollingProximityIdentifier rpi,
                                                 TemporaryExposureKey tek) {
         return decryptAEM(aem, rpi, generateAEMK(tek));
+    }
+
+    private void updateTEK() {
+        if(!currentTekDay.equals(
+                TemporaryExposureKey.getMidnight(getCurrentENNumber()))) {
+            TemporaryExposureKey currentTek = getNewRandomTEK();
+            currentTekDay = currentTek.getInterval();
+            currentRPIK = generateRPIK(currentTek);
+            currentAEMK = generateAEMK(currentTek);
+            //TODO: store current tek
+        }
+    }
+
+    public BluetoothPayload getCurrentPayload() {
+
+        if(metadata == null) throw new CryptoException("Associated metadata has not yet been set.");
+
+        if(currentPayload == null
+                || !currentPayload.getInterval().equals(getCurrentENNumber())) {
+            updateTEK();
+            RollingProximityIdentifier currentRPI = generateRPI(currentRPIK, getCurrentENNumber());
+            AssociatedEncryptedMetadata currentAEM = encryptAM(metadata, currentRPI, currentAEMK);
+            currentPayload = new BluetoothPayload(currentRPI, currentAEM);
+        }
+
+        return currentPayload;
+    }
+
+    public AssociatedMetadata getMetadata() {
+        return metadata;
+    }
+
+    public void setMetadata(AssociatedMetadata metadata) {
+        this.metadata = metadata;
     }
 }
