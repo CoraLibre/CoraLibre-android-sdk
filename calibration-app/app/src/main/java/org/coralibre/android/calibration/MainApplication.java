@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: MPL-2.0
  */
-package org.dpppt.android.calibration;
+package org.coralibre.android.calibration;
 
 import android.app.Application;
 import android.content.BroadcastReceiver;
@@ -17,13 +17,13 @@ import android.os.Build;
 
 import java.security.PublicKey;
 
-import org.dpppt.android.calibration.util.NotificationUtil;
-import org.dpppt.android.calibration.util.PreferencesUtil;
-import org.dpppt.android.sdk.DP3T;
-import org.dpppt.android.sdk.internal.logger.LogLevel;
-import org.dpppt.android.sdk.internal.logger.Logger;
-import org.dpppt.android.sdk.internal.util.ProcessUtil;
-import org.dpppt.android.sdk.util.SignatureUtil;
+import org.coralibre.android.calibration.util.NotificationUtil;
+import org.coralibre.android.calibration.util.PreferencesUtil;
+import org.coralibre.android.sdk.DP3T;
+import org.coralibre.android.sdk.internal.logger.LogLevel;
+import org.coralibre.android.sdk.internal.logger.Logger;
+import org.coralibre.android.sdk.internal.util.ProcessUtil;
+import org.coralibre.android.sdk.util.SignatureUtil;
 
 import okhttp3.CertificatePinner;
 

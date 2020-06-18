@@ -1,7 +1,7 @@
--keep class org.dpppt.android.sdk.backend.models.** { *; }
--keep class org.dpppt.android.sdk.internal.backend.models.** { *; }
--keep class org.dpppt.android.sdk.internal.backend.proto.** { *; }
--keep class org.dpppt.android.sdk.internal.database.models.** { *; }
+-keep class org.coralibre.android.sdk.backend.models.** { *; }
+-keep class org.coralibre.android.sdk.internal.backend.models.** { *; }
+-keep class org.coralibre.android.sdk.internal.backend.proto.** { *; }
+-keep class org.coralibre.android.sdk.internal.database.models.** { *; }
 
 -keep class com.google.crypto.tink.proto.** { *; }
 
@@ -17,3 +17,5 @@
 -keep class io.jsonwebtoken.** { *; }
 -keepnames class io.jsonwebtoken.* { *; }
 -keepnames interface io.jsonwebtoken.* { *; }
+
+# TODO repair unresolved names

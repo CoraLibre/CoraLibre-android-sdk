@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: MPL-2.0
  */
-package org.dpppt.android.calibration.controls;
+package org.coralibre.android.calibration.controls;
 
 import android.Manifest;
 import android.app.Activity;
@@ -50,19 +50,19 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 
-import org.dpppt.android.calibration.MainApplication;
-import org.dpppt.android.calibration.R;
-import org.dpppt.android.calibration.util.DialogUtil;
-import org.dpppt.android.calibration.util.RequirementsUtil;
-import org.dpppt.android.sdk.DP3T;
-import org.dpppt.android.sdk.DP3TCalibrationHelper;
-import org.dpppt.android.sdk.InfectionStatus;
-import org.dpppt.android.sdk.TracingStatus;
-import org.dpppt.android.sdk.internal.AppConfigManager;
-import org.dpppt.android.sdk.backend.ResponseCallback;
-import org.dpppt.android.sdk.backend.models.ExposeeAuthMethodJson;
-import org.dpppt.android.sdk.internal.database.Database;
-import org.dpppt.android.sdk.util.FileUploadRepository;
+import org.coralibre.android.calibration.MainApplication;
+import org.coralibre.android.calibration.R;
+import org.coralibre.android.calibration.util.DialogUtil;
+import org.coralibre.android.calibration.util.RequirementsUtil;
+import org.coralibre.android.sdk.DP3T;
+import org.coralibre.android.sdk.DP3TCalibrationHelper;
+import org.coralibre.android.sdk.InfectionStatus;
+import org.coralibre.android.sdk.TracingStatus;
+import org.coralibre.android.sdk.internal.AppConfigManager;
+import org.coralibre.android.sdk.backend.ResponseCallback;
+import org.coralibre.android.sdk.backend.models.ExposeeAuthMethodJson;
+import org.coralibre.android.sdk.internal.database.Database;
+import org.coralibre.android.sdk.util.FileUploadRepository;
 
 import retrofit2.Call;
 import retrofit2.Callback;

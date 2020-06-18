@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: MPL-2.0
  */
 
-package org.dpppt.android.calibration.util;
+package org.coralibre.android.calibration.util;
 
 import android.content.Context;
 import android.content.DialogInterface;
@@ -16,7 +16,7 @@ import android.content.DialogInterface;
 import androidx.annotation.StringRes;
 import androidx.appcompat.app.AlertDialog;
 
-import org.dpppt.android.calibration.R;
+import org.coralibre.android.calibration.R;
 
 public class DialogUtil {
 

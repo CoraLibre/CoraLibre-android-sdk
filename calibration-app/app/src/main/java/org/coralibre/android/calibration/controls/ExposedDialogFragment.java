@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: MPL-2.0
  */
 
-package org.dpppt.android.calibration.controls;
+package org.coralibre.android.calibration.controls;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -30,8 +30,8 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
-import org.dpppt.android.calibration.R;
-import org.dpppt.android.calibration.util.DatePickerFragmentDialog;
+import org.coralibre.android.calibration.R;
+import org.coralibre.android.calibration.util.DatePickerFragmentDialog;
 
 public class ExposedDialogFragment extends DialogFragment {
 

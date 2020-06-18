@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: MPL-2.0
  */
-package org.dpppt.android.calibration.util;
+package org.coralibre.android.calibration.util;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -21,7 +21,7 @@ import androidx.annotation.RequiresApi;
 import androidx.annotation.StringRes;
 import androidx.core.app.NotificationCompat;
 
-import org.dpppt.android.calibration.R;
+import org.coralibre.android.calibration.R;
 
 public class NotificationUtil {
 

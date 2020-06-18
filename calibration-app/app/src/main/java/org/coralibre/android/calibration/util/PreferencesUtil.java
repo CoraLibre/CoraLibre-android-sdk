@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: MPL-2.0
  */
-package org.dpppt.android.calibration.util;
+package org.coralibre.android.calibration.util;
 
 import android.content.Context;
 import android.content.SharedPreferences;
