@@ -63,15 +63,29 @@ android {
 }
 
 protobuf {
+	// The following lines are copied from the build.gradle file of the Server-Protocol-Buffer
+	// project inside the CoraLibre-Android / Corona-Warn app repository:
+
 	protoc {
-		artifact = 'com.google.protobuf:protoc:3.11.4'
+		artifact = 'com.google.protobuf:protoc:3.0.0'
 	}
+
+	plugins {
+		javalite {
+			// The codegen for lite comes as a separate artifact
+			artifact = 'com.google.protobuf:protoc-gen-javalite:3.0.0'
+		}
+	}
+
 	generateProtoTasks {
 		all().each { task ->
 			task.builtins {
-				java {
-					option "lite"
-				}
+				// In most cases you don't need the full Java output
+				// if you use the lite output.
+				remove java
+			}
+			task.plugins {
+				javalite {}
 			}
 		}
 	}
@@ -96,7 +110,11 @@ ext.readProperty = { paramName ->
 
 dependencies {
 	implementation 'androidx.core:core:1.2.0'
-	implementation 'androidx.security:security-crypto:1.0.0-rc01'
+	implementation('androidx.security:security-crypto:1.0.0-rc02') {
+		exclude group: 'com.google.protobuf', module: "protobuf-javalite"
+		// See:
+		// https://stackoverflow.com/questions/61518039/androidx-security-with-google-protobuf
+	}
 	implementation 'androidx.work:work-runtime:2.3.4'
 
 	implementation 'com.squareup.retrofit2:retrofit:2.8.1'
@@ -104,7 +122,11 @@ dependencies {
 	implementation('com.squareup.retrofit2:converter-protobuf:2.8.1') {
 		exclude group: 'com.google.protobuf', module: 'protobuf-java'
 	}
-	implementation 'com.google.protobuf:protobuf-javalite:3.11.4'
+
+	implementation 'com.google.protobuf:protobuf-lite:3.0.1'
+		// I changed the protobuf lite version to resolve a duplicate class conflict when building
+		// the CoraLibre App. This version is the same as in the original corona warn app. Also
+		// see the 'protobuf {...}' section above.
 
 	implementation 'io.jsonwebtoken:jjwt-api:0.11.1'
 	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.1'
