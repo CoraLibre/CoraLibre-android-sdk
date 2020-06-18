@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: MPL-2.0
  */
-package org.dpppt.android.calibration.handshakes;
+package org.coralibre.android.calibration.handshakes;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -22,10 +22,10 @@ import androidx.fragment.app.Fragment;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import org.dpppt.android.calibration.R;
-import org.dpppt.android.sdk.internal.AppConfigManager;
-import org.dpppt.android.sdk.internal.database.Database;
-import org.dpppt.android.sdk.internal.database.models.Handshake;
+import org.coralibre.android.calibration.R;
+import org.coralibre.android.sdk.internal.AppConfigManager;
+import org.coralibre.android.sdk.internal.database.Database;
+import org.coralibre.android.sdk.internal.database.models.Handshake;
 
 public class HandshakesFragment extends Fragment {
 

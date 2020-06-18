@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: MPL-2.0
  */
 
-package org.dpppt.android.calibration.logs;
+package org.coralibre.android.calibration.logs;
 
 import android.os.Bundle;
 import android.os.Handler;
@@ -27,11 +27,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.dpppt.android.sdk.internal.logger.LogEntry;
-import org.dpppt.android.sdk.internal.logger.LogLevel;
-import org.dpppt.android.sdk.internal.logger.Logger;
-import org.dpppt.android.calibration.R;
-import org.dpppt.android.calibration.util.OnTextChangedListener;
+import org.coralibre.android.sdk.internal.logger.LogEntry;
+import org.coralibre.android.sdk.internal.logger.LogLevel;
+import org.coralibre.android.sdk.internal.logger.Logger;
+import org.coralibre.android.calibration.R;
+import org.coralibre.android.calibration.util.OnTextChangedListener;
 
 public class LogsFragment extends Fragment {
 

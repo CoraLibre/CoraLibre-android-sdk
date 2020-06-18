@@ -8,17 +8,17 @@
  * SPDX-License-Identifier: MPL-2.0
  */
 
-package org.dpppt.android.calibration;
+package org.coralibre.android.calibration;
 
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
-import org.dpppt.android.calibration.controls.ControlsFragment;
-import org.dpppt.android.calibration.handshakes.HandshakesFragment;
-import org.dpppt.android.calibration.logs.LogsFragment;
-import org.dpppt.android.calibration.parameters.ParametersFragment;
+import org.coralibre.android.calibration.controls.ControlsFragment;
+import org.coralibre.android.calibration.handshakes.HandshakesFragment;
+import org.coralibre.android.calibration.logs.LogsFragment;
+import org.coralibre.android.calibration.parameters.ParametersFragment;
 
 public class MainActivity extends AppCompatActivity {
 

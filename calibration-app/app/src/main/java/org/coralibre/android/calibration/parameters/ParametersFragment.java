@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: MPL-2.0
  */
-package org.dpppt.android.calibration.parameters;
+package org.coralibre.android.calibration.parameters;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -24,12 +24,12 @@ import androidx.fragment.app.Fragment;
 import java.text.SimpleDateFormat;
 import java.util.TimeZone;
 
-import org.dpppt.android.calibration.R;
-import org.dpppt.android.sdk.BuildConfig;
-import org.dpppt.android.sdk.internal.AppConfigManager;
-import org.dpppt.android.sdk.internal.BluetoothAdvertiseMode;
-import org.dpppt.android.sdk.internal.BluetoothScanMode;
-import org.dpppt.android.sdk.internal.BluetoothTxPowerLevel;
+import org.coralibre.android.calibration.R;
+import org.coralibre.android.sdk.BuildConfig;
+import org.coralibre.android.sdk.internal.AppConfigManager;
+import org.coralibre.android.sdk.internal.BluetoothAdvertiseMode;
+import org.coralibre.android.sdk.internal.BluetoothScanMode;
+import org.coralibre.android.sdk.internal.BluetoothTxPowerLevel;
 
 public class ParametersFragment extends Fragment {
 
