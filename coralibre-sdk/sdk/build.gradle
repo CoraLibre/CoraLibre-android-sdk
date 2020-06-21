@@ -36,9 +36,17 @@ android {
 	flavorDimensions "version"
 
 	productFlavors {
+
+		//  TODO: Unify flavors.
 		calibration {
 		}
 		production {
+		}
+
+		// The product flavors below are required to build the CoraLibre App:
+		device {
+		}
+		deviceForTesters {
 		}
 	}
 
