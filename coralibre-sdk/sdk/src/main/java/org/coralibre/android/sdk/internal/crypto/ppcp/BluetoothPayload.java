@@ -1,9 +1,4 @@
 package org.coralibre.android.sdk.internal.crypto.ppcp;
-
-import org.coralibre.android.sdk.internal.crypto.ppcp.AssociatedEncryptedMetadata;
-import org.coralibre.android.sdk.internal.crypto.ppcp.AssociatedMetadata;
-import org.coralibre.android.sdk.internal.crypto.ppcp.RollingProximityIdentifier;
-
 import java.security.InvalidParameterException;
 
 import static org.coralibre.android.sdk.internal.crypto.ppcp.AssociatedMetadata.AEM_LENGTH;
@@ -35,6 +30,10 @@ public class BluetoothPayload {
 
     public AssociatedEncryptedMetadata getAem() {
         return aem;
+    }
+
+    public ENNumber getInterval() {
+        return rpi.getInterval();
     }
 
     public byte[] getRawPayload() {
