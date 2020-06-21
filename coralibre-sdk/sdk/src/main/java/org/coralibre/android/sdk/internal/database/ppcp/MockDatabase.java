@@ -1,64 +1,68 @@
 package org.coralibre.android.sdk.internal.database.ppcp;
 
-import org.coralibre.android.sdk.internal.BluetoothAdvertiseMode;
-import org.coralibre.android.sdk.internal.crypto.ppcp.BluetoothPayload;
+import org.coralibre.android.sdk.internal.crypto.ppcp.CryptoException;
+import org.coralibre.android.sdk.internal.crypto.ppcp.CryptoModule;
 import org.coralibre.android.sdk.internal.crypto.ppcp.ENNumber;
 import org.coralibre.android.sdk.internal.crypto.ppcp.TemporaryExposureKey;
+import org.coralibre.android.sdk.internal.database.ppcp.model.BluetoothPackage;
+import org.coralibre.android.sdk.internal.database.ppcp.model.GeneratedTEK;
+import org.coralibre.android.sdk.internal.database.ppcp.model.IntervalOfCollectedPackages;
+import org.coralibre.android.sdk.internal.database.ppcp.model.IntervalOfCollectedPackagesImpl;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class MockDatabase implements Database {
-    private Map<ENNumber, Set<BluetoothPayload>> collectedPayloadByInterval = new HashMap<>();
-    private Map<ENNumber, TemporaryExposureKey> generatedTEKs = new HashMap<>();
+    private Map<ENNumber, IntervalOfCollectedPackages> collectedPackagesByInterval = new HashMap<>();
+    private List<GeneratedTEK> generatedTEKs = new ArrayList<>();
 
     @Override
-    public void addCollectedPayload(BluetoothPayload collectedPayload) {
+    public void addCollectedPayload(BluetoothPackage collectedPayload) {
         ENNumber interval = collectedPayload.getInterval();
-        Set<BluetoothPayload> payloadPerInterval = collectedPayloadByInterval.get(interval);
-        if(payloadPerInterval == null) {
-            payloadPerInterval = new HashSet<>();
-            collectedPayloadByInterval.put(interval, payloadPerInterval);
+        IntervalOfCollectedPackages payloadPerInterval = collectedPackagesByInterval.get(interval);
+        if (payloadPerInterval == null) {
+            payloadPerInterval = new IntervalOfCollectedPackagesImpl(interval);
+            collectedPackagesByInterval.put(interval, payloadPerInterval);
         }
         payloadPerInterval.add(collectedPayload);
     }
 
     @Override
-    public void addGeneratedTEK(TemporaryExposureKey generatedTEK) {
-        ENNumber interval = generatedTEK.getInterval();
-        TemporaryExposureKey storedTek = generatedTEKs.get(interval);
-        if(storedTek == null) {
-            generatedTEKs.put(interval, generatedTEK);
-        } else {
-            throw new StorageException("Trying to store new tek where one is already existing");
-        }
+    public void addGeneratedTEK(GeneratedTEK generatedTEK) {
+        generatedTEKs.add(generatedTEK);
     }
 
     @Override
-    public Set<BluetoothPayload> getCollectedPayloadByInterval(ENNumber enNumber) {
-        Set<BluetoothPayload> interval = collectedPayloadByInterval.get(enNumber);
-        if(interval == null) {
-            return Collections.emptySet();
-        }
-        return interval;
+    public Iterable<GeneratedTEK> getAllGeneratedTEKs() {
+        return generatedTEKs;
     }
 
     @Override
-    public TemporaryExposureKey getGeneratedTEKByInterval(ENNumber enNumber) {
-        TemporaryExposureKey genTEK = generatedTEKs.get(enNumber);
-        if(genTEK == null) {
-            throw new StorageException("TEK for interval does not exist");
-        }
-        return genTEK;
+    public Iterable<IntervalOfCollectedPackages> getAllCollectedPayload() {
+        return collectedPackagesByInterval.values();
+
     }
 
     @Override
-    public boolean doesTEKExist(ENNumber enNumber) {
-        return generatedTEKs.get(enNumber) != null;
-    }
+    public void truncateLast14Days() {
+        ENNumber now = CryptoModule.getCurrentENNumber();
+        long lastIntervalToKeep =now.get() -
+                        (CryptoModule.TEK_MAX_STORE_TIME
+                                * TemporaryExposureKey.TEK_ROLLING_PERIOD);
+        for(ENNumber key : collectedPackagesByInterval.keySet()) {
+            if(key.get() < lastIntervalToKeep) {
+                collectedPackagesByInterval.remove(key);
+            }
+        }
 
+        for(int i = 0; i < generatedTEKs.size(); i++) {
+            if(generatedTEKs.get(i).getInterval().get() < lastIntervalToKeep) {
+                generatedTEKs.remove(i);
+                i--;
+            }
+        }
+    }
 
 }
