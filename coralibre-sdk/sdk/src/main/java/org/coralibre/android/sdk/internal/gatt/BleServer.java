@@ -29,6 +29,7 @@ import org.coralibre.android.sdk.internal.crypto.ppcp.CryptoModule;
 import org.coralibre.android.sdk.internal.logger.Logger;
 
 import static android.bluetooth.le.AdvertisingSetParameters.INTERVAL_MEDIUM;
+import static android.bluetooth.le.AdvertisingSetParameters.TX_POWER_LOW;
 import static android.bluetooth.le.AdvertisingSetParameters.TX_POWER_ULTRA_LOW;
 
 public class BleServer {
@@ -88,7 +89,7 @@ public class BleServer {
 		AppConfigManager appConfigManager = AppConfigManager.getInstance(context);
 
 		AdvertisingSetParameters advParameters = new AdvertisingSetParameters.Builder()
-				.setTxPowerLevel(TX_POWER_ULTRA_LOW)
+				.setTxPowerLevel(TX_POWER_LOW)
 				.setInterval(INTERVAL_MEDIUM)
 				.setIncludeTxPower(false)
 				.setConnectable(false)
