@@ -11,29 +11,25 @@ package org.coralibre.android.sdk.internal.gatt;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
-import android.bluetooth.le.AdvertiseCallback;
 import android.bluetooth.le.AdvertiseData;
-import android.bluetooth.le.AdvertiseSettings;
 import android.bluetooth.le.AdvertisingSet;
 import android.bluetooth.le.AdvertisingSetCallback;
 import android.bluetooth.le.AdvertisingSetParameters;
 import android.bluetooth.le.BluetoothLeAdvertiser;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.os.Build;
 import android.os.ParcelUuid;
 
-import androidx.annotation.RequiresApi;
 
 import java.util.UUID;
 
-import org.coralibre.android.sdk.BuildConfig;
 import org.coralibre.android.sdk.internal.AppConfigManager;
 import org.coralibre.android.sdk.internal.crypto.ppcp.AssociatedMetadata;
 import org.coralibre.android.sdk.internal.crypto.ppcp.CryptoModule;
 import org.coralibre.android.sdk.internal.logger.Logger;
 
 import static android.bluetooth.le.AdvertisingSetParameters.INTERVAL_MEDIUM;
+import static android.bluetooth.le.AdvertisingSetParameters.TX_POWER_ULTRA_LOW;
 
 public class BleServer {
 
@@ -47,17 +43,17 @@ public class BleServer {
 	public static final UUID TOTP_CHARACTERISTIC_UUID = UUID.fromString("8c8494e3-bab5-1848-40a0-1b06991c0001");
 
 	private final Context context;
-	private final AdvertiseCallback advertiseCallback = new AdvertiseCallback() {
+	private final AdvertisingSetCallback advertisingSetCallback = new AdvertisingSetCallback() {
 		@Override
-		public void onStartFailure(int errorCode) {
-			Logger.e(TAG, "advertise onStartFailure: " + errorCode);
-			BluetoothServiceStatus.getInstance(context).updateAdvertiseStatus(errorCode);
-		}
-
-		@Override
-		public void onStartSuccess(AdvertiseSettings settingsInEffect) {
-			Logger.i(TAG, "advertise onStartSuccess: " + settingsInEffect.toString());
-			BluetoothServiceStatus.getInstance(context).updateAdvertiseStatus(BluetoothServiceStatus.ADVERTISE_OK);
+		public void onAdvertisingSetStarted(AdvertisingSet advertisingSet, int txPower, int status) {
+			super.onAdvertisingSetStarted(advertisingSet, txPower, status);
+			if(status == ADVERTISE_SUCCESS) {
+				Logger.i(TAG, "advertise onStartSuccess: " + advertisingSet.toString());
+				BluetoothServiceStatus.getInstance(context).updateAdvertiseStatus(BluetoothServiceStatus.ADVERTISE_OK);
+			} else {
+				Logger.e(TAG, "advertise onStartFailure: " + status);
+				BluetoothServiceStatus.getInstance(context).updateAdvertiseStatus(status);
+			}
 		}
 	};
 
@@ -91,34 +87,34 @@ public class BleServer {
 
 		AppConfigManager appConfigManager = AppConfigManager.getInstance(context);
 
-		//TODO: ADD REAL POWERLEVEL !!!! THIS IS JUST A PLACEHOLDER
+		AdvertisingSetParameters advParameters = new AdvertisingSetParameters.Builder()
+				.setTxPowerLevel(TX_POWER_ULTRA_LOW)
+				.setInterval(INTERVAL_MEDIUM)
+				.setIncludeTxPower(false)
+				.setConnectable(false)
+				.build();
+
+		//TODO: ADD REAL POWERLEVEL !!!! I AM NOT SURE IF THIS IS RIGHT
 		CryptoModule.getInstance(context).setMetadata(
-				new AssociatedMetadata(PPCP_VERSION_MAJOR, PPCP_VERSION_MINOR, 0));
+				new AssociatedMetadata(PPCP_VERSION_MAJOR, PPCP_VERSION_MINOR, advParameters.getTxPowerLevel()));
 
-		AdvertiseSettings.Builder settingBuilder = new AdvertiseSettings.Builder();
-		settingBuilder.setAdvertiseMode(appConfigManager.getBluetoothAdvertiseMode().getSystemValue());
-		settingBuilder.setTxPowerLevel(appConfigManager.getBluetoothTxPowerLevel().getSystemValue());
-		settingBuilder.setConnectable(false);
-		settingBuilder.setTimeout(0);
-		AdvertiseSettings settings = settingBuilder.build();
+		AdvertiseData advData = new AdvertiseData.Builder()
+				.setIncludeDeviceName(false)
+				.setIncludeTxPowerLevel(false)
+				.addServiceUuid(new ParcelUuid(SERVICE_UUID))
+				.addServiceData(new ParcelUuid(SERVICE_UUID), getAdvertiseData())
+				.build();
 
-		AdvertiseData.Builder advBuilder = new AdvertiseData.Builder();
-		advBuilder.setIncludeTxPowerLevel(false);
-		advBuilder.setIncludeDeviceName(false);
-		advBuilder.addServiceUuid(new ParcelUuid(SERVICE_UUID));
-
-		advBuilder.addServiceData(new ParcelUuid(SERVICE_UUID), getAdvertiseData());
-
-		mLeAdvertiser.startAdvertising(settings, advBuilder.build(), advertiseCallback);
-		Logger.d(TAG, "started advertising (only advertiseData), advertiseMode " + settings.getMode() + " powerLevel " +
-				settings.getTxPowerLevel());
+		mLeAdvertiser.startAdvertisingSet(advParameters, advData, null, null, null, advertisingSetCallback);
+		Logger.d(TAG, "started advertising (only advertiseData), powerLevel "
+				+ advParameters.getTxPowerLevel());
 
 		return BluetoothState.ENABLED;
 	}
 
 	public void stopAdvertising() {
 		if (mLeAdvertiser != null) {
-			mLeAdvertiser.stopAdvertising(advertiseCallback);
+			mLeAdvertiser.stopAdvertisingSet(advertisingSetCallback);
 		}
 	}
 

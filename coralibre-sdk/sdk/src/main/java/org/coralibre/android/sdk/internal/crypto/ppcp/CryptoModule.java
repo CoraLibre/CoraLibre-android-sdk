@@ -181,7 +181,6 @@ public class CryptoModule {
     }
 
     public BluetoothPayload getCurrentPayload() {
-
         if(metadata == null) throw new CryptoException("Associated metadata has not yet been set.");
 
         if(currentPayload == null
