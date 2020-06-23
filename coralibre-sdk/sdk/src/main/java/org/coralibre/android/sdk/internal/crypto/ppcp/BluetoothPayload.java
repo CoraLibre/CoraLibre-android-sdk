@@ -6,6 +6,7 @@ import static org.coralibre.android.sdk.internal.crypto.ppcp.AssociatedMetadata.
 import static org.coralibre.android.sdk.internal.crypto.ppcp.RollingProximityIdentifier.RPI_SIZE;
 
 public class BluetoothPayload {
+    public static final int PAYLOAD_LENGTH = RPI_SIZE + AEM_LENGTH;
     private RollingProximityIdentifier rpi;
     private AssociatedEncryptedMetadata aem;
 

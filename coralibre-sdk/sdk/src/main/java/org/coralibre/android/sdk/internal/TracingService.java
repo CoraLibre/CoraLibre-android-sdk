@@ -336,7 +336,7 @@ public class TracingService extends Service {
 
 	private void stopScanning() {
 		if (bleClient != null) {
-			bleClient.stopScan();
+			bleClient.stop();
 		}
 	}
 

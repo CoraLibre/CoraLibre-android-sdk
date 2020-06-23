@@ -19,6 +19,7 @@ import android.bluetooth.le.ScanSettings;
 import android.content.Context;
 import android.os.Build;
 import android.os.ParcelUuid;
+import android.util.Pair;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,10 +28,9 @@ import java.util.Map;
 
 import org.coralibre.android.sdk.internal.AppConfigManager;
 import org.coralibre.android.sdk.internal.BroadcastHelper;
-import org.coralibre.android.sdk.internal.crypto.CryptoModule;
-import org.coralibre.android.sdk.internal.crypto.EphId;
-import org.coralibre.android.sdk.internal.database.Database;
-import org.coralibre.android.sdk.internal.database.models.Handshake;
+import org.coralibre.android.sdk.internal.crypto.ppcp.CryptoModule;
+import org.coralibre.android.sdk.internal.crypto.ppcp.BluetoothPayload;
+import org.coralibre.android.sdk.internal.crypto.ppcp.ENNumber;
 import org.coralibre.android.sdk.internal.logger.Logger;
 
 import static org.coralibre.android.sdk.internal.gatt.BleServer.SERVICE_UUID;
@@ -44,8 +44,8 @@ public class BleClient {
 	private ScanCallback bleScanCallback;
 	private GattConnectionThread gattConnectionThread;
 
-	private HashMap<String, List<Handshake>> scanResultMap = new HashMap<>();
-	private HashMap<String, EphId> connectedEphIdMap = new HashMap<>();
+	// contains the received payload and the rx power
+	private List<Pair<BluetoothPayload, Integer>> collectedPayload = new ArrayList<>();
 
 	public BleClient(Context context) {
 		this.context = context;
@@ -69,16 +69,11 @@ public class BleClient {
 				.setServiceUuid(new ParcelUuid(SERVICE_UUID))
 				.build());
 
-		// Scan for Apple devices as iOS does not advertise service uuid when in background,
-		// but instead pushes it to the "overflow" area (manufacturer data). For now let's
-		// connect to all Apple devices until we find the algorithm used to put the service uuid
-		// into the manufacturer data
-		scanFilters.add(new ScanFilter.Builder()
-				.setManufacturerData(0x004c, new byte[0])
-				.build());
-
 		ScanSettings.Builder settingsBuilder = new ScanSettings.Builder()
-				.setScanMode(AppConfigManager.getInstance(context).getBluetoothScanMode().getSystemValue())
+				.setScanMode(AppConfigManager
+						.getInstance(context)
+						.getBluetoothScanMode()
+						.getSystemValue())
 				.setMatchMode(ScanSettings.MATCH_MODE_AGGRESSIVE)
 				.setReportDelay(0)
 				.setNumOfMatches(ScanSettings.MATCH_NUM_MAX_ADVERTISEMENT)
@@ -125,51 +120,25 @@ public class BleClient {
 
 	private void onDeviceFound(ScanResult scanResult) {
 		try {
+			final ENNumber now = CryptoModule.getCurrentENNumber();
 			BluetoothDevice bluetoothDevice = scanResult.getDevice();
 			final String deviceAddr = bluetoothDevice.getAddress();
 
-			int power = scanResult.getScanRecord().getTxPowerLevel();
-			if (power == Integer.MIN_VALUE) {
-				Logger.d(TAG, "No power levels found for " + deviceAddr + ", use default of 12dbm");
-				power = 12;
+			int rxPower = scanResult.getRssi();
+			byte[] rawPayload = scanResult.getScanRecord().getServiceData(new ParcelUuid(SERVICE_UUID));
+			BluetoothPayload payload = new BluetoothPayload(rawPayload, now);
+			Logger.d(TAG, "found " + deviceAddr + "; rssi: " + scanResult.getRssi());
+			for(Pair<BluetoothPayload, Integer> alreadyCollected : collectedPayload) {
+				if(alreadyCollected.first.equals(payload))
+					return;
 			}
-
-			List<Handshake> handshakesForDevice = scanResultMap.get(deviceAddr);
-			if (handshakesForDevice == null) {
-				handshakesForDevice = new ArrayList<>();
-				scanResultMap.put(deviceAddr, handshakesForDevice);
-			}
-
-			byte[] payload = scanResult.getScanRecord().getServiceData(new ParcelUuid(SERVICE_UUID));
-			boolean correctPayload = payload != null && payload.length == CryptoModule.EPHID_LENGTH;
-			Logger.d(TAG, "found " + deviceAddr + "; power: " + power + "; rssi: " + scanResult.getRssi() +
-					"; haspayload: " + correctPayload);
-			if (correctPayload) {
-				// if Android, optimize (meaning: send/read payload directly in the advertisement
-				Logger.i(TAG, "handshake with " + deviceAddr + " (servicedata payload)");
-				handshakesForDevice.add(createHandshake(new EphId(payload), scanResult, power));
-			} else {
-				if (handshakesForDevice.isEmpty()) {
-					gattConnectionThread.addTask(new GattConnectionTask(context, bluetoothDevice, scanResult,
-							(ephId, device) -> {
-								connectedEphIdMap.put(device.getAddress(), ephId);
-								Logger.i(TAG, "handshake with " + device.getAddress() + " (gatt connection)");
-							}));
-				}
-				handshakesForDevice.add(createHandshake(null, scanResult, power));
-			}
+			collectedPayload.add(new Pair<>(payload, rxPower));
 		} catch (Exception e) {
 			Logger.e(TAG, e);
 		}
 	}
 
-	private Handshake createHandshake(EphId ephId, ScanResult scanResult, int power) {
-		return new Handshake(-1, System.currentTimeMillis(), ephId, power, scanResult.getRssi(),
-				BleCompat.getPrimaryPhy(scanResult), BleCompat.getSecondaryPhy(scanResult),
-				scanResult.getTimestampNanos());
-	}
-
-	public synchronized void stopScan() {
+	private synchronized void stopScan() {
 		final BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 		if (bluetoothAdapter == null || !bluetoothAdapter.isEnabled()) {
 			bleScanner = null;
@@ -186,25 +155,7 @@ public class BleClient {
 	public synchronized void stop() {
 		gattConnectionThread.terminate();
 		stopScan();
-
-		Database database = new Database(context);
-		for (Map.Entry<String, List<Handshake>> entry : scanResultMap.entrySet()) {
-			String device = entry.getKey();
-			List<Handshake> handshakes = scanResultMap.get(device);
-			if (connectedEphIdMap.containsKey(device)) {
-				EphId ephId = connectedEphIdMap.get(device);
-				for (Handshake handshake : handshakes) {
-					handshake.setEphId(ephId);
-					database.addHandshake(context, handshake);
-				}
-			} else {
-				for (Handshake handshake : handshakes) {
-					if (handshake.getEphId() != null) {
-						database.addHandshake(context, handshake);
-					}
-				}
-			}
-		}
+		//TODO: Save collectedPayload into database
 	}
 
 }
