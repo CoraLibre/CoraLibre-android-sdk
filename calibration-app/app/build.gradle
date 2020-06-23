@@ -27,7 +27,7 @@ android {
 	buildToolsVersion "29.0.3"
 
 	defaultConfig {
-		applicationId "org.dpppt.android.calibration"
+		applicationId "org.coralibre.android.calibration"
 		minSdkVersion 23
 		targetSdkVersion 29
 		versionCode 1
@@ -63,6 +63,7 @@ android {
 			proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
 		}
 	}
+
 
 }
 

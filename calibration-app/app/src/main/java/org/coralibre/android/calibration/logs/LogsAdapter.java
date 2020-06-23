@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: MPL-2.0
  */
 
-package org.dpppt.android.calibration.logs;
+package org.coralibre.android.calibration.logs;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -21,9 +21,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import org.dpppt.android.sdk.internal.logger.LogEntry;
-import org.dpppt.android.sdk.internal.logger.LogLevel;
-import org.dpppt.android.calibration.R;
+import org.coralibre.android.sdk.internal.logger.LogEntry;
+import org.coralibre.android.sdk.internal.logger.LogLevel;
+import org.coralibre.android.calibration.R;
 
 class LogsAdapter extends RecyclerView.Adapter<LogsViewHolder> {
 

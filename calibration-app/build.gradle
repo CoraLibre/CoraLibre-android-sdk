@@ -16,9 +16,13 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.6.3'
+        classpath 'com.android.tools.build:gradle:4.0.0'
+            // Must match the version in the sdk build.gradle, which depends on the version of
+            // the CoraLibre app
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.5'
         classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.12'
+            // Must match the version in the sdk build.gradle, which depends on the version of
+            // the CoraLibre app
     }
 }
 
