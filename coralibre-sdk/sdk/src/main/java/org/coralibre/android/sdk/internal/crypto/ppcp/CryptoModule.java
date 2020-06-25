@@ -52,6 +52,7 @@ public class CryptoModule {
                         EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
                         EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM);
 
+                //TODO: use dependency injection
                 Database database = MockDatabase.getInstance();
                 GeneratedTEK rawTek = database.getGeneratedTEK(
                         TemporaryExposureKey.getMidnight(getCurrentInterval()));
