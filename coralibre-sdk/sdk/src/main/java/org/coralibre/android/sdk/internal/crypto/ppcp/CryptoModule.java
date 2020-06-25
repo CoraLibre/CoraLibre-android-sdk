@@ -52,9 +52,9 @@ public class CryptoModule {
                         EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
                         EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM);
 
-                Database database = new MockDatabase();
+                Database database = MockDatabase.getInstance();
                 GeneratedTEK rawTek = database.getGeneratedTEK(
-                        TemporaryExposureKey.getMidnight(getCurrentENNumber()));
+                        TemporaryExposureKey.getMidnight(getCurrentInterval()));
                 if(rawTek == null) {
                     instance.updateTEK();
                 } else {
@@ -71,7 +71,7 @@ public class CryptoModule {
         }
     }
 
-    public static ENNumber getCurrentENNumber() {
+    public static ENNumber getCurrentInterval() {
         return new ENNumber(System.currentTimeMillis() / 1000L, true);
     }
 
@@ -79,7 +79,7 @@ public class CryptoModule {
         try {
             KeyGenerator keyGenerator = KeyGenerator.getInstance("HmacSHA256");
             SecretKey secretKey = keyGenerator.generateKey();
-            ENNumber now = getCurrentENNumber();
+            ENNumber now = getCurrentInterval();
             return new TemporaryExposureKey(now, secretKey.getEncoded());
         } catch (Exception e) {
             throw new CryptoException(e);
@@ -107,7 +107,7 @@ public class CryptoModule {
     }
 
     public static RollingProximityIdentifier generateRPI(RollingProximityIdentifierKey rpik) {
-        return generateRPI(rpik, getCurrentENNumber());
+        return generateRPI(rpik, getCurrentInterval());
     }
 
     public static RollingProximityIdentifier generateRPI(RollingProximityIdentifierKey rpik,
@@ -179,14 +179,14 @@ public class CryptoModule {
 
     private void updateTEK() {
         if(!currentTekDay.equals(
-                TemporaryExposureKey.getMidnight(getCurrentENNumber()))) {
+                TemporaryExposureKey.getMidnight(getCurrentInterval()))) {
             TemporaryExposureKey currentTek = getNewRandomTEK();
             currentTekDay = currentTek.getInterval();
             currentRPIK = generateRPIK(currentTek);
             currentAEMK = generateAEMK(currentTek);
 
             //TODO: use dependency injection
-            Database database = new MockDatabase();
+            Database database = MockDatabase.getInstance();
             database.addGeneratedTEK(new GeneratedTEKImpl(currentTekDay, currentTek.getKey()));
         }
     }
@@ -195,9 +195,9 @@ public class CryptoModule {
         if(metadata == null) throw new CryptoException("Associated metadata has not yet been set.");
 
         if(currentPayload == null
-                || !currentPayload.getInterval().equals(getCurrentENNumber())) {
+                || !currentPayload.getInterval().equals(getCurrentInterval())) {
             updateTEK();
-            RollingProximityIdentifier currentRPI = generateRPI(currentRPIK, getCurrentENNumber());
+            RollingProximityIdentifier currentRPI = generateRPI(currentRPIK, getCurrentInterval());
             AssociatedEncryptedMetadata currentAEM = encryptAM(metadata, currentRPI, currentAEMK);
             currentPayload = new BluetoothPayload(currentRPI, currentAEM);
         }
