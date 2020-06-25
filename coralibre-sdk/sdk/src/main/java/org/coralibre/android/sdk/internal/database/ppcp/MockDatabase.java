@@ -1,6 +1,5 @@
 package org.coralibre.android.sdk.internal.database.ppcp;
 
-import org.coralibre.android.sdk.internal.crypto.ppcp.CryptoException;
 import org.coralibre.android.sdk.internal.crypto.ppcp.CryptoModule;
 import org.coralibre.android.sdk.internal.crypto.ppcp.ENNumber;
 import org.coralibre.android.sdk.internal.crypto.ppcp.TemporaryExposureKey;
@@ -51,10 +50,15 @@ public class MockDatabase implements Database {
         long lastIntervalToKeep =now.get() -
                         (CryptoModule.TEK_MAX_STORE_TIME
                                 * TemporaryExposureKey.TEK_ROLLING_PERIOD);
+
+        List<ENNumber> toRemove = new ArrayList<>();
         for(ENNumber key : collectedPackagesByInterval.keySet()) {
             if(key.get() < lastIntervalToKeep) {
-                collectedPackagesByInterval.remove(key);
+                toRemove.add(key);
             }
+        }
+        for(ENNumber key : toRemove) {
+            collectedPackagesByInterval.remove(key);
         }
 
         for(int i = 0; i < generatedTEKs.size(); i++) {
