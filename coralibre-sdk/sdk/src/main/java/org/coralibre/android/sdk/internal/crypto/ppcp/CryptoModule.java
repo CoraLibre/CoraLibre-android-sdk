@@ -3,7 +3,6 @@ package org.coralibre.android.sdk.internal.crypto.ppcp;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.util.Log;
 
 import androidx.security.crypto.EncryptedSharedPreferences;
 import androidx.security.crypto.MasterKeys;
@@ -11,13 +10,12 @@ import androidx.security.crypto.MasterKeys;
 import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.bouncycastle.crypto.generators.HKDFBytesGenerator;
 import org.bouncycastle.crypto.params.HKDFParameters;
-import org.coralibre.android.sdk.internal.util.Json;
+import org.coralibre.android.sdk.internal.database.ppcp.Database;
+import org.coralibre.android.sdk.internal.database.ppcp.MockDatabase;
+import org.coralibre.android.sdk.internal.database.ppcp.model.GeneratedTEK;
+import org.coralibre.android.sdk.internal.database.ppcp.model.GeneratedTEKImpl;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.security.GeneralSecurityException;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
@@ -25,8 +23,6 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
-import static org.coralibre.android.sdk.internal.crypto.ppcp.TemporaryExposureKey.TEK_ROLLING_PERIOD;
-import static org.coralibre.android.sdk.internal.crypto.ppcp.TemporaryExposureKey.getMidnight;
 
 public class CryptoModule {
     private static final String TAG = CryptoModule.class.getName();
@@ -39,10 +35,10 @@ public class CryptoModule {
     private static CryptoModule instance;
 
     private SharedPreferences esp;
-    private ENNumber currentTekDay;
+    private ENNumber currentTekDay = new ENNumber(0);
     private RollingProximityIdentifierKey currentRPIK;
     private AssociatedEncryptedMetadataKey currentAEMK;
-    private BluetoothPayload currentPayload;
+    private BluetoothPayload currentPayload = null;
     private AssociatedMetadata metadata = null;
 
     public static CryptoModule getInstance(Context context) {
@@ -55,7 +51,19 @@ public class CryptoModule {
                         context,
                         EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
                         EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM);
-                //TODO: load current RPIK and AEMK
+
+                Database database = new MockDatabase();
+                GeneratedTEK rawTek = database.getGeneratedTEK(
+                        TemporaryExposureKey.getMidnight(getCurrentENNumber()));
+                if(rawTek == null) {
+                    instance.updateTEK();
+                } else {
+                    TemporaryExposureKey tek = new TemporaryExposureKey(rawTek.getInterval(), rawTek.getKey());
+                    instance.currentTekDay = tek.getInterval();
+                    instance.currentRPIK = generateRPIK(tek);
+                    instance.currentAEMK = generateAEMK(tek);
+                }
+
             }
             return instance;
         } catch(Exception e) {
@@ -176,7 +184,10 @@ public class CryptoModule {
             currentTekDay = currentTek.getInterval();
             currentRPIK = generateRPIK(currentTek);
             currentAEMK = generateAEMK(currentTek);
-            //TODO: store current tek
+
+            //TODO: use dependency injection
+            Database database = new MockDatabase();
+            database.addGeneratedTEK(new GeneratedTEKImpl(currentTekDay, currentTek.getKey()));
         }
     }
 

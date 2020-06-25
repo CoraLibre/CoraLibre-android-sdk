@@ -1,3 +1,3 @@
 
 include ':sdk'
-rootProject.name = "DP3T-SDK"
+rootProject.name = "CoraLibre"

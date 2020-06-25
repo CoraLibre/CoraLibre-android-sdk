@@ -4,8 +4,13 @@ import org.coralibre.android.sdk.internal.crypto.ppcp.ENNumber;
 
 public class GeneratedTEKImpl implements GeneratedTEK {
 
-    private ENNumber interval;
-    private byte[] key;
+    private final ENNumber interval;
+    private final byte[] key;
+
+    public GeneratedTEKImpl(ENNumber interval, byte[] key) {
+        this.interval =interval;
+        this.key = key;
+    }
 
     @Override
     public ENNumber getInterval() {

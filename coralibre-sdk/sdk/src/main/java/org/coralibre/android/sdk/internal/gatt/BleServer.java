@@ -67,10 +67,9 @@ public class BleServer {
 
 	private byte[] getAdvertiseData() {
 		CryptoModule cryptoModule = CryptoModule.getInstance(context);
-		byte[] advertiseData = cryptoModule.getCurrentPayload().getRawPayload();
+		return cryptoModule.getCurrentPayload().getRawPayload();
 		//TODO: add data described in here:
 		// https://covid19-static.cdn-apple.com/applications/covid19/current/static/contact-tracing/pdf/ExposureNotification-BluetoothSpecificationv1.2.pdf
-		return advertiseData;
 	}
 
 	public BluetoothState startAdvertising() {

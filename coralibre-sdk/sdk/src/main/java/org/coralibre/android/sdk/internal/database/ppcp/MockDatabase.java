@@ -39,6 +39,15 @@ public class MockDatabase implements Database {
     }
 
     @Override
+    public GeneratedTEK getGeneratedTEK(ENNumber interval) {
+        for(GeneratedTEK tek : generatedTEKs) {
+            if(tek.getInterval().equals(interval))
+                return tek;
+        }
+        return null;
+    }
+
+    @Override
     public Iterable<IntervalOfCollectedPackages> getAllCollectedPayload() {
         return collectedPackagesByInterval.values();
 
