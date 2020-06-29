@@ -29,12 +29,14 @@ public class ContactsFactory {
 
 		AppConfigManager appConfigManager = AppConfigManager.getInstance(context);
 
-		// group handhakes by id
+		// group handshakes by id
 		for (Handshake handshake : handshakes) {
-			if (!handshakeMapping.containsKey(handshake.getEphId())) {
-				handshakeMapping.put(handshake.getEphId(), new ArrayList<>());
+			List<Handshake> mappedHandshakes = handshakeMapping.get(handshake.getEphId());
+			if (mappedHandshakes == null) {
+				mappedHandshakes = new ArrayList<>();
+				handshakeMapping.put(handshake.getEphId(), mappedHandshakes);
 			}
-			handshakeMapping.get(handshake.getEphId()).add(handshake);
+			mappedHandshakes.add(handshake);
 		}
 
 		//filter result to only contain actual contacts in close proximity
