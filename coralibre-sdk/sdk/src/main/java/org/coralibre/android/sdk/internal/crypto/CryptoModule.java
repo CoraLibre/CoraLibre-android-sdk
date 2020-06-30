@@ -13,15 +13,26 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Pair;
+
 import androidx.security.crypto.EncryptedSharedPreferences;
 import androidx.security.crypto.MasterKeys;
 
+import org.coralibre.android.sdk.internal.database.models.Contact;
+import org.coralibre.android.sdk.internal.util.DayDate;
+import org.coralibre.android.sdk.internal.util.Json;
+
 import java.io.IOException;
-import java.security.*;
+import java.security.GeneralSecurityException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.Mac;
@@ -29,13 +40,6 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-
-import org.coralibre.android.sdk.backend.models.ExposeeAuthMethod;
-import org.coralibre.android.sdk.backend.models.ExposeeAuthMethodJson;
-import org.coralibre.android.sdk.internal.backend.models.ExposeeRequest;
-import org.coralibre.android.sdk.internal.database.models.Contact;
-import org.coralibre.android.sdk.internal.util.DayDate;
-import org.coralibre.android.sdk.internal.util.Json;
 
 import static org.coralibre.android.sdk.internal.util.Base64Util.toBase64;
 
@@ -227,23 +231,20 @@ public class CryptoModule {
 		}
 	}
 
-	public ExposeeRequest getSecretKeyForPublishing(DayDate date, ExposeeAuthMethod exposeeAuthMethod) {
+	public ExposeeData getSecretKeyForPublishing(DayDate date) {
+		// TODO This method will probably be required in a different form
 		SKList skList = getSKList();
-		ExposeeAuthMethodJson jsonAuth =
-				exposeeAuthMethod instanceof ExposeeAuthMethodJson ? (ExposeeAuthMethodJson) exposeeAuthMethod : null;
 		for (Pair<DayDate, byte[]> daySKPair : skList) {
 			if (daySKPair.first.equals(date)) {
-				return new ExposeeRequest(
+				return new ExposeeData(
 						toBase64(daySKPair.second),
-						daySKPair.first.getStartOfDayTimestamp(),
-						jsonAuth);
+						daySKPair.first.getStartOfDayTimestamp());
 			}
 		}
 		if (date.isBefore(skList.get(skList.size() - 1).first)) {
-			return new ExposeeRequest(
+			return new ExposeeData(
 					toBase64(skList.get(skList.size() - 1).second),
-					skList.get(skList.size() - 1).first.getStartOfDayTimestamp(),
-					jsonAuth);
+					skList.get(skList.size() - 1).first.getStartOfDayTimestamp()					);
 		}
 		return null;
 	}
@@ -273,5 +274,26 @@ public class CryptoModule {
 		void contactMatched(Contact contact);
 
 	}
-
 }
+
+/**
+ * Temporary data structure until the fate of getSecretKeyForPublishing is decided
+ */
+class ExposeeData {
+	private final String key;
+	private final long keyDate;
+
+	public ExposeeData(String key, long keyDate) {
+		this.key = key;
+		this.keyDate = keyDate;
+	}
+
+	public String getKey() {
+		return key;
+	}
+
+	public long getKeyDate() {
+		return keyDate;
+	}
+}
+

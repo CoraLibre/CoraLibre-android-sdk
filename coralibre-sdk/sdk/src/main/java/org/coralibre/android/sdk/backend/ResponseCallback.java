@@ -10,6 +10,8 @@
 
 package org.coralibre.android.sdk.backend;
 
+// Kept for temporary compatibility
+@Deprecated
 public interface ResponseCallback<T> {
 
 	void onSuccess(T response);

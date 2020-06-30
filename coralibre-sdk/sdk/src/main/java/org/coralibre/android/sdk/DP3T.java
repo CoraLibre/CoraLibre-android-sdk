@@ -12,9 +12,20 @@ package org.coralibre.android.sdk;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.database.sqlite.SQLiteException;
+
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
+
+import org.coralibre.android.sdk.backend.ResponseCallback;
+import org.coralibre.android.sdk.internal.AppConfigManager;
+import org.coralibre.android.sdk.internal.BroadcastHelper;
+import org.coralibre.android.sdk.internal.ErrorHelper;
+import org.coralibre.android.sdk.internal.TracingService;
+import org.coralibre.android.sdk.internal.crypto.CryptoModule;
+import org.coralibre.android.sdk.internal.database.Database;
+import org.coralibre.android.sdk.internal.database.models.ExposureDay;
+import org.coralibre.android.sdk.internal.logger.Logger;
+import org.coralibre.android.sdk.internal.util.ProcessUtil;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
@@ -23,30 +34,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
-import org.coralibre.android.sdk.backend.ResponseCallback;
-import org.coralibre.android.sdk.backend.SignatureException;
-import org.coralibre.android.sdk.backend.models.ApplicationInfo;
-import org.coralibre.android.sdk.backend.models.ExposeeAuthMethod;
-import org.coralibre.android.sdk.backend.models.ExposeeAuthMethodJson;
-import org.coralibre.android.sdk.internal.AppConfigManager;
-import org.coralibre.android.sdk.internal.BroadcastHelper;
-import org.coralibre.android.sdk.internal.ErrorHelper;
-import org.coralibre.android.sdk.internal.SyncWorker;
-import org.coralibre.android.sdk.internal.TracingService;
-import org.coralibre.android.sdk.internal.backend.CertificatePinning;
-import org.coralibre.android.sdk.internal.backend.ServerTimeOffsetException;
-import org.coralibre.android.sdk.internal.backend.StatusCodeException;
-import org.coralibre.android.sdk.internal.backend.models.ExposeeRequest;
-import org.coralibre.android.sdk.internal.crypto.CryptoModule;
-import org.coralibre.android.sdk.internal.database.Database;
-import org.coralibre.android.sdk.internal.database.models.ExposureDay;
-import org.coralibre.android.sdk.internal.logger.Logger;
-import org.coralibre.android.sdk.internal.util.DayDate;
-import org.coralibre.android.sdk.internal.util.ProcessUtil;
-
 import okhttp3.CertificatePinner;
-
-import static org.coralibre.android.sdk.internal.util.Base64Util.toBase64;
 
 public class DP3T {
 
@@ -54,40 +42,35 @@ public class DP3T {
 
 	public static final String UPDATE_INTENT_ACTION = "org.coralibre.android.sdk.UPDATE_ACTION";
 
-	private static String appId;
+	private static boolean isInitialized = false;
 
+	public static void init(Context context) {
+		// TODO: there's no else branch, that's bad.
+		if (ProcessUtil.isMainProcess(context)) {
+			executeInit(context);
+			DP3T.isInitialized = true;
+		}
+	}
+
+	@Deprecated
+	public static void init(Context context, PublicKey signaturePublicKey) {
+		init(context);
+	}
+
+	@Deprecated
 	public static void init(Context context, String appId, PublicKey signaturePublicKey) {
-		init(context, appId, false, signaturePublicKey);
+		init(context);
 	}
 
+	@Deprecated
 	public static void init(Context context, String appId, boolean enableDevDiscoveryMode, PublicKey signaturePublicKey) {
-		if (ProcessUtil.isMainProcess(context)) {
-			DP3T.appId = appId;
-			AppConfigManager appConfigManager = AppConfigManager.getInstance(context);
-			appConfigManager.setAppId(appId);
-			appConfigManager.setDevDiscoveryModeEnabled(enableDevDiscoveryMode);
-			appConfigManager.triggerLoad();
-
-			executeInit(context, signaturePublicKey);
-		}
+		init(context);
 	}
 
-	public static void init(Context context, ApplicationInfo applicationInfo, PublicKey signaturePublicKey) {
-		if (ProcessUtil.isMainProcess(context)) {
-			DP3T.appId = applicationInfo.getAppId();
-			AppConfigManager appConfigManager = AppConfigManager.getInstance(context);
-			appConfigManager.setManualApplicationInfo(applicationInfo);
-
-			executeInit(context, signaturePublicKey);
-		}
-	}
-
-	private static void executeInit(Context context, PublicKey signaturePublicKey) {
+	private static void executeInit(Context context) {
 		CryptoModule.getInstance(context).init();
 
 		new Database(context).removeOldData();
-
-		SyncWorker.setBucketSignaturePublicKey(signaturePublicKey);
 
 		AppConfigManager appConfigManager = AppConfigManager.getInstance(context);
 		boolean advertising = appConfigManager.isAdvertisingEnabled();
@@ -98,7 +81,7 @@ public class DP3T {
 	}
 
 	private static void checkInit() throws IllegalStateException {
-		if (appId == null) {
+		if (!DP3T.isInitialized) {
 			throw new IllegalStateException("You have to call DP3T.init() in your application onCreate()");
 		}
 	}
@@ -120,7 +103,6 @@ public class DP3T {
 		intent.putExtra(TracingService.EXTRA_SCAN_INTERVAL, scanInterval);
 		intent.putExtra(TracingService.EXTRA_SCAN_DURATION, scanDuration);
 		ContextCompat.startForegroundService(context, intent);
-		SyncWorker.startSyncWorker(context);
 		BroadcastHelper.sendUpdateBroadcast(context);
 	}
 
@@ -130,13 +112,10 @@ public class DP3T {
 		return appConfigManager.isAdvertisingEnabled() || appConfigManager.isReceivingEnabled();
 	}
 
+	@Deprecated
 	public static void sync(Context context) {
 		checkInit();
-		try {
-			SyncWorker.doSync(context);
-		} catch (IOException | StatusCodeException | ServerTimeOffsetException | SQLiteException | SignatureException ignored) {
-			// has been handled upstream
-		}
+		// kept for temporary compatibility
 	}
 
 	public static TracingStatus getStatus(Context context) {
@@ -164,49 +143,18 @@ public class DP3T {
 		);
 	}
 
-	public static void sendIAmInfected(Context context, Date onset, ExposeeAuthMethod exposeeAuthMethod,
+	@Deprecated
+	public static void sendIAmInfected(Context context, Date onset, Object exposeeAuthMethod,
 			ResponseCallback<Void> callback) {
 		checkInit();
-
-		DayDate onsetDate = new DayDate(onset.getTime());
-		ExposeeRequest exposeeRequest = CryptoModule.getInstance(context).getSecretKeyForPublishing(onsetDate, exposeeAuthMethod);
-
-		AppConfigManager appConfigManager = AppConfigManager.getInstance(context);
-		try {
-			appConfigManager.getBackendReportRepository(context).addExposee(exposeeRequest, exposeeAuthMethod,
-					new ResponseCallback<Void>() {
-						@Override
-						public void onSuccess(Void response) {
-							appConfigManager.setIAmInfected(true);
-							CryptoModule.getInstance(context).reset();
-							stop(context);
-							callback.onSuccess(response);
-						}
-
-						@Override
-						public void onError(Throwable throwable) {
-							callback.onError(throwable);
-						}
-					});
-		} catch (IllegalStateException e) {
-			callback.onError(e);
-			Logger.e(TAG, e);
-		}
+		// Kept for temporary compatibility
 	}
 
-	public static void sendFakeInfectedRequest(Context context, Date onset, ExposeeAuthMethod exposeeAuthMethod)
+	@Deprecated
+	public static void sendFakeInfectedRequest(Context context, Date onset, Object exposeeAuthMethod)
 			throws NoSuchAlgorithmException, IOException {
 		checkInit();
-
-		DayDate onsetDate = new DayDate(onset.getTime());
-		ExposeeAuthMethodJson jsonAuthMethod = null;
-		if (exposeeAuthMethod instanceof ExposeeAuthMethodJson) {
-			jsonAuthMethod = (ExposeeAuthMethodJson) exposeeAuthMethod;
-		}
-		ExposeeRequest exposeeRequest = new ExposeeRequest(toBase64(CryptoModule.getInstance(context).getNewRandomKey()),
-				onsetDate.getStartOfDayTimestamp(), 1, jsonAuthMethod);
-		AppConfigManager.getInstance(context).getBackendReportRepository(context)
-				.addExposeeSync(exposeeRequest, exposeeAuthMethod);
+		// Kept for temporary compatibility
 	}
 
 	public static void stop(Context context) {
@@ -218,7 +166,6 @@ public class DP3T {
 
 		Intent intent = new Intent(context, TracingService.class).setAction(TracingService.ACTION_STOP);
 		context.startService(intent);
-		SyncWorker.stopSyncWorker(context);
 		BroadcastHelper.sendUpdateBroadcast(context);
 	}
 
@@ -230,8 +177,9 @@ public class DP3T {
 		appConfigManager.setNumberOfWindowsForExposure(numberOfWindowsForExposure);
 	}
 
+	@Deprecated
 	public static void setCertificatePinner(@NonNull CertificatePinner certificatePinner) {
-		CertificatePinning.setCertificatePinner(certificatePinner);
+		// Kept for temporary compatibility
 	}
 
 	public static IntentFilter getUpdateIntentFilter() {

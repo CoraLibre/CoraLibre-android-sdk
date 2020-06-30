@@ -18,7 +18,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.coralibre.android.sdk.internal.backend.BackendBucketRepository;
 import org.coralibre.android.sdk.internal.database.models.Contact;
 import org.coralibre.android.sdk.internal.util.DayDate;
 import org.junit.Test;
@@ -105,9 +104,12 @@ public class CryptoTest {
 		contacts.add(new Contact(0, today.getStartOfDayTimestamp(), ephId, 0, 0));
 		byte[] keyByte = fromBase64(key);
 
+		// TODO: use actual batch length
+		int BATCH_LENGTH = 16;
+
 		HashSet<Contact> infectedContacts = new HashSet<>();
 		module.checkContacts(keyByte, today.getStartOfDayTimestamp(),
-				today.getStartOfDayTimestamp() + BackendBucketRepository.BATCH_LENGTH,
+				today.getStartOfDayTimestamp() + BATCH_LENGTH,
 				(timeFrom, timeUntil) -> contacts.stream().filter(c -> timeFrom <= c.getDate() && c.getDate() < timeUntil)
 						.collect(Collectors.toList()),
 				contact -> infectedContacts.add(contact));
