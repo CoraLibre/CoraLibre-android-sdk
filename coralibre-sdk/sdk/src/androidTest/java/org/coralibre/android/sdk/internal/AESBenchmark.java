@@ -49,7 +49,7 @@ public class AESBenchmark {
 	public BenchmarkRule benchmarkRule = new BenchmarkRule();
 
 	@Test
-	public void micro_create_ephIDs() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException {
+	public void microCreateEphIDs() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException {
 
 		BenchmarkState state = benchmarkRule.getState();
 
@@ -59,13 +59,13 @@ public class AESBenchmark {
 
 		while (state.keepRunning()) {
 			long start = System.currentTimeMillis();
-			create_ephIDs(SKt, broadcast_key, size);
+			createEphIDs(SKt, broadcast_key, size);
 			long end = System.currentTimeMillis();
 			Log.d("AESBenchmark", String.format("Creating " + size + " ephIDs took %.3f seconds.", (end - start) / 1000.0));
 		}
 	}
 
-	private ArrayList<byte[]> create_ephIDs(byte[] SKt, byte[] broadcast_key, int epochs)
+	private ArrayList<byte[]> createEphIDs(byte[] SKt, byte[] broadcast_key, int epochs)
 			throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
 
 		Mac mac = Mac.getInstance("HmacSHA256");
@@ -79,11 +79,11 @@ public class AESBenchmark {
 		SecretKeySpec keySpec = new SecretKeySpec(keyBytes, "AES");
 		Cipher cipher = Cipher.getInstance("AES/CTR/NoPadding");
 		cipher.init(Cipher.ENCRYPT_MODE, keySpec, new SecureRandom());
-		ArrayList<byte[]> emphIds = new ArrayList<>();
+		ArrayList<byte[]> ephIds = new ArrayList<>();
 		for (int i = 0; i < epochs; i++) {
-			emphIds.add(cipher.update(emptyArray));
+			ephIds.add(cipher.update(emptyArray));
 		}
-		return emphIds;
+		return ephIds;
 	}
 
 }

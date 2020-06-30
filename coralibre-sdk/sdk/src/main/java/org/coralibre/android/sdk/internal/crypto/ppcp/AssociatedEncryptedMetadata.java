@@ -6,7 +6,7 @@ public class AssociatedEncryptedMetadata {
     private static final byte[] data = new byte[AssociatedMetadata.AEM_LENGTH];
 
     public AssociatedEncryptedMetadata(byte[] rawAEM) {
-        if(rawAEM.length != AssociatedMetadata.AEM_LENGTH) throw new InvalidParameterException("wront rawAEM size");
+        if(rawAEM.length != AssociatedMetadata.AEM_LENGTH) throw new InvalidParameterException("wrong rawAEM size");
         System.arraycopy(rawAEM, 0, data, 0, AssociatedMetadata.AEM_LENGTH);
     }
 

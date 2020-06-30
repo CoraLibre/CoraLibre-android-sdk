@@ -27,9 +27,9 @@ public class PaddedData {
     }
 
     public boolean isRPIInfoValid() {
-        byte[] extracted_rpiinfo = new byte[RPI_INFO.length()];
-        System.arraycopy(data, 0, extracted_rpiinfo, 0, RPI_INFO.length());
-        return (new String(extracted_rpiinfo, StandardCharsets.UTF_8)).equals(RPI_INFO);
+        byte[] extractedRpiInfo = new byte[RPI_INFO.length()];
+        System.arraycopy(data, 0, extractedRpiInfo, 0, RPI_INFO.length());
+        return (new String(extractedRpiInfo, StandardCharsets.UTF_8)).equals(RPI_INFO);
     }
 
     public ENNumber getInterval() {

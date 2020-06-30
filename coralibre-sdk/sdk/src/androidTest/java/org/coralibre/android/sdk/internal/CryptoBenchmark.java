@@ -34,7 +34,7 @@ public class CryptoBenchmark {
 	public BenchmarkRule benchmarkRule = new BenchmarkRule();
 
 	@Test
-	public void key_matching_performance() {
+	public void keyMatchingPerformance() {
 		final BenchmarkState state = benchmarkRule.getState();
 		CryptoModule module = CryptoModule.getInstance(InstrumentationRegistry.getInstrumentation().getContext());
 		module.reset();

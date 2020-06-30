@@ -28,7 +28,7 @@ public class AssociatedMetadata {
     }
 
     public AssociatedMetadata(byte[] rawAM) {
-        if(rawAM.length != AEM_LENGTH) throw new InvalidParameterException("rawAM not the right length");
+        if(rawAM.length != AEM_LENGTH) throw new InvalidParameterException("rawAEM not the right length");
         System.arraycopy(rawAM, 0, data, 0, AEM_LENGTH);
     }
 
