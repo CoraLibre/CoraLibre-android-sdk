@@ -15,17 +15,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 
-import java.security.PublicKey;
-
 import org.coralibre.android.calibration.util.NotificationUtil;
 import org.coralibre.android.calibration.util.PreferencesUtil;
 import org.coralibre.android.sdk.DP3T;
 import org.coralibre.android.sdk.internal.logger.LogLevel;
 import org.coralibre.android.sdk.internal.logger.Logger;
 import org.coralibre.android.sdk.internal.util.ProcessUtil;
-import org.coralibre.android.sdk.util.SignatureUtil;
-
-import okhttp3.CertificatePinner;
 
 public class MainApplication extends Application {
 
@@ -43,16 +38,7 @@ public class MainApplication extends Application {
 	}
 
 	public static void initDP3T(Context context) {
-		PublicKey publicKey = SignatureUtil.getPublicKeyFromBase64OrThrow(
-				"LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUZrd0V3WUhLb1pJemowQ0FRWUlLb1pJemowREFRY0R" +
-						"RZ0FFWTc3MFZEWjJlZjZCYjh0UXZYWVJpcUFaemtHLwpwNWs0U3pTV3FRY00zNzlqTVN6c3JOaU5nc0" +
-						"hWZlRPeGFqMUFzQ3RrNmJVUDV1cDc3RU5nckVzVkh3PT0KLS0tLS1FTkQgUFVCTElDIEtFWS0tLS0t");
-		DP3T.init(context, "org.dpppt.demo", true, publicKey);
-
-		CertificatePinner certificatePinner = new CertificatePinner.Builder()
-				.add("demo.dpppt.org", "sha256/YLh1dUR9y6Kja30RrAn7JKnbQG/uEtLMkBgFF2Fuihg=")
-				.build();
-		DP3T.setCertificatePinner(certificatePinner);
+		DP3T.init(context);
 	}
 
 	@Override
