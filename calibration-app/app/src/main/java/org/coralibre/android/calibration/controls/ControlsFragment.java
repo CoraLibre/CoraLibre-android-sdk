@@ -304,7 +304,7 @@ public class ControlsFragment extends Fragment {
 
 	private void resyncSdk() {
 		new Thread(() -> {
-			DP3T.sync(getContext());
+			// TODO should sync with backend servers here
 			new Handler(getContext().getMainLooper()).post(this::updateSdkStatus);
 		}).start();
 	}

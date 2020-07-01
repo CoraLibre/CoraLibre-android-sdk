@@ -13,10 +13,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 
-import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 
-import org.coralibre.android.sdk.backend.ResponseCallback;
 import org.coralibre.android.sdk.internal.AppConfigManager;
 import org.coralibre.android.sdk.internal.BroadcastHelper;
 import org.coralibre.android.sdk.internal.ErrorHelper;
@@ -27,14 +25,9 @@ import org.coralibre.android.sdk.internal.database.models.ExposureDay;
 import org.coralibre.android.sdk.internal.logger.Logger;
 import org.coralibre.android.sdk.internal.util.ProcessUtil;
 
-import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
-
-import okhttp3.CertificatePinner;
 
 public class DP3T {
 
@@ -112,12 +105,6 @@ public class DP3T {
 		return appConfigManager.isAdvertisingEnabled() || appConfigManager.isReceivingEnabled();
 	}
 
-	@Deprecated
-	public static void sync(Context context) {
-		checkInit();
-		// kept for temporary compatibility
-	}
-
 	public static TracingStatus getStatus(Context context) {
 		checkInit();
 		Database database = new Database(context);
@@ -143,20 +130,6 @@ public class DP3T {
 		);
 	}
 
-	@Deprecated
-	public static void sendIAmInfected(Context context, Date onset, Object exposeeAuthMethod,
-			ResponseCallback<Void> callback) {
-		checkInit();
-		// Kept for temporary compatibility
-	}
-
-	@Deprecated
-	public static void sendFakeInfectedRequest(Context context, Date onset, Object exposeeAuthMethod)
-			throws NoSuchAlgorithmException, IOException {
-		checkInit();
-		// Kept for temporary compatibility
-	}
-
 	public static void stop(Context context) {
 		checkInit();
 
@@ -175,11 +148,6 @@ public class DP3T {
 		AppConfigManager appConfigManager = AppConfigManager.getInstance(context);
 		appConfigManager.setContactAttenuationThreshold(contactAttenuationThreshold);
 		appConfigManager.setNumberOfWindowsForExposure(numberOfWindowsForExposure);
-	}
-
-	@Deprecated
-	public static void setCertificatePinner(@NonNull CertificatePinner certificatePinner) {
-		// Kept for temporary compatibility
 	}
 
 	public static IntentFilter getUpdateIntentFilter() {
