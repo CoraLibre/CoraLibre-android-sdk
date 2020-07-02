@@ -20,6 +20,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
+
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
@@ -36,334 +37,337 @@ import org.coralibre.android.sdk.internal.gatt.BluetoothServiceStatus;
 import org.coralibre.android.sdk.internal.gatt.BluetoothState;
 import org.coralibre.android.sdk.internal.logger.Logger;
 
-import static org.coralibre.android.sdk.internal.AppConfigManager.DEFAULT_SCAN_DURATION;
-import static org.coralibre.android.sdk.internal.AppConfigManager.DEFAULT_SCAN_INTERVAL;
-
 public class TracingService extends Service {
 
-	private static final String TAG = "TracingService";
+    private static final String TAG = "TracingService";
 
-	public static final String ACTION_START = TracingService.class.getCanonicalName() + ".ACTION_START";
-	public static final String ACTION_RESTART_CLIENT = TracingService.class.getCanonicalName() + ".ACTION_RESTART_CLIENT";
-	public static final String ACTION_RESTART_SERVER = TracingService.class.getCanonicalName() + ".ACTION_RESTART_SERVER";
-	public static final String ACTION_STOP = TracingService.class.getCanonicalName() + ".ACTION_STOP";
+    public static final String ACTION_START = TracingService.class.getCanonicalName() + ".ACTION_START";
+    public static final String ACTION_RESTART_CLIENT = TracingService.class.getCanonicalName() + ".ACTION_RESTART_CLIENT";
+    public static final String ACTION_RESTART_SERVER = TracingService.class.getCanonicalName() + ".ACTION_RESTART_SERVER";
+    public static final String ACTION_STOP = TracingService.class.getCanonicalName() + ".ACTION_STOP";
 
-	public static final String EXTRA_ADVERTISE = TracingService.class.getCanonicalName() + ".EXTRA_ADVERTISE";
-	public static final String EXTRA_RECEIVE = TracingService.class.getCanonicalName() + ".EXTRA_RECEIVE";
-	public static final String EXTRA_SCAN_INTERVAL = TracingService.class.getCanonicalName() + ".EXTRA_SCAN_INTERVAL";
-	public static final String EXTRA_SCAN_DURATION = TracingService.class.getCanonicalName() + ".EXTRA_SCAN_DURATION";
+    public static final String EXTRA_ADVERTISE = TracingService.class.getCanonicalName() + ".EXTRA_ADVERTISE";
+    public static final String EXTRA_RECEIVE = TracingService.class.getCanonicalName() + ".EXTRA_RECEIVE";
+    public static final String EXTRA_SCAN_INTERVAL = TracingService.class.getCanonicalName() + ".EXTRA_SCAN_INTERVAL";
+    public static final String EXTRA_SCAN_DURATION = TracingService.class.getCanonicalName() + ".EXTRA_SCAN_DURATION";
 
-	private static final String NOTIFICATION_CHANNEL_ID = "dp3t_tracing_service";
-	private static final int NOTIFICATION_ID = 1827;
+    private static final String NOTIFICATION_CHANNEL_ID = "dp3t_tracing_service";
+    private static final int NOTIFICATION_ID = 1827;
 
-	private Handler handler;
-	private PowerManager.WakeLock wl;
 
-	private BleServer bleServer;
-	private BleClient bleClient;
+    // The source of these Values is this a description on Googles API description:
+    // https://developers.google.com/android/exposure-notifications/ble-attenuation-overview
+    public static final long SCAN_DURATION = 4 * 1000; // unit in milliseconds
+    public static final long SCAN_INTERVAL = 5 * 60 * 1000; // unit in milliseconds
+    public static final long MAC_ROTATION_PERIOD = 15 * 60 * 1000; // unit in milliseconds
 
-	private final BroadcastReceiver bluetoothStateChangeReceiver = new BroadcastReceiver() {
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			if (BluetoothAdapter.ACTION_STATE_CHANGED.equals(intent.getAction())) {
-				int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1);
-				if (state == BluetoothAdapter.STATE_OFF || state == BluetoothAdapter.STATE_ON) {
-					Logger.w(TAG, BluetoothAdapter.ACTION_STATE_CHANGED);
-					BluetoothServiceStatus.resetInstance();
-					BroadcastHelper.sendErrorUpdateBroadcast(context);
-				}
-			}
-		}
-	};
+    private Handler handler;
+    private PowerManager.WakeLock wl;
 
-	private final BroadcastReceiver locationServiceStateChangeReceiver = new BroadcastReceiver() {
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			if (LocationManager.MODE_CHANGED_ACTION.equals(intent.getAction())) {
-				Logger.w(TAG, LocationManager.MODE_CHANGED_ACTION);
-				BroadcastHelper.sendErrorUpdateBroadcast(context);
-			}
-		}
-	};
+    private BleServer bleServer;
+    private BleClient bleClient;
 
-	private final BroadcastReceiver errorsUpdateReceiver = new BroadcastReceiver() {
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			if (BroadcastHelper.ACTION_UPDATE_ERRORS.equals(intent.getAction())) {
-				invalidateForegroundNotification();
-			}
-		}
-	};
+    private final BroadcastReceiver bluetoothStateChangeReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (BluetoothAdapter.ACTION_STATE_CHANGED.equals(intent.getAction())) {
+                int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1);
+                if (state == BluetoothAdapter.STATE_OFF || state == BluetoothAdapter.STATE_ON) {
+                    Logger.w(TAG, BluetoothAdapter.ACTION_STATE_CHANGED);
+                    BluetoothServiceStatus.resetInstance();
+                    BroadcastHelper.sendErrorUpdateBroadcast(context);
+                }
+            }
+        }
+    };
 
-	private boolean startAdvertising;
-	private boolean startReceiving;
-	private long scanInterval;
-	private long scanDuration;
+    private final BroadcastReceiver locationServiceStateChangeReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (LocationManager.MODE_CHANGED_ACTION.equals(intent.getAction())) {
+                Logger.w(TAG, LocationManager.MODE_CHANGED_ACTION);
+                BroadcastHelper.sendErrorUpdateBroadcast(context);
+            }
+        }
+    };
 
-	private boolean isFinishing;
+    private final BroadcastReceiver errorsUpdateReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (BroadcastHelper.ACTION_UPDATE_ERRORS.equals(intent.getAction())) {
+                invalidateForegroundNotification();
+            }
+        }
+    };
 
-	public TracingService() { }
+    private boolean startAdvertising;
+    private boolean startReceiving;
 
-	@Override
-	public void onCreate() {
-		super.onCreate();
+    private boolean isFinishing;
 
-		isFinishing = false;
+    public TracingService() {
+    }
 
-		IntentFilter bluetoothFilter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
-		registerReceiver(bluetoothStateChangeReceiver, bluetoothFilter);
+    @Override
+    public void onCreate() {
+        super.onCreate();
 
-		IntentFilter locationServiceFilter = new IntentFilter(LocationManager.MODE_CHANGED_ACTION);
-		registerReceiver(locationServiceStateChangeReceiver, locationServiceFilter);
+        isFinishing = false;
 
-		IntentFilter errorsUpdateFilter = new IntentFilter(BroadcastHelper.ACTION_UPDATE_ERRORS);
-		registerReceiver(errorsUpdateReceiver, errorsUpdateFilter);
-	}
+        IntentFilter bluetoothFilter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
+        registerReceiver(bluetoothStateChangeReceiver, bluetoothFilter);
 
-	@Override
-	public int onStartCommand(Intent intent, int flags, int startId) {
-		if (intent == null || intent.getAction() == null) {
-			stopSelf();
-			return START_NOT_STICKY;
-		}
+        IntentFilter locationServiceFilter = new IntentFilter(LocationManager.MODE_CHANGED_ACTION);
+        registerReceiver(locationServiceStateChangeReceiver, locationServiceFilter);
 
-		if (wl == null) {
-			PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-			wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
-					getPackageName() + ":TracingServiceWakeLock");
-			wl.acquire();
-		}
+        IntentFilter errorsUpdateFilter = new IntentFilter(BroadcastHelper.ACTION_UPDATE_ERRORS);
+        registerReceiver(errorsUpdateReceiver, errorsUpdateFilter);
+    }
 
-		Logger.i(TAG, "onStartCommand() with " + intent.getAction());
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        if (intent == null || intent.getAction() == null) {
+            stopSelf();
+            return START_NOT_STICKY;
+        }
 
-		scanInterval = intent.getLongExtra(EXTRA_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL);
-		scanDuration = intent.getLongExtra(EXTRA_SCAN_DURATION, DEFAULT_SCAN_DURATION);
+        if (wl == null) {
+            PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+            assert pm != null;
+            wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+                    getPackageName() + ":TracingServiceWakeLock");
+            //TODO: insert wakelock timeout
+            // Remember google wrote on its website that the scan duration is ~4sec:
+            // https://developers.google.com/android/exposure-notifications/ble-attenuation-overview
+            // maybe the wake lock should least a little longer that that
+            wl.acquire();
+        }
 
-		startAdvertising = intent.getBooleanExtra(EXTRA_ADVERTISE, true);
-		startReceiving = intent.getBooleanExtra(EXTRA_RECEIVE, true);
+        Logger.i(TAG, "onStartCommand() with " + intent.getAction());
 
-		if (ACTION_START.equals(intent.getAction())) {
-			startForeground(NOTIFICATION_ID, createForegroundNotification());
-			start();
-		} else if (ACTION_RESTART_CLIENT.equals(intent.getAction())) {
-			startForeground(NOTIFICATION_ID, createForegroundNotification());
-			ensureStarted();
-			restartClient();
-		} else if (ACTION_RESTART_SERVER.equals(intent.getAction())) {
-			startForeground(NOTIFICATION_ID, createForegroundNotification());
-			ensureStarted();
-			restartServer();
-		} else if (ACTION_STOP.equals(intent.getAction())) {
-			stopForegroundService();
-		}
+        startAdvertising = intent.getBooleanExtra(EXTRA_ADVERTISE, true);
+        startReceiving = intent.getBooleanExtra(EXTRA_RECEIVE, true);
 
-		return START_REDELIVER_INTENT;
-	}
+        if (ACTION_START.equals(intent.getAction())) {
+            startForeground(NOTIFICATION_ID, createForegroundNotification());
+            start();
+        } else if (ACTION_RESTART_CLIENT.equals(intent.getAction())) {
+            startForeground(NOTIFICATION_ID, createForegroundNotification());
+            ensureStarted();
+            restartClient();
+        } else if (ACTION_RESTART_SERVER.equals(intent.getAction())) {
+            startForeground(NOTIFICATION_ID, createForegroundNotification());
+            ensureStarted();
+            restartServer();
+        } else if (ACTION_STOP.equals(intent.getAction())) {
+            stopForegroundService();
+        }
 
-	private Notification createForegroundNotification() {
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-			createNotificationChannel();
-		}
+        return START_REDELIVER_INTENT;
+    }
 
-		Intent launchIntent = getPackageManager().getLaunchIntentForPackage(getPackageName());
-		PendingIntent contentIntent = null;
-		if (launchIntent != null) {
-			contentIntent = PendingIntent.getActivity(this, 0, launchIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-		}
+    private Notification createForegroundNotification() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            createNotificationChannel();
+        }
 
-		TracingStatus status = DP3T.getStatus(this);
+        Intent launchIntent = getPackageManager().getLaunchIntentForPackage(getPackageName());
+        PendingIntent contentIntent = null;
+        if (launchIntent != null) {
+            contentIntent = PendingIntent.getActivity(this, 0, launchIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        }
 
-		NotificationCompat.Builder builder = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
-				.setOngoing(true)
-				.setSmallIcon(R.drawable.ic_handshakes)
-				.setContentIntent(contentIntent);
+        TracingStatus status = DP3T.getStatus(this);
 
-		if (status.getErrors().size() > 0) {
-			String errorText = getNotificationErrorText(status.getErrors());
-			builder.setContentTitle(getString(R.string.dp3t_sdk_service_notification_title))
-					.setContentText(errorText)
-					.setStyle(new NotificationCompat.BigTextStyle().bigText(errorText))
-					.setPriority(NotificationCompat.PRIORITY_DEFAULT);
-		} else {
-			String text = getString(R.string.dp3t_sdk_service_notification_text);
-			builder.setContentTitle(getString(R.string.dp3t_sdk_service_notification_title))
-					.setContentText(text)
-					.setStyle(new NotificationCompat.BigTextStyle().bigText(text))
-					.setPriority(NotificationCompat.PRIORITY_LOW)
-					.build();
-		}
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
+                .setOngoing(true)
+                .setSmallIcon(R.drawable.ic_coralibre)
+                .setContentIntent(contentIntent);
 
-		return builder.build();
-	}
+        if (status.getErrors().size() > 0) {
+            String errorText = getNotificationErrorText(status.getErrors());
+            builder.setContentTitle(getString(R.string.ppcp_sdk_service_notification_title))
+                    .setContentText(errorText)
+                    .setStyle(new NotificationCompat.BigTextStyle().bigText(errorText))
+                    .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+        } else {
+            String text = getString(R.string.ppcp_sdk_service_notification_text);
+            builder.setContentTitle(getString(R.string.ppcp_sdk_service_notification_title))
+                    .setContentText(text)
+                    .setStyle(new NotificationCompat.BigTextStyle().bigText(text))
+                    .setPriority(NotificationCompat.PRIORITY_LOW)
+                    .build();
+        }
 
-	private String getNotificationErrorText(Collection<TracingStatus.ErrorState> errors) {
-		StringBuilder sb = new StringBuilder(getString(R.string.dp3t_sdk_service_notification_errors)).append("\n");
-		String sep = "";
-		for (TracingStatus.ErrorState error : errors) {
-			sb.append(sep).append(getString(error.getErrorString()));
-			sep = ", ";
-		}
-		return sb.toString();
-	}
+        return builder.build();
+    }
 
-	@RequiresApi(api = Build.VERSION_CODES.O)
-	private void createNotificationChannel() {
-		NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-		String channelName = getString(R.string.dp3t_sdk_service_notification_channel);
-		NotificationChannel channel =
-				new NotificationChannel(NOTIFICATION_CHANNEL_ID, channelName, NotificationManager.IMPORTANCE_LOW);
-		channel.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
-		notificationManager.createNotificationChannel(channel);
-	}
+    private String getNotificationErrorText(Collection<TracingStatus.ErrorState> errors) {
+        StringBuilder sb = new StringBuilder(getString(R.string.ppcp_sdk_service_notification_errors)).append("\n");
+        String sep = "";
+        for (TracingStatus.ErrorState error : errors) {
+            sb.append(sep).append(getString(error.getErrorString()));
+            sep = ", ";
+        }
+        return sb.toString();
+    }
 
-	private void invalidateForegroundNotification() {
-		if (isFinishing) {
-			return;
-		}
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    private void createNotificationChannel() {
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        String channelName = getString(R.string.ppcp_sdk_service_notification_channel);
+        NotificationChannel channel =
+                new NotificationChannel(NOTIFICATION_CHANNEL_ID, channelName, NotificationManager.IMPORTANCE_LOW);
+        channel.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
+        assert notificationManager != null;
+        notificationManager.createNotificationChannel(channel);
+    }
 
-		Notification notification = createForegroundNotification();
-		NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-		mNotificationManager.notify(NOTIFICATION_ID, notification);
-	}
+    private void invalidateForegroundNotification() {
+        if (isFinishing) {
+            return;
+        }
 
-	private void start() {
-		if (handler != null) {
-			handler.removeCallbacksAndMessages(null);
-		}
-		handler = new Handler();
+        Notification notification = createForegroundNotification();
+        NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        assert mNotificationManager != null;
+        mNotificationManager.notify(NOTIFICATION_ID, notification);
+    }
 
-		invalidateForegroundNotification();
-		restartClient();
-		restartServer();
-	}
+    private void start() {
+        if (handler != null) {
+            handler.removeCallbacksAndMessages(null);
+        }
+        handler = new Handler();
 
-	private void ensureStarted() {
-		if (handler == null) {
-			handler = new Handler();
-		}
-		invalidateForegroundNotification();
-	}
+        invalidateForegroundNotification();
+        restartClient();
+        restartServer();
+    }
 
-	private void restartClient() {
-		//also restart server here to generate a new mac-address so we get rediscovered by apple devices
-		startServer();
+    private void ensureStarted() {
+        if (handler == null) {
+            handler = new Handler();
+        }
+        invalidateForegroundNotification();
+    }
 
-		BluetoothState bluetoothState = startClient();
-		if (bluetoothState == BluetoothState.NOT_SUPPORTED) {
-			Logger.e(TAG, "bluetooth not supported");
-			return;
-		}
+    private void restartClient() {
+        BluetoothState bluetoothState = startClient();
+        if (bluetoothState == BluetoothState.NOT_SUPPORTED) {
+            Logger.e(TAG, "bluetooth not supported");
+            return;
+        }
 
-		handler.postDelayed(() -> {
-			stopScanning();
-			scheduleNextClientRestart(this, scanInterval);
-		}, scanDuration);
-	}
+        handler.postDelayed(() -> {
+            stopScanning();
+            scheduleNextClientRestart(this, SCAN_INTERVAL);
+        }, SCAN_DURATION);
+    }
 
-	private void restartServer() {
-		BluetoothState bluetoothState = startServer();
-		if (bluetoothState == BluetoothState.NOT_SUPPORTED) {
-			Logger.e(TAG, "bluetooth not supported");
-			return;
-		}
+    private void restartServer() {
+        BluetoothState bluetoothState = startServer();
+        if (bluetoothState == BluetoothState.NOT_SUPPORTED) {
+            Logger.e(TAG, "bluetooth not supported");
+            return;
+        }
 
-		scheduleNextServerRestart(this);
-	}
+        scheduleNextServerRestart(this);
+    }
 
-	public static void scheduleNextClientRestart(Context context, long scanInterval) {
-		long now = System.currentTimeMillis();
-		long delay = scanInterval - (now % scanInterval);
-		AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-		Intent intent = new Intent(context, TracingServiceBroadcastReceiver.class);
-		intent.setAction(ACTION_RESTART_CLIENT);
-		PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 1, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-		alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, now + delay, pendingIntent);
-	}
+    public static void scheduleNextClientRestart(Context context, long scanInterval) {
+        final long now = System.currentTimeMillis();
+        final long delay = scanInterval - (now % scanInterval);
+        final long nextScan = now + delay;
 
-	public static void scheduleNextServerRestart(Context context) {
-		long nextEpochStart = CryptoModule.getInstance(context).getCurrentEpochStart() + CryptoModule.MILLISECONDS_PER_EPOCH;
-		long nextAdvertiseChange = nextEpochStart;
-		String calibrationTestDeviceName = AppConfigManager.getInstance(context).getCalibrationTestDeviceName();
-		if (calibrationTestDeviceName != null) {
-			long now = System.currentTimeMillis();
-			nextAdvertiseChange = now - (now % (60 * 1000)) + 60 * 1000;
-		}
-		AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-		Intent intent = new Intent(context, TracingServiceBroadcastReceiver.class);
-		intent.setAction(ACTION_RESTART_SERVER);
-		PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 2, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-		alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, nextAdvertiseChange, pendingIntent);
-	}
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(context, TracingServiceBroadcastReceiver.class);
+        intent.setAction(ACTION_RESTART_CLIENT);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 1, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        assert alarmManager != null;
+        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, nextScan, pendingIntent);
+    }
 
-	private void stopForegroundService() {
-		isFinishing = true;
-		stopClient();
-		stopServer();
-		BluetoothServiceStatus.resetInstance();
-		stopForeground(true);
-		wl.release();
-		stopSelf();
-	}
+    public static void scheduleNextServerRestart(Context context) {
+        final long now = System.currentTimeMillis();
+        final long delay = MAC_ROTATION_PERIOD - (now % MAC_ROTATION_PERIOD);
+        final long nextAdvertiseChange = now + delay;
 
-	private BluetoothState startServer() {
-		stopServer();
-		if (startAdvertising) {
-			bleServer = new BleServer(this);
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(context, TracingServiceBroadcastReceiver.class);
+        intent.setAction(ACTION_RESTART_SERVER);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 2, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        assert alarmManager != null;
+        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, nextAdvertiseChange, pendingIntent);
+    }
 
-			Logger.d(TAG, "startAdvertising");
-			BluetoothState advertiserState = bleServer.startAdvertising();
-			return advertiserState;
-		}
-		return null;
-	}
+    private void stopForegroundService() {
+        isFinishing = true;
+        stopClient();
+        stopServer();
+        BluetoothServiceStatus.resetInstance();
+        stopForeground(true);
+        wl.release();
+        stopSelf();
+    }
 
-	private void stopServer() {
-		if (bleServer != null) {
-			bleServer.stop();
-			bleServer = null;
-		}
-	}
+    private BluetoothState startServer() {
+        stopServer();
+        if (startAdvertising) {
+            bleServer = new BleServer(this);
 
-	private BluetoothState startClient() {
-		stopClient();
-		if (startReceiving) {
-			bleClient = new BleClient(this);
-			BluetoothState clientState = bleClient.start();
-			return clientState;
-		}
-		return null;
-	}
+            Logger.d(TAG, "startAdvertising");
+            return bleServer.startAdvertising();
+        }
+        return null;
+    }
 
-	private void stopScanning() {
-		if (bleClient != null) {
-			bleClient.stop();
-		}
-	}
+    private void stopServer() {
+        if (bleServer != null) {
+            bleServer.stop();
+            bleServer = null;
+        }
+    }
 
-	private void stopClient() {
-		if (bleClient != null) {
-			bleClient.stop();
-			bleClient = null;
-		}
-	}
+    private BluetoothState startClient() {
+        stopClient();
+        if (startReceiving) {
+            bleClient = new BleClient(this);
+            return bleClient.start();
+        }
+        return null;
+    }
 
-	@Nullable
-	@Override
-	public IBinder onBind(Intent intent) {
-		return null;
-	}
+    private void stopScanning() {
+        if (bleClient != null) {
+            bleClient.stop();
+        }
+    }
 
-	@Override
-	public void onDestroy() {
-		Logger.i(TAG, "onDestroy()");
+    private void stopClient() {
+        if (bleClient != null) {
+            bleClient.stop();
+            bleClient = null;
+        }
+    }
 
-		unregisterReceiver(errorsUpdateReceiver);
-		unregisterReceiver(bluetoothStateChangeReceiver);
-		unregisterReceiver(locationServiceStateChangeReceiver);
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
+    }
 
-		if (handler != null) {
-			handler.removeCallbacksAndMessages(null);
-		}
-	}
+    @Override
+    public void onDestroy() {
+        Logger.i(TAG, "onDestroy()");
+
+        unregisterReceiver(errorsUpdateReceiver);
+        unregisterReceiver(bluetoothStateChangeReceiver);
+        unregisterReceiver(locationServiceStateChangeReceiver);
+
+        if (handler != null) {
+            handler.removeCallbacksAndMessages(null);
+        }
+    }
 
 }
