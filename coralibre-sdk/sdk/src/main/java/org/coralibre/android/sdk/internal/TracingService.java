@@ -27,10 +27,9 @@ import androidx.core.app.NotificationCompat;
 
 import java.util.Collection;
 
-import org.coralibre.android.sdk.DP3T;
+import org.coralibre.android.sdk.PPCP;
 import org.coralibre.android.sdk.R;
 import org.coralibre.android.sdk.TracingStatus;
-import org.coralibre.android.sdk.internal.crypto.CryptoModule;
 import org.coralibre.android.sdk.internal.gatt.BleClient;
 import org.coralibre.android.sdk.internal.gatt.BleServer;
 import org.coralibre.android.sdk.internal.gatt.BluetoothServiceStatus;
@@ -48,11 +47,9 @@ public class TracingService extends Service {
 
     public static final String EXTRA_ADVERTISE = TracingService.class.getCanonicalName() + ".EXTRA_ADVERTISE";
     public static final String EXTRA_RECEIVE = TracingService.class.getCanonicalName() + ".EXTRA_RECEIVE";
-    public static final String EXTRA_SCAN_INTERVAL = TracingService.class.getCanonicalName() + ".EXTRA_SCAN_INTERVAL";
-    public static final String EXTRA_SCAN_DURATION = TracingService.class.getCanonicalName() + ".EXTRA_SCAN_DURATION";
 
-    private static final String NOTIFICATION_CHANNEL_ID = "dp3t_tracing_service";
-    private static final int NOTIFICATION_ID = 1827;
+    private static final String NOTIFICATION_CHANNEL_ID = "ppcp_tracing_service";
+    private static final int NOTIFICATION_ID = 1829;
 
 
     // The source of these Values is this a description on Googles API description:
@@ -177,7 +174,7 @@ public class TracingService extends Service {
             contentIntent = PendingIntent.getActivity(this, 0, launchIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         }
 
-        TracingStatus status = DP3T.getStatus(this);
+        TracingStatus status = PPCP.getStatus(this);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
                 .setOngoing(true)

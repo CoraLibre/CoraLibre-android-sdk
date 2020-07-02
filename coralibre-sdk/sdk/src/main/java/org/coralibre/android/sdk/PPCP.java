@@ -29,7 +29,7 @@ import java.security.PublicKey;
 import java.util.Collection;
 import java.util.List;
 
-public class DP3T {
+public class PPCP {
 
 	private static final String TAG = "DP3T Interface";
 
@@ -41,13 +41,8 @@ public class DP3T {
 		// TODO: there's no else branch, that's bad.
 		if (ProcessUtil.isMainProcess(context)) {
 			executeInit(context);
-			DP3T.isInitialized = true;
+			PPCP.isInitialized = true;
 		}
-	}
-
-	@Deprecated
-	public static void init(Context context, PublicKey signaturePublicKey) {
-		init(context);
 	}
 
 	@Deprecated
@@ -74,7 +69,7 @@ public class DP3T {
 	}
 
 	private static void checkInit() throws IllegalStateException {
-		if (!DP3T.isInitialized) {
+		if (!PPCP.isInitialized) {
 			throw new IllegalStateException("You have to call DP3T.init() in your application onCreate()");
 		}
 	}
@@ -88,13 +83,9 @@ public class DP3T {
 		AppConfigManager appConfigManager = AppConfigManager.getInstance(context);
 		appConfigManager.setAdvertisingEnabled(advertise);
 		appConfigManager.setReceivingEnabled(receive);
-		long scanInterval = appConfigManager.getScanInterval();
-		long scanDuration = appConfigManager.getScanDuration();
 		Intent intent = new Intent(context, TracingService.class).setAction(TracingService.ACTION_START);
 		intent.putExtra(TracingService.EXTRA_ADVERTISE, advertise);
 		intent.putExtra(TracingService.EXTRA_RECEIVE, receive);
-		intent.putExtra(TracingService.EXTRA_SCAN_INTERVAL, scanInterval);
-		intent.putExtra(TracingService.EXTRA_SCAN_DURATION, scanDuration);
 		ContextCompat.startForegroundService(context, intent);
 		BroadcastHelper.sendUpdateBroadcast(context);
 	}
@@ -151,7 +142,7 @@ public class DP3T {
 	}
 
 	public static IntentFilter getUpdateIntentFilter() {
-		return new IntentFilter(DP3T.UPDATE_INTENT_ACTION);
+		return new IntentFilter(PPCP.UPDATE_INTENT_ACTION);
 	}
 
 	public static void clearData(Context context, Runnable onDeleteListener) {
