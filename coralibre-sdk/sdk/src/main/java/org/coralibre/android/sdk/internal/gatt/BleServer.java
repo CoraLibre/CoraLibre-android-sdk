@@ -12,6 +12,7 @@ package org.coralibre.android.sdk.internal.gatt;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.le.AdvertiseData;
+import android.bluetooth.le.AdvertiseSettings;
 import android.bluetooth.le.AdvertisingSet;
 import android.bluetooth.le.AdvertisingSetCallback;
 import android.bluetooth.le.AdvertisingSetParameters;
@@ -94,7 +95,18 @@ public class BleServer {
 				.setConnectable(false)
 				.build();
 
-		//TODO: ADD REAL POWERLEVEL !!!! I AM NOT SURE IF THIS IS RIGHT
+		// This seems not to be used for advertise set. This seems to be utilized only
+		// on older devices with android 21. Leaving it in as a comment for a possible
+		// legacy version of the SDK
+		/*
+		AdvertiseSettings advSettings = new AdvertiseSettings.Builder()
+				.setTxPowerLevel(AdvertiseSettings.ADVERTISE_TX_POWER_LOW)
+				.setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_BALANCED)
+				.setConnectable(false)
+				.setTimeout(0)
+				.build();
+		*/
+
 		CryptoModule.getInstance(context).setMetadata(
 				new AssociatedMetadata(PPCP_VERSION_MAJOR, PPCP_VERSION_MINOR, advParameters.getTxPowerLevel()));
 
