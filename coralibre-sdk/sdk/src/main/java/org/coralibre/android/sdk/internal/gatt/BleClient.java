@@ -42,7 +42,6 @@ public class BleClient {
     private final Context context;
     private BluetoothLeScanner bleScanner;
     private ScanCallback bleScanCallback;
-    private GattConnectionThread gattConnectionThread;
 
     // contains the received payload and the rx power
     private List<CollectedDatumInstance> collectedData = new ArrayList<>();
@@ -73,8 +72,6 @@ public class BleClient {
 
     public BleClient(Context context) {
         this.context = context;
-        gattConnectionThread = new GattConnectionThread();
-        gattConnectionThread.start();
     }
 
     public BluetoothState start() {
@@ -177,8 +174,9 @@ public class BleClient {
     }
 
     public synchronized void stop() {
-        gattConnectionThread.terminate();
         stopScan();
+
+        //TODO: Use dependency injection
         Database database = MockDatabase.getInstance();
 
         for (CollectedDatumInstance data : collectedData) {
