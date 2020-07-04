@@ -1,11 +1,5 @@
 package org.coralibre.android.sdk.fakegms.nearby.exposurenotification;
 
-import android.content.Context;
-
-import org.coralibre.android.sdk.internal.crypto.ppcp.TemporaryExposureKey;
-
-import java.util.List;
-
 public class ExposureNotificationClient {
 
     //
