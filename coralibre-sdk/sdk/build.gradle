@@ -14,6 +14,7 @@ plugins {
 	id 'com.jfrog.bintray'
 	id 'com.google.protobuf'
 }
+apply plugin: 'kotlin-android'
 
 android {
 	compileSdkVersion 29
@@ -140,4 +141,9 @@ dependencies {
 	androidTestImplementation 'androidx.benchmark:benchmark-junit4:1.0.0'
 	androidTestImplementation 'androidx.test.ext:junit:1.1.1'
 	androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+    implementation "androidx.core:core-ktx:+"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+}
+repositories {
+    mavenCentral()
 }
