@@ -23,7 +23,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.coralibre.android.sdk.TracingStatus.ErrorState;
-import org.coralibre.android.sdk.internal.backend.SyncErrorState;
 import org.coralibre.android.sdk.internal.gatt.BluetoothServiceStatus;
 import org.coralibre.android.sdk.internal.logger.Logger;
 import org.coralibre.android.sdk.internal.util.LocationServiceUtil;
@@ -59,15 +58,6 @@ public class ErrorHelper {
 
 		if (!LocationServiceUtil.isLocationEnabled(context)) {
 			errors.add(ErrorState.LOCATION_SERVICE_DISABLED);
-		}
-
-		if (!AppConfigManager.getInstance(context).getLastSyncNetworkSuccess()) {
-			ErrorState syncError = SyncErrorState.getInstance().getSyncError();
-			if (syncError == null) {
-				Logger.w(TAG, "lost sync error state");
-				syncError = ErrorState.SYNC_ERROR_NETWORK;
-			}
-			errors.add(syncError);
 		}
 
 		if (!errors.contains(ErrorState.BLE_DISABLED)) {

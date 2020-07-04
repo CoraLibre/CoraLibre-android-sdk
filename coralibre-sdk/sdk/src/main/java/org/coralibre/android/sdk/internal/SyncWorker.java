@@ -16,43 +16,33 @@ import androidx.work.*;
 
 import java.io.IOException;
 import java.security.PublicKey;
-import java.util.concurrent.TimeUnit;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 
 import org.coralibre.android.sdk.TracingStatus.ErrorState;
-import org.coralibre.android.sdk.backend.SignatureException;
-import org.coralibre.android.sdk.backend.models.ApplicationInfo;
-import org.coralibre.android.sdk.internal.backend.BackendBucketRepository;
-import org.coralibre.android.sdk.internal.backend.ServerTimeOffsetException;
-import org.coralibre.android.sdk.internal.backend.StatusCodeException;
-import org.coralibre.android.sdk.internal.backend.SyncErrorState;
 import org.coralibre.android.sdk.internal.backend.proto.Exposed;
 import org.coralibre.android.sdk.internal.database.Database;
 import org.coralibre.android.sdk.internal.logger.Logger;
 
-import static org.coralibre.android.sdk.internal.backend.BackendBucketRepository.BATCH_LENGTH;
-
+/**
+ * Originally retrieved diagnosis keys from backend and inserted them into backend.
+ *
+ * Not fully removed as the content of the {@link #doSyncInternal(Context)} method might still
+ * be useful.
+ */
+// TODO: delete class
+@Deprecated
 public class SyncWorker extends Worker {
 
 	private static final String TAG = "SyncWorker";
 	private static final String WORK_TAG = "org.coralibre.android.sdk.internal.SyncWorker";
 
-	private static PublicKey bucketSignaturePublicKey;
-
+	@Deprecated
 	public static void startSyncWorker(Context context) {
-		Constraints constraints = new Constraints.Builder()
-				.setRequiredNetworkType(NetworkType.CONNECTED)
-				.build();
-
-		PeriodicWorkRequest periodicWorkRequest = new PeriodicWorkRequest.Builder(SyncWorker.class, 15, TimeUnit.MINUTES)
-				.setConstraints(constraints)
-				.build();
-
-		WorkManager workManager = WorkManager.getInstance(context);
-		workManager.enqueueUniquePeriodicWork(WORK_TAG, ExistingPeriodicWorkPolicy.KEEP, periodicWorkRequest);
+		// kept for compatibility
 	}
 
+	@Deprecated
 	public static void stopSyncWorker(Context context) {
 		WorkManager workManager = WorkManager.getInstance(context);
 		workManager.cancelAllWorkByTag(WORK_TAG);
@@ -62,8 +52,9 @@ public class SyncWorker extends Worker {
 		super(context, workerParams);
 	}
 
+	@Deprecated
 	public static void setBucketSignaturePublicKey(PublicKey publicKey) {
-		bucketSignaturePublicKey = publicKey;
+		// kept for compatibility
 	}
 
 	@NonNull
@@ -78,7 +69,7 @@ public class SyncWorker extends Worker {
 
 		try {
 			doSync(context);
-		} catch (IOException | StatusCodeException | ServerTimeOffsetException | SignatureException | SQLiteException e) {
+		} catch (IOException | SQLiteException e) {
 			Logger.d(TAG, "SyncWorker finished with exception " + e.getMessage());
 			return Result.retry();
 		}
@@ -87,38 +78,35 @@ public class SyncWorker extends Worker {
 	}
 
 	public static void doSync(Context context)
-			throws IOException, StatusCodeException, ServerTimeOffsetException, SQLiteException, SignatureException {
+			throws IOException,SQLiteException {
 		try {
 			doSyncInternal(context);
 			Logger.i(TAG, "synced");
 			AppConfigManager.getInstance(context).setLastSyncNetworkSuccess(true);
-			SyncErrorState.getInstance().setSyncError(null);
+			//SyncErrorState.getInstance().setSyncError(null);
 			BroadcastHelper.sendErrorUpdateBroadcast(context);
-		} catch (IOException | StatusCodeException | ServerTimeOffsetException | SignatureException | SQLiteException e) {
+		} catch (IOException | SQLiteException e) {
 			Logger.e(TAG, e);
 			AppConfigManager.getInstance(context).setLastSyncNetworkSuccess(false);
 			ErrorState syncError;
-			if (e instanceof ServerTimeOffsetException) {
-				syncError = ErrorState.SYNC_ERROR_TIMING;
-			} else if (e instanceof SignatureException) {
-				syncError = ErrorState.SYNC_ERROR_SIGNATURE;
-			} else if (e instanceof StatusCodeException || e instanceof InvalidProtocolBufferException) {
+			if (e instanceof InvalidProtocolBufferException) {
 				syncError = ErrorState.SYNC_ERROR_SERVER;
 			} else if (e instanceof SQLiteException) {
 				syncError = ErrorState.SYNC_ERROR_DATABASE;
 			} else {
 				syncError = ErrorState.SYNC_ERROR_NETWORK;
 			}
-			SyncErrorState.getInstance().setSyncError(syncError);
+			//SyncErrorState.getInstance().setSyncError(syncError);
 			BroadcastHelper.sendErrorUpdateBroadcast(context);
 			throw e;
 		}
 	}
 
-	private static void doSyncInternal(Context context) throws IOException, StatusCodeException, ServerTimeOffsetException {
+	private static void doSyncInternal(Context context) throws IOException {
 		AppConfigManager appConfigManager = AppConfigManager.getInstance(context);
-		appConfigManager.updateFromDiscoverySynchronous();
-		ApplicationInfo appConfig = appConfigManager.getAppConfig();
+
+		// Random value to satisfy compiler and keep readability of code below
+		final long BATCH_LENGTH = 16;
 
 		Database database = new Database(context);
 		database.generateContactsFromHandshakes(context);
@@ -132,14 +120,13 @@ public class SyncWorker extends Worker {
 			nextBatchReleaseTime = lastLoadedBatchReleaseTime + BATCH_LENGTH;
 		}
 
-		BackendBucketRepository backendBucketRepository =
-				new BackendBucketRepository(context, appConfig.getBucketBaseUrl(), bucketSignaturePublicKey);
-
 		for (long batchReleaseTime = nextBatchReleaseTime;
 			 batchReleaseTime < System.currentTimeMillis();
 			 batchReleaseTime += BATCH_LENGTH) {
 
-			Exposed.ProtoExposedList result = backendBucketRepository.getExposees(batchReleaseTime);
+			// Not valid now, will throw NPE; was retrieving exposees from backend.
+			Exposed.ProtoExposedList result = null;
+			// was before: result = backendBucketRepository.getExposees(batchReleaseTime)
 			long batchReleaseServerTime = result.getBatchReleaseTime();
 			for (Exposed.ProtoExposeeOrBuilder exposee : result.getExposedOrBuilderList()) {
 				database.addKnownCase(
@@ -157,5 +144,4 @@ public class SyncWorker extends Worker {
 
 		appConfigManager.setLastSyncDate(System.currentTimeMillis());
 	}
-
 }

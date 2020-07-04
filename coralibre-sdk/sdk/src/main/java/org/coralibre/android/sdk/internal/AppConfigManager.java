@@ -12,15 +12,6 @@ package org.coralibre.android.sdk.internal;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import java.io.IOException;
-
-import org.coralibre.android.sdk.backend.ResponseCallback;
-import org.coralibre.android.sdk.backend.models.ApplicationInfo;
-import org.coralibre.android.sdk.internal.backend.BackendReportRepository;
-import org.coralibre.android.sdk.internal.backend.DiscoveryRepository;
-import org.coralibre.android.sdk.internal.backend.models.ApplicationsList;
-import org.coralibre.android.sdk.internal.util.Json;
-
 public class AppConfigManager {
 
 	private static AppConfigManager instance;
@@ -62,63 +53,10 @@ public class AppConfigManager {
 	private static final String PREF_CONTACT_ATTENUATION_THRESHOLD = "contact_attenuation_threshold";
 	private static final String PREF_NUMBER_OF_WINDOWS_FOR_EXPOSURE = "number_of_windows_for_exposure";
 
-	private String appId;
-	private boolean useDiscovery;
-	private boolean isDevDiscoveryMode;
 	private SharedPreferences sharedPrefs;
-	private DiscoveryRepository discoveryRepository;
 
 	private AppConfigManager(Context context) {
-		discoveryRepository = new DiscoveryRepository(context);
 		sharedPrefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-	}
-
-	public void setAppId(String appId) {
-		this.appId = appId;
-	}
-
-	public void triggerLoad() {
-		useDiscovery = true;
-		discoveryRepository.getDiscovery(new ResponseCallback<ApplicationsList>() {
-			@Override
-			public void onSuccess(ApplicationsList response) {
-				sharedPrefs.edit().putString(PREF_APPLICATION_LIST, Json.toJson(response)).apply();
-			}
-
-			@Override
-			public void onError(Throwable throwable) {
-				throwable.printStackTrace();
-			}
-		}, isDevDiscoveryMode);
-	}
-
-	public void setManualApplicationInfo(ApplicationInfo applicationInfo) {
-		useDiscovery = false;
-		setAppId(applicationInfo.getAppId());
-		ApplicationsList applicationsList = new ApplicationsList();
-		applicationsList.getApplications().add(applicationInfo);
-		sharedPrefs.edit().putString(PREF_APPLICATION_LIST, Json.toJson(applicationsList)).apply();
-	}
-
-	public void updateFromDiscoverySynchronous() throws IOException {
-		if (useDiscovery) {
-			ApplicationsList response = discoveryRepository.getDiscoverySync(isDevDiscoveryMode);
-			sharedPrefs.edit().putString(PREF_APPLICATION_LIST, Json.toJson(response)).apply();
-		}
-	}
-
-	public ApplicationsList getLoadedApplicationsList() {
-		return Json.safeFromJson(sharedPrefs.getString(PREF_APPLICATION_LIST, "{}"), ApplicationsList.class,
-				ApplicationsList::new);
-	}
-
-	public ApplicationInfo getAppConfig() throws IllegalStateException {
-		for (ApplicationInfo application : getLoadedApplicationsList().getApplications()) {
-			if (application.getAppId().equals(appId)) {
-				return application;
-			}
-		}
-		throw new IllegalStateException("The provided appId is not found by the discovery service!");
 	}
 
 	public void setAdvertisingEnabled(boolean enabled) {
@@ -167,15 +105,6 @@ public class AppConfigManager {
 
 	public void setIAmInfected(boolean exposed) {
 		sharedPrefs.edit().putBoolean(PREF_I_AM_INFECTED, exposed).apply();
-	}
-
-	public BackendReportRepository getBackendReportRepository(Context context) throws IllegalStateException {
-		ApplicationInfo appConfig = getAppConfig();
-		return new BackendReportRepository(context, appConfig.getReportBaseUrl());
-	}
-
-	public void setDevDiscoveryModeEnabled(boolean enable) {
-		isDevDiscoveryMode = enable;
 	}
 
 	public void setCalibrationTestDeviceName(String name) {

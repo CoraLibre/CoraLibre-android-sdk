@@ -14,7 +14,6 @@ import android.content.Context;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
 
-import org.coralibre.android.sdk.internal.backend.models.ExposeeRequest;
 import org.coralibre.android.sdk.internal.database.Database;
 import org.coralibre.android.sdk.internal.database.models.Handshake;
 import org.coralibre.android.sdk.internal.util.DayDate;
@@ -47,7 +46,7 @@ public class ContactTests {
 
 		database.generateContactsFromHandshakes(context);
 
-		ExposeeRequest exposeeRequest = module.getSecretKeyForPublishing(new DayDate(), null);
+		ExposeeData exposeeRequest = module.getSecretKeyForPublishing(new DayDate());
 		database.addKnownCase(context, fromBase64(exposeeRequest.getKey()), exposeeRequest.getKeyDate(),
 				System.currentTimeMillis());
 

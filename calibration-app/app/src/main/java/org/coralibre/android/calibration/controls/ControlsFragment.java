@@ -59,8 +59,6 @@ import org.coralibre.android.sdk.DP3TCalibrationHelper;
 import org.coralibre.android.sdk.InfectionStatus;
 import org.coralibre.android.sdk.TracingStatus;
 import org.coralibre.android.sdk.internal.AppConfigManager;
-import org.coralibre.android.sdk.backend.ResponseCallback;
-import org.coralibre.android.sdk.backend.models.ExposeeAuthMethodJson;
 import org.coralibre.android.sdk.internal.database.Database;
 import org.coralibre.android.sdk.util.FileUploadRepository;
 
@@ -306,7 +304,7 @@ public class ControlsFragment extends Fragment {
 
 	private void resyncSdk() {
 		new Thread(() -> {
-			DP3T.sync(getContext());
+			// TODO should sync with backend servers here
 			new Handler(getContext().getMainLooper()).post(this::updateSdkStatus);
 		}).start();
 	}
@@ -406,24 +404,9 @@ public class ControlsFragment extends Fragment {
 
 	private void sendInfectedUpdate(Context context, Date onsetDate, String codeInputBase64) {
 		setExposeLoadingViewVisible(true);
-
-		DP3T.sendIAmInfected(context, onsetDate, new ExposeeAuthMethodJson(codeInputBase64), new ResponseCallback<Void>() {
-			@Override
-			public void onSuccess(Void response) {
-				DialogUtil.showMessageDialog(context, getString(R.string.dialog_title_success),
-						getString(R.string.dialog_message_request_success));
-				setExposeLoadingViewVisible(false);
-				updateSdkStatus();
-			}
-
-			@Override
-			public void onError(Throwable throwable) {
-				DialogUtil.showMessageDialog(context, getString(R.string.dialog_title_error),
-						throwable.getLocalizedMessage());
-				Log.e(TAG, throwable.getMessage(), throwable);
-				setExposeLoadingViewVisible(false);
-			}
-		});
+		Toast.makeText(context, "Not implemented", Toast.LENGTH_SHORT).show();
+		// simulate IO activity...
+		new Handler().postDelayed(() -> setExposeLoadingViewVisible(false), 2000);
 	}
 
 	private void setExposeLoadingViewVisible(boolean visible) {

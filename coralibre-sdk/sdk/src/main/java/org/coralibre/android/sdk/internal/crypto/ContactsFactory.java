@@ -16,13 +16,12 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.coralibre.android.sdk.internal.AppConfigManager;
-import org.coralibre.android.sdk.internal.backend.BackendBucketRepository;
 import org.coralibre.android.sdk.internal.database.models.Contact;
 import org.coralibre.android.sdk.internal.database.models.Handshake;
 
 public class ContactsFactory {
 
-	private static final long WINDOW_DURATION = 5 * 60 * 1000l;
+	private static final long WINDOW_DURATION = 5 * 60 * 1000L;
 
 	public static List<Contact> mergeHandshakesToContacts(Context context, List<Handshake> handshakes) {
 		HashMap<EphId, List<Handshake>> handshakeMapping = new HashMap<>();
@@ -102,14 +101,15 @@ public class ContactsFactory {
 
 	}
 
-
 	private interface ToLongConverter<T> {
 		long toLong(T value);
 
 	}
 
 	private static long floorTimestampToBucket(long timestamp) {
-		return timestamp - (timestamp % BackendBucketRepository.BATCH_LENGTH);
+		return timestamp;
+		// TODO might be needed when we have an accessible BATCH_LENGTH again
+		// return timestamp - (timestamp % BackendBucketRepository.BATCH_LENGTH);
 	}
 
 }
