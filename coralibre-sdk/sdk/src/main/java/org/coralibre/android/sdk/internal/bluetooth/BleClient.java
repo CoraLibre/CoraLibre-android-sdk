@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: MPL-2.0
  */
-package org.coralibre.android.sdk.internal.gatt;
+package org.coralibre.android.sdk.internal.bluetooth;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -33,7 +33,7 @@ import org.coralibre.android.sdk.internal.database.ppcp.MockDatabase;
 import org.coralibre.android.sdk.internal.database.ppcp.model.CapturedData;
 import org.coralibre.android.sdk.internal.logger.Logger;
 
-import static org.coralibre.android.sdk.internal.gatt.BleServer.SERVICE_UUID;
+import static org.coralibre.android.sdk.internal.bluetooth.BleServer.SERVICE_UUID;
 
 public class BleClient {
 

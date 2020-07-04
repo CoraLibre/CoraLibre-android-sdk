@@ -3,7 +3,7 @@ package org.coralibre.android.sdk.internal.database.ppcp.model;
 public class CapturedData {
     private long captureTimestamp; // in milliseconds since Epoch
 
-    /** in db */
+    /** in dB */
     private byte rssi;
 
     /** 16 bytes */

@@ -7,12 +7,11 @@
  *
  * SPDX-License-Identifier: MPL-2.0
  */
-package org.coralibre.android.sdk.internal.gatt;
+package org.coralibre.android.sdk.internal.bluetooth;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.le.AdvertiseData;
-import android.bluetooth.le.AdvertiseSettings;
 import android.bluetooth.le.AdvertisingSet;
 import android.bluetooth.le.AdvertisingSetCallback;
 import android.bluetooth.le.AdvertisingSetParameters;
@@ -31,7 +30,6 @@ import org.coralibre.android.sdk.internal.logger.Logger;
 
 import static android.bluetooth.le.AdvertisingSetParameters.INTERVAL_MEDIUM;
 import static android.bluetooth.le.AdvertisingSetParameters.TX_POWER_LOW;
-import static android.bluetooth.le.AdvertisingSetParameters.TX_POWER_ULTRA_LOW;
 
 public class BleServer {
 

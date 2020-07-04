@@ -5,8 +5,8 @@ import org.coralibre.android.sdk.internal.crypto.ppcp.ENNumber;
 import org.coralibre.android.sdk.internal.crypto.ppcp.TemporaryExposureKey;
 import org.coralibre.android.sdk.internal.database.ppcp.model.CapturedData;
 import org.coralibre.android.sdk.internal.database.ppcp.model.GeneratedTEK;
-import org.coralibre.android.sdk.internal.database.ppcp.model.IntervallOfCapturedData;
-import org.coralibre.android.sdk.internal.database.ppcp.model.IntervallOfCapturedDataImpl;
+import org.coralibre.android.sdk.internal.database.ppcp.model.IntervalOfCapturedData;
+import org.coralibre.android.sdk.internal.database.ppcp.model.IntervalOfCapturedDataImpl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 public class MockDatabase implements Database {
-    private Map<ENNumber, IntervallOfCapturedData> collectedPackagesByInterval = new HashMap<>();
+    private Map<ENNumber, IntervalOfCapturedData> collectedPackagesByInterval = new HashMap<>();
     private List<GeneratedTEK> generatedTEKs = new ArrayList<>();
 
     private static MockDatabase database = null;
@@ -35,10 +35,10 @@ public class MockDatabase implements Database {
         ENNumber interval = new ENNumber(timestamp, true);
 
         // find correct interval
-        IntervallOfCapturedData payloadPerInterval =
+        IntervalOfCapturedData payloadPerInterval =
                 collectedPackagesByInterval.get(interval);
         if (payloadPerInterval == null) {
-            payloadPerInterval = new IntervallOfCapturedDataImpl(interval);
+            payloadPerInterval = new IntervalOfCapturedDataImpl(interval);
             collectedPackagesByInterval.put(interval, payloadPerInterval);
         }
         payloadPerInterval.add(collectedPayload);
@@ -64,7 +64,7 @@ public class MockDatabase implements Database {
     }
 
     @Override
-    public Iterable<IntervallOfCapturedData> getAllCollectedPayload() {
+    public Iterable<IntervalOfCapturedData> getAllCollectedPayload() {
         return collectedPackagesByInterval.values();
 
     }

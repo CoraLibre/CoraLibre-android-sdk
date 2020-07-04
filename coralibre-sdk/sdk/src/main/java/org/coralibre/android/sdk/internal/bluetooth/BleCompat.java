@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: MPL-2.0
  */
 
-package org.coralibre.android.sdk.internal.gatt;
+package org.coralibre.android.sdk.internal.bluetooth;
 
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.le.ScanResult;

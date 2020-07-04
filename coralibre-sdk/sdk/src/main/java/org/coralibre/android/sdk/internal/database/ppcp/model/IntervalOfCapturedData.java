@@ -4,7 +4,7 @@ import org.coralibre.android.sdk.internal.crypto.ppcp.ENNumber;
 
 import java.util.List;
 
-public interface IntervallOfCapturedData {
+public interface IntervalOfCapturedData {
 
     ENNumber getInterval();
 

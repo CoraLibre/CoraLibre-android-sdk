@@ -5,12 +5,12 @@ import org.coralibre.android.sdk.internal.crypto.ppcp.ENNumber;
 import java.util.ArrayList;
 import java.util.List;
 
-public class IntervallOfCapturedDataImpl implements IntervallOfCapturedData {
+public class IntervalOfCapturedDataImpl implements IntervalOfCapturedData {
 
     ENNumber interval;
     List<CapturedData> capturedData = new ArrayList<>();
 
-    public IntervallOfCapturedDataImpl(ENNumber interval) {
+    public IntervalOfCapturedDataImpl(ENNumber interval) {
         this.interval = interval;
     }
 

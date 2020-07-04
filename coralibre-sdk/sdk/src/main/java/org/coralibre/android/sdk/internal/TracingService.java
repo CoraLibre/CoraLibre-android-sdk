@@ -30,10 +30,10 @@ import java.util.Collection;
 import org.coralibre.android.sdk.PPCP;
 import org.coralibre.android.sdk.R;
 import org.coralibre.android.sdk.TracingStatus;
-import org.coralibre.android.sdk.internal.gatt.BleClient;
-import org.coralibre.android.sdk.internal.gatt.BleServer;
-import org.coralibre.android.sdk.internal.gatt.BluetoothServiceStatus;
-import org.coralibre.android.sdk.internal.gatt.BluetoothState;
+import org.coralibre.android.sdk.internal.bluetooth.BleClient;
+import org.coralibre.android.sdk.internal.bluetooth.BleServer;
+import org.coralibre.android.sdk.internal.bluetooth.BluetoothServiceStatus;
+import org.coralibre.android.sdk.internal.bluetooth.BluetoothState;
 import org.coralibre.android.sdk.internal.logger.Logger;
 
 public class TracingService extends Service {

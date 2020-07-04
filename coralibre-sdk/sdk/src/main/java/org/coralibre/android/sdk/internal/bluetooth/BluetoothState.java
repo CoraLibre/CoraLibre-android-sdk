@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: MPL-2.0
  */
 
-package org.coralibre.android.sdk.internal.gatt;
+package org.coralibre.android.sdk.internal.bluetooth;
 
 public enum  BluetoothState {
 	ENABLED,
