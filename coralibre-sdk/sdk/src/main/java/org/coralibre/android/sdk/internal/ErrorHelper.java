@@ -23,8 +23,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.coralibre.android.sdk.TracingStatus.ErrorState;
-import org.coralibre.android.sdk.internal.gatt.BluetoothServiceStatus;
-import org.coralibre.android.sdk.internal.logger.Logger;
+import org.coralibre.android.sdk.internal.bluetooth.BluetoothServiceStatus;
 import org.coralibre.android.sdk.internal.util.LocationServiceUtil;
 
 public class ErrorHelper {

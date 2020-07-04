@@ -3,7 +3,6 @@ package org.coralibre.android.sdk.internal.crypto.ppcp;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.util.Log;
 
 import androidx.security.crypto.EncryptedSharedPreferences;
 import androidx.security.crypto.MasterKeys;
@@ -11,13 +10,12 @@ import androidx.security.crypto.MasterKeys;
 import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.bouncycastle.crypto.generators.HKDFBytesGenerator;
 import org.bouncycastle.crypto.params.HKDFParameters;
-import org.coralibre.android.sdk.internal.util.Json;
+import org.coralibre.android.sdk.internal.database.ppcp.Database;
+import org.coralibre.android.sdk.internal.database.ppcp.MockDatabase;
+import org.coralibre.android.sdk.internal.database.ppcp.model.GeneratedTEK;
+import org.coralibre.android.sdk.internal.database.ppcp.model.GeneratedTEKImpl;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.security.GeneralSecurityException;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
@@ -25,8 +23,6 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
-import static org.coralibre.android.sdk.internal.crypto.ppcp.TemporaryExposureKey.TEK_ROLLING_PERIOD;
-import static org.coralibre.android.sdk.internal.crypto.ppcp.TemporaryExposureKey.getMidnight;
 
 public class CryptoModule {
     private static final String TAG = CryptoModule.class.getName();
@@ -36,45 +32,55 @@ public class CryptoModule {
     public static final String RPIK_INFO = "EN-RPIK";
     public static final String AEMK_INFO = "EN-AEMK";
 
-    private static final String TEK_LIST_JSON = "TEK_LIST_JSON";
-    private static final String RPIAEM_TODAY_JSON = "RPIAEM_TODAY_JSON";
-
-
     private static CryptoModule instance;
 
     private SharedPreferences esp;
+    private ENNumber currentTekDay = new ENNumber(0);
+    private RollingProximityIdentifierKey currentRPIK;
+    private AssociatedEncryptedMetadataKey currentAEMK;
+    private BluetoothPayload currentPayload = null;
+    private AssociatedMetadata metadata = null;
 
-    public static CryptoModule getInstance(Context context) throws IOException, GeneralSecurityException {
-        if(instance == null) {
-            instance = new CryptoModule();
-            String KEY_ALIAS = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC);
-            instance.esp = EncryptedSharedPreferences.create("coralibre_store",
-                    KEY_ALIAS,
-                    context,
-                    EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-                    EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM);
+    public static CryptoModule getInstance(Context context) {
+        try {
+            if (instance == null) {
+                instance = new CryptoModule();
+                String KEY_ALIAS = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC);
+                instance.esp = EncryptedSharedPreferences.create("coralibre_store",
+                        KEY_ALIAS,
+                        context,
+                        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM);
+
+                //TODO: use dependency injection
+                Database database = MockDatabase.getInstance();
+                GeneratedTEK rawTek = database.getGeneratedTEK(
+                        TemporaryExposureKey.getMidnight(getCurrentInterval()));
+                if(rawTek == null) {
+                    instance.updateTEK();
+                } else {
+                    TemporaryExposureKey tek = new TemporaryExposureKey(rawTek.getInterval(), rawTek.getKey());
+                    instance.currentTekDay = tek.getInterval();
+                    instance.currentRPIK = generateRPIK(tek);
+                    instance.currentAEMK = generateAEMK(tek);
+                }
+
+            }
+            return instance;
+        } catch(Exception e) {
+            throw new CryptoException("could not crate new CryptoModule instance", e);
         }
-        return instance;
     }
 
-    protected RawTeKList getTEKList() {
-        String tekListJson = esp.getString(TEK_LIST_JSON, null);
-        return Json.safeFromJson(tekListJson, RawTeKList.class, RawTeKList::new);
-    }
-
-    private void storeTeKList(RawTeKList tekListRaw) {
-        esp.edit().putString(TEK_LIST_JSON, Json.toJson(tekListRaw)).apply();
-    }
-
-    public static ENNumber getCurrentENNumber() {
+    public static ENNumber getCurrentInterval() {
         return new ENNumber(System.currentTimeMillis() / 1000L, true);
     }
 
-    public static TemporaryExposureKey getNewRandomKey() {
+    private static TemporaryExposureKey getNewRandomTEK() {
         try {
             KeyGenerator keyGenerator = KeyGenerator.getInstance("HmacSHA256");
             SecretKey secretKey = keyGenerator.generateKey();
-            ENNumber now = getCurrentENNumber();
+            ENNumber now = getCurrentInterval();
             return new TemporaryExposureKey(now, secretKey.getEncoded());
         } catch (Exception e) {
             throw new CryptoException(e);
@@ -102,7 +108,7 @@ public class CryptoModule {
     }
 
     public static RollingProximityIdentifier generateRPI(RollingProximityIdentifierKey rpik) {
-        return generateRPI(rpik, getCurrentENNumber());
+        return generateRPI(rpik, getCurrentInterval());
     }
 
     public static RollingProximityIdentifier generateRPI(RollingProximityIdentifierKey rpik,
@@ -170,5 +176,41 @@ public class CryptoModule {
                                                 RollingProximityIdentifier rpi,
                                                 TemporaryExposureKey tek) {
         return decryptAEM(aem, rpi, generateAEMK(tek));
+    }
+
+    private void updateTEK() {
+        if(!currentTekDay.equals(
+                TemporaryExposureKey.getMidnight(getCurrentInterval()))) {
+            TemporaryExposureKey currentTek = getNewRandomTEK();
+            currentTekDay = currentTek.getInterval();
+            currentRPIK = generateRPIK(currentTek);
+            currentAEMK = generateAEMK(currentTek);
+
+            //TODO: use dependency injection
+            Database database = MockDatabase.getInstance();
+            database.addGeneratedTEK(new GeneratedTEKImpl(currentTekDay, currentTek.getKey()));
+        }
+    }
+
+    public BluetoothPayload getCurrentPayload() {
+        if(metadata == null) throw new CryptoException("Associated metadata has not yet been set.");
+
+        if(currentPayload == null
+                || !currentPayload.getInterval().equals(getCurrentInterval())) {
+            updateTEK();
+            RollingProximityIdentifier currentRPI = generateRPI(currentRPIK, getCurrentInterval());
+            AssociatedEncryptedMetadata currentAEM = encryptAM(metadata, currentRPI, currentAEMK);
+            currentPayload = new BluetoothPayload(currentRPI, currentAEM);
+        }
+
+        return currentPayload;
+    }
+
+    public AssociatedMetadata getMetadata() {
+        return metadata;
+    }
+
+    public void setMetadata(AssociatedMetadata metadata) {
+        this.metadata = metadata;
     }
 }

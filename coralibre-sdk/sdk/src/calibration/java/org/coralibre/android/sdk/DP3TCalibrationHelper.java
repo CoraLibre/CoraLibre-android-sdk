@@ -45,7 +45,7 @@ public class DP3TCalibrationHelper {
 	}
 
 	public static void start(Context context, boolean advertise, boolean receive) {
-		DP3T.start(context, advertise, receive);
+		PPCP.start(context, advertise, receive);
 	}
 
 }

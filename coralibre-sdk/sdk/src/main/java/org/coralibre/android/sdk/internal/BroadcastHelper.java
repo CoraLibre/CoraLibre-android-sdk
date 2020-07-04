@@ -13,14 +13,14 @@ package org.coralibre.android.sdk.internal;
 import android.content.Context;
 import android.content.Intent;
 
-import org.coralibre.android.sdk.DP3T;
+import org.coralibre.android.sdk.PPCP;
 
 public class BroadcastHelper {
 
 	public static final String ACTION_UPDATE_ERRORS = "org.coralibre.android.sdk.internal.ACTION_UPDATE_ERRORS";
 
 	public static void sendUpdateBroadcast(Context context) {
-		Intent intent = new Intent(DP3T.UPDATE_INTENT_ACTION);
+		Intent intent = new Intent(PPCP.UPDATE_INTENT_ACTION);
 		context.sendBroadcast(intent);
 	}
 

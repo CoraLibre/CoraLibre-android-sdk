@@ -4,12 +4,12 @@ import org.coralibre.android.sdk.internal.crypto.ppcp.ENNumber;
 
 import java.util.List;
 
-public interface IntervalOfCollectedPackages {
+public interface IntervalOfCapturedData {
 
     ENNumber getInterval();
 
-    List<BluetoothPackage> getBluetoothPackages();
+    List<CapturedData> getCapturedData();
 
-    void add(BluetoothPackage bluetoothPackage);
+    void add(CapturedData capturedData);
 
 }
