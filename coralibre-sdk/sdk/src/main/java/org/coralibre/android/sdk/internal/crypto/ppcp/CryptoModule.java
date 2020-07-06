@@ -87,23 +87,32 @@ public class CryptoModule {
         }
     }
 
-    public static RollingProximityIdentifierKey generateRPIK(TemporaryExposureKey tek) {
+    private static byte[] generateHKDFBytes(TemporaryExposureKey tek, byte[] info, int length) {
         HKDFBytesGenerator generator = new HKDFBytesGenerator(new SHA256Digest());
         generator.init(new HKDFParameters(tek.getKey(),
                 null,
-                RPIK_INFO.getBytes(StandardCharsets.UTF_8)));
-        byte[] rawRPIK = new byte[RollingProximityIdentifierKey.RPIK_LENGTH];
-        generator.generateBytes(rawRPIK, 0, RollingProximityIdentifierKey.RPIK_LENGTH);
+                info
+        ));
+        byte[] bytes = new byte[length];
+        generator.generateBytes(bytes, 0, length);
+        return bytes;
+    }
+
+    public static RollingProximityIdentifierKey generateRPIK(TemporaryExposureKey tek) {
+        byte[] rawRPIK = generateHKDFBytes(
+                tek,
+                RPIK_INFO.getBytes(StandardCharsets.UTF_8),
+                RollingProximityIdentifierKey.RPIK_LENGTH
+        );
         return new RollingProximityIdentifierKey(rawRPIK);
     }
 
     public static AssociatedEncryptedMetadataKey generateAEMK(TemporaryExposureKey tek) {
-        HKDFBytesGenerator generator = new HKDFBytesGenerator(new SHA256Digest());
-        generator.init(new HKDFParameters(tek.getKey(),
-                null,
-                AEMK_INFO.getBytes(StandardCharsets.UTF_8)));
-        byte[] rawAEMK = new byte[AssociatedEncryptedMetadataKey.AEMK_LENGTH];
-        generator.generateBytes(rawAEMK, 0, AssociatedEncryptedMetadataKey.AEMK_LENGTH);
+        byte[] rawAEMK = generateHKDFBytes(
+                tek,
+                AEMK_INFO.getBytes(StandardCharsets.UTF_8),
+                AssociatedEncryptedMetadataKey.AEMK_LENGTH
+        );
         return new AssociatedEncryptedMetadataKey(rawAEMK);
     }
 
