@@ -7,15 +7,15 @@ import android.content.SharedPreferences;
 import androidx.security.crypto.EncryptedSharedPreferences;
 import androidx.security.crypto.MasterKeys;
 
-import org.bouncycastle.crypto.digests.SHA256Digest;
-import org.bouncycastle.crypto.generators.HKDFBytesGenerator;
-import org.bouncycastle.crypto.params.HKDFParameters;
+import com.google.crypto.tink.subtle.Hkdf;
+
 import org.coralibre.android.sdk.internal.database.ppcp.Database;
 import org.coralibre.android.sdk.internal.database.ppcp.MockDatabase;
 import org.coralibre.android.sdk.internal.database.ppcp.model.GeneratedTEK;
 import org.coralibre.android.sdk.internal.database.ppcp.model.GeneratedTEKImpl;
 
 import java.nio.charset.StandardCharsets;
+import java.security.GeneralSecurityException;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
@@ -88,14 +88,19 @@ public class CryptoModule {
     }
 
     private static byte[] generateHKDFBytes(TemporaryExposureKey tek, byte[] info, int length) {
-        HKDFBytesGenerator generator = new HKDFBytesGenerator(new SHA256Digest());
-        generator.init(new HKDFParameters(tek.getKey(),
-                null,
-                info
-        ));
-        byte[] bytes = new byte[length];
-        generator.generateBytes(bytes, 0, length);
-        return bytes;
+        try {
+            return Hkdf.computeHkdf(
+                    "HMACSHA256",
+                    tek.getKey(),
+                    null,
+                    info,
+                    length
+            );
+        } catch (GeneralSecurityException e) {
+            // Could only happen if MAC algorithm isn't supported or size is too big,
+            // both of which shouldn't ever happen here.
+            throw new RuntimeException(e);
+        }
     }
 
     public static RollingProximityIdentifierKey generateRPIK(TemporaryExposureKey tek) {

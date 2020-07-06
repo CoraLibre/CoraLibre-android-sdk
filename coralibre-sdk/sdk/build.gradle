@@ -130,6 +130,7 @@ dependencies {
 		// see the 'protobuf {...}' section above.
 
 	implementation 'org.bouncycastle:bcprov-jdk15on:1.65'
+	implementation 'com.google.crypto.tink:tink-android:1.4.0-rc2'
 
 	testImplementation 'junit:junit:4.12'
 
