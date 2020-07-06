@@ -101,6 +101,92 @@ public class ExposureConfiguration {
     public int[] durationAtAttenuationThresholds = new int[] {50, 70};
 
 
+    /**
+     * @param attenuationValue the bluetooth attenuation value from an exposure, in dB:
+     * {@code transmission power - } {@link CapturedData#getRssi()}
+     * @return the attenuation score for the provided value
+     * @see #attenuationScores
+     */
+    public int getAttenuationScore(final int attenuationValue) {
+        if (attenuationValue > 73) {
+            return attenuationScores[0];
+        } else if (attenuationValue > 63) {
+            return attenuationScores[1];
+        } else if (attenuationValue > 51) {
+            return attenuationScores[2];
+        } else if (attenuationValue > 33) {
+            return attenuationScores[3];
+        } else if (attenuationValue > 27) {
+            return attenuationScores[4];
+        } else if (attenuationValue > 15) {
+            return attenuationScores[5];
+        } else if (attenuationValue > 10) {
+            return attenuationScores[6];
+        } else {
+            return attenuationScores[7];
+        }
+    }
+
+    /**
+     * @param daysSinceLastExposureValue the number of days since the last exposure
+     * @return the days since last exposure score for the provided value
+     * @see #daysSinceLastExposureScores
+     */
+    public int getDaysSinceLastExposureScore(final int daysSinceLastExposureValue) {
+        if (daysSinceLastExposureValue >= 14) {
+            return daysSinceLastExposureScores[0];
+        } else if (daysSinceLastExposureValue == 12 || daysSinceLastExposureValue == 13) {
+            return daysSinceLastExposureScores[1];
+        } else if (daysSinceLastExposureValue == 10 || daysSinceLastExposureValue == 11) {
+            return daysSinceLastExposureScores[2];
+        } else if (daysSinceLastExposureValue == 8 || daysSinceLastExposureValue == 9) {
+            return daysSinceLastExposureScores[3];
+        } else if (daysSinceLastExposureValue == 6 || daysSinceLastExposureValue == 7) {
+            return daysSinceLastExposureScores[4];
+        } else if (daysSinceLastExposureValue == 4 || daysSinceLastExposureValue == 5) {
+            return daysSinceLastExposureScores[5];
+        } else if (daysSinceLastExposureValue == 2 || daysSinceLastExposureValue == 3) {
+            return daysSinceLastExposureScores[6];
+        } else {
+            return daysSinceLastExposureScores[7];
+        }
+    }
+
+    /**
+     * @param durationValue the duration of an exposure, in minutes
+     * @return the duration score for the provided value
+     * @see #durationScores
+     */
+    public int getDurationScore(final int durationValue) {
+        if (durationValue <= 0) { // using <= instead of == just to be sure
+            return durationScores[0];
+        } else if (durationValue <= 5) {
+            return durationScores[1];
+        } else if (durationValue <= 10) {
+            return durationScores[2];
+        } else if (durationValue <= 15) {
+            return durationScores[3];
+        } else if (durationValue <= 20) {
+            return durationScores[4];
+        } else if (durationValue <= 25) {
+            return durationScores[5];
+        } else if (durationValue <= 30) {
+            return durationScores[6];
+        } else {
+            return durationScores[7];
+        }
+    }
+
+    /**
+     * @param transmissionRiskValue the user defined risk value associated to an exposure, must be
+     *                              >= 0 and <= 7
+     * @return the transmission risk score for the provided value
+     * @see #transmissionRiskScores
+     */
+    public int getTransmissionRiskScore(final int transmissionRiskValue) {
+        return transmissionRiskScores[transmissionRiskValue];
+    }
+
 
     public static class ExposureConfigurationBuilder {
         // This one imported and used inside the
