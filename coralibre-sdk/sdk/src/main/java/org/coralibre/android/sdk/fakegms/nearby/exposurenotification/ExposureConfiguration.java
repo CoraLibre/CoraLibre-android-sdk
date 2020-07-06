@@ -103,7 +103,7 @@ public class ExposureConfiguration {
 
     /**
      * @param attenuationValue the bluetooth attenuation value from an exposure, in dB:
-     * {@code transmission power - } {@link CapturedData#getRssi()}
+     *                         {@code transmission power - } {@link CapturedData#getRssi()}
      * @return the attenuation score for the provided value
      * @see #attenuationScores
      */
@@ -178,13 +178,35 @@ public class ExposureConfiguration {
     }
 
     /**
-     * @param transmissionRiskValue the user defined risk value associated to an exposure, must be
-     *                              >= 0 and <= 7
+     * @param transmissionRiskValue the user defined risk value associated to an exposure,
+     *                              must be >= 0 and <= 7
      * @return the transmission risk score for the provided value
      * @see #transmissionRiskScores
      */
     public int getTransmissionRiskScore(final int transmissionRiskValue) {
         return transmissionRiskScores[transmissionRiskValue];
+    }
+
+
+    /**
+     * @param attenuationValue the bluetooth attenuation value from an exposure, in dB:
+     *                         {@code transmission power - } {@link CapturedData#getRssi()}
+     * @param daysSinceLastExposureValue the number of days since the last exposure
+     * @param durationValue the duration of an exposure, in minutes
+     * @param transmissionRiskValue the user defined risk value associated to an exposure,
+     *                              must be >= 0 and <= 7
+     * @return the final risk score calculated by multiplying together the intermediary risk scores
+     * associated with the provided values
+     * @see <a href="https://developer.apple.com/documentation/exposurenotification/enexposureconfiguration">risk calculation algorithm details on developer.apple.com</a>
+     */
+    public int getRiskScore(final int attenuationValue,
+                            final int daysSinceLastExposureValue,
+                            final int durationValue,
+                            final int transmissionRiskValue) {
+        return getAttenuationScore(attenuationValue)
+                * getDaysSinceLastExposureScore(daysSinceLastExposureValue)
+                * getDurationScore(durationValue)
+                * getTransmissionRiskScore(transmissionRiskValue);
     }
 
 
