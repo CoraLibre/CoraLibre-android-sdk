@@ -25,7 +25,7 @@ public class ExposureConfiguration {
      * which ignore exposure incidents with lower scores. Default is no minimum (i.e. {@code 0}).
      * @see <a href="https://developers.google.com/android/exposure-notifications/exposure-notifications-api#minimumriskscore">documentation on developers.google.com</a>
      */
-    public int minimumRiskScore = 0;
+    private final int minimumRiskScore;
 
     /**
      * Contains how much risk should be associated with every possible range of attenuation values
@@ -42,7 +42,7 @@ public class ExposureConfiguration {
      * @see <a href="https://developer.apple.com/documentation/exposurenotification/enexposureconfiguration">risk calculation algorithm details on developer.apple.com</a>
      * @see <a href="https://developers.google.com/android/exposure-notifications/exposure-notifications-api#attenuationscores">documentation on developers.google.com</a>
      */
-    public int[] attenuationScores = null;
+    private final int[] attenuationScores;
 
     /**
      * Contains how much risk should be associated with every possible day range since last
@@ -58,7 +58,7 @@ public class ExposureConfiguration {
      * @see <a href="https://developer.apple.com/documentation/exposurenotification/enexposureconfiguration">risk calculation algorithm details on developer.apple.com</a>
      * @see <a href="https://developers.google.com/android/exposure-notifications/exposure-notifications-api#dayssincelastexposurescores">documentation on developers.google.com</a>
      */
-    public int[] daysSinceLastExposureScores = null;
+    private final int[] daysSinceLastExposureScores;
 
     /**
      * Contains how much risk should be associated with every possible time range of the duration
@@ -74,7 +74,7 @@ public class ExposureConfiguration {
      * @see <a href="https://developer.apple.com/documentation/exposurenotification/enexposureconfiguration">risk calculation algorithm details on developer.apple.com</a>
      * @see <a href="https://developers.google.com/android/exposure-notifications/exposure-notifications-api#durationscores">documentation on developers.google.com</a>
      */
-    public int[] durationScores = null;
+    private final int[] durationScores;
 
     /**
      * Contains how much transmission risk should be associated to an encounter. The risk factor
@@ -84,7 +84,7 @@ public class ExposureConfiguration {
      * @see <a href="https://developer.apple.com/documentation/exposurenotification/enexposureconfiguration">risk calculation algorithm details on developer.apple.com</a>
      * @see <a href="https://developers.google.com/android/exposure-notifications/exposure-notifications-api#transmissionriskscores">documentation on developers.google.com</a>
      */
-    public int[] transmissionRiskScores = null;
+    private final int[] transmissionRiskScores;
 
     /**
      * Contains the thresholds used to calculate the three attenuation duration buckets for
@@ -98,7 +98,45 @@ public class ExposureConfiguration {
      * 3. Y < durationAtAttenuationThresholds[1]
      * @see <a href="https://developer.apple.com/documentation/exposurenotification/enexposureconfiguration/3601128-attenuationdurationthresholds">documentation on developer.apple.com</a>
      */
-    public int[] durationAtAttenuationThresholds = new int[] {50, 70};
+    private final int[] durationAtAttenuationThresholds;
+
+
+    private ExposureConfiguration(final int minimumRiskScore,
+                                  final int[] attenuationScores,
+                                  final int[] daysSinceLastExposureScores,
+                                  final int[] durationScores,
+                                  final int[] transmissionRiskScores,
+                                  final int[] durationAtAttenuationThresholds) {
+
+        this.minimumRiskScore = minimumRiskScore;
+        this.attenuationScores = attenuationScores;
+        this.daysSinceLastExposureScores = daysSinceLastExposureScores;
+        this.durationScores = durationScores;
+        this.transmissionRiskScores = transmissionRiskScores;
+        this.durationAtAttenuationThresholds = durationAtAttenuationThresholds;
+    }
+
+
+    /**
+     * @see #minimumRiskScore
+     */
+    public int getMinimumRiskScore() {
+        return minimumRiskScore;
+    }
+
+    /**
+     * @see #durationAtAttenuationThresholds
+     */
+    public int getDurationAtAttenuationLowThreshold() {
+        return durationAtAttenuationThresholds[0];
+    }
+
+    /**
+     * @see #durationAtAttenuationThresholds
+     */
+    public int getDurationAtAttenuationHighThreshold() {
+        return durationAtAttenuationThresholds[1];
+    }
 
 
     /**
@@ -218,87 +256,119 @@ public class ExposureConfiguration {
         //  ApplicationConfigurationService
         //  https://github.com/corona-warn-app/cwa-app-android/blob/master/Corona-Warn-App/src/main/java/de/rki/coronawarnapp/service/applicationconfiguration/ApplicationConfigurationService.kt
 
-        private ExposureConfiguration builtObject = new ExposureConfiguration();
+
+        private int minimumRiskScore = 0;
+        private int[] attenuationScores = null;
+        private int[] daysSinceLastExposureScores = null;
+        private int[] durationScores = null;
+        private int[] transmissionRiskScores = null;
+        private final int[] durationAtAttenuationThresholds = new int[] {50, 70};
+
         public ExposureConfigurationBuilder() {}
 
 
-        public ExposureConfigurationBuilder setTransmissionRiskScores(
-                int val0, int val1, int val2, int val3, int val4, int val5, int val6, int val7) {
-            builtObject.transmissionRiskScores = new int[8];
-            builtObject.transmissionRiskScores[0] = val0;
-            builtObject.transmissionRiskScores[1] = val1;
-            builtObject.transmissionRiskScores[2] = val2;
-            builtObject.transmissionRiskScores[3] = val3;
-            builtObject.transmissionRiskScores[4] = val4;
-            builtObject.transmissionRiskScores[5] = val5;
-            builtObject.transmissionRiskScores[6] = val6;
-            builtObject.transmissionRiskScores[7] = val7;
+        /**
+         * if not called defaults to 0
+         * @see ExposureConfiguration#minimumRiskScore
+         * @return {@code this}
+         */
+        public ExposureConfigurationBuilder setMinimumRiskScore(int val) {
+            minimumRiskScore = val;
             return this;
         }
 
-
-        public ExposureConfigurationBuilder setDurationScores(
-                int val0, int val1, int val2, int val3, int val4, int val5, int val6, int val7) {
-            builtObject.durationScores = new int[8];
-            builtObject.durationScores[0] = val0;
-            builtObject.durationScores[1] = val1;
-            builtObject.durationScores[2] = val2;
-            builtObject.durationScores[3] = val3;
-            builtObject.durationScores[4] = val4;
-            builtObject.durationScores[5] = val5;
-            builtObject.durationScores[6] = val6;
-            builtObject.durationScores[7] = val7;
-            return this;
-        }
-
-
-        public ExposureConfigurationBuilder setDaysSinceLastExposureScores(
-                int val0, int val1, int val2, int val3, int val4, int val5, int val6, int val7) {
-            builtObject.daysSinceLastExposureScores = new int[8];
-            builtObject.daysSinceLastExposureScores[0] = val0;
-            builtObject.daysSinceLastExposureScores[1] = val1;
-            builtObject.daysSinceLastExposureScores[2] = val2;
-            builtObject.daysSinceLastExposureScores[3] = val3;
-            builtObject.daysSinceLastExposureScores[4] = val4;
-            builtObject.daysSinceLastExposureScores[5] = val5;
-            builtObject.daysSinceLastExposureScores[6] = val6;
-            builtObject.daysSinceLastExposureScores[7] = val7;
-            return this;
-        }
-
-
+        /**
+         * @see ExposureConfiguration#attenuationScores
+         * @return {@code this}
+         */
         public ExposureConfigurationBuilder setAttenuationScores(
                 int val0, int val1, int val2, int val3, int val4, int val5, int val6, int val7) {
-            builtObject.attenuationScores = new int[8];
-            builtObject.attenuationScores[0] = val0;
-            builtObject.attenuationScores[1] = val1;
-            builtObject.attenuationScores[2] = val2;
-            builtObject.attenuationScores[3] = val3;
-            builtObject.attenuationScores[4] = val4;
-            builtObject.attenuationScores[5] = val5;
-            builtObject.attenuationScores[6] = val6;
-            builtObject.attenuationScores[7] = val7;
+            attenuationScores = new int[8];
+            attenuationScores[0] = val0;
+            attenuationScores[1] = val1;
+            attenuationScores[2] = val2;
+            attenuationScores[3] = val3;
+            attenuationScores[4] = val4;
+            attenuationScores[5] = val5;
+            attenuationScores[6] = val6;
+            attenuationScores[7] = val7;
             return this;
         }
 
-
-        public ExposureConfigurationBuilder setMinimumRiskScore(int val) {
-            builtObject.minimumRiskScore = val;
+        /**
+         * @see ExposureConfiguration#daysSinceLastExposureScores
+         * @return {@code this}
+         */
+        public ExposureConfigurationBuilder setDaysSinceLastExposureScores(
+                int val0, int val1, int val2, int val3, int val4, int val5, int val6, int val7) {
+            daysSinceLastExposureScores = new int[8];
+            daysSinceLastExposureScores[0] = val0;
+            daysSinceLastExposureScores[1] = val1;
+            daysSinceLastExposureScores[2] = val2;
+            daysSinceLastExposureScores[3] = val3;
+            daysSinceLastExposureScores[4] = val4;
+            daysSinceLastExposureScores[5] = val5;
+            daysSinceLastExposureScores[6] = val6;
+            daysSinceLastExposureScores[7] = val7;
             return this;
         }
 
+        /**
+         * @see ExposureConfiguration#durationScores
+         * @return {@code this}
+         */
+        public ExposureConfigurationBuilder setDurationScores(
+                int val0, int val1, int val2, int val3, int val4, int val5, int val6, int val7) {
+            durationScores = new int[8];
+            durationScores[0] = val0;
+            durationScores[1] = val1;
+            durationScores[2] = val2;
+            durationScores[3] = val3;
+            durationScores[4] = val4;
+            durationScores[5] = val5;
+            durationScores[6] = val6;
+            durationScores[7] = val7;
+            return this;
+        }
 
+        /**
+         * @see ExposureConfiguration#transmissionRiskScores
+         * @return {@code this}
+         */
+        public ExposureConfigurationBuilder setTransmissionRiskScores(
+                int val0, int val1, int val2, int val3, int val4, int val5, int val6, int val7) {
+            transmissionRiskScores = new int[8];
+            transmissionRiskScores[0] = val0;
+            transmissionRiskScores[1] = val1;
+            transmissionRiskScores[2] = val2;
+            transmissionRiskScores[3] = val3;
+            transmissionRiskScores[4] = val4;
+            transmissionRiskScores[5] = val5;
+            transmissionRiskScores[6] = val6;
+            transmissionRiskScores[7] = val7;
+            return this;
+        }
+
+        /**
+         * if not called defaults to {50, 70}
+         * @see ExposureConfiguration#durationAtAttenuationThresholds
+         * @return {@code this}
+         */
         public ExposureConfigurationBuilder setDurationAtAttenuationThresholds(
-                int val0, int val1) {
-            builtObject.durationAtAttenuationThresholds = new int[2];
-            builtObject.durationAtAttenuationThresholds[0] = val0;
-            builtObject.durationAtAttenuationThresholds[1] = val1;
+                int lowThreshold, int highThreshold) {
+            durationAtAttenuationThresholds[0] = lowThreshold;
+            durationAtAttenuationThresholds[1] = highThreshold;
             return this;
         }
 
 
+        /**
+         * @return an {@link ExposureConfiguration} instance based on the values set in the builder
+         */
         public ExposureConfiguration build() {
-            return builtObject;
+            return new ExposureConfiguration(minimumRiskScore,attenuationScores,
+                    daysSinceLastExposureScores, durationScores, transmissionRiskScores,
+                    durationAtAttenuationThresholds);
         }
     }
 }
