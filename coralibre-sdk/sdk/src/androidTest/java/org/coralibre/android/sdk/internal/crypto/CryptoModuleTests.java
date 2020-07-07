@@ -1,8 +1,5 @@
 package org.coralibre.android.sdk.internal.crypto;
 
-import android.util.Log;
-import android.util.Pair;
-
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import org.coralibre.android.sdk.internal.crypto.ppcp.AssociatedEncryptedMetadata;
@@ -17,11 +14,8 @@ import org.coralibre.android.sdk.internal.crypto.ppcp.TemporaryExposureKey;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.util.Arrays;
-
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(AndroidJUnit4.class)

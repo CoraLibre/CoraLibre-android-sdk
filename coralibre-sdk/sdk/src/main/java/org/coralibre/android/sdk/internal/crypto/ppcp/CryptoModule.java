@@ -7,15 +7,15 @@ import android.content.SharedPreferences;
 import androidx.security.crypto.EncryptedSharedPreferences;
 import androidx.security.crypto.MasterKeys;
 
-import org.bouncycastle.crypto.digests.SHA256Digest;
-import org.bouncycastle.crypto.generators.HKDFBytesGenerator;
-import org.bouncycastle.crypto.params.HKDFParameters;
+import com.google.crypto.tink.subtle.Hkdf;
+
 import org.coralibre.android.sdk.internal.database.ppcp.Database;
 import org.coralibre.android.sdk.internal.database.ppcp.MockDatabase;
 import org.coralibre.android.sdk.internal.database.ppcp.model.GeneratedTEK;
 import org.coralibre.android.sdk.internal.database.ppcp.model.GeneratedTEKImpl;
 
 import java.nio.charset.StandardCharsets;
+import java.security.GeneralSecurityException;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
@@ -87,23 +87,37 @@ public class CryptoModule {
         }
     }
 
+    private static byte[] generateHKDFBytes(TemporaryExposureKey tek, byte[] info, int length) {
+        try {
+            return Hkdf.computeHkdf(
+                    "HMACSHA256",
+                    tek.getKey(),
+                    null,
+                    info,
+                    length
+            );
+        } catch (GeneralSecurityException e) {
+            // Could only happen if MAC algorithm isn't supported or size is too big,
+            // both of which shouldn't ever happen here.
+            throw new RuntimeException(e);
+        }
+    }
+
     public static RollingProximityIdentifierKey generateRPIK(TemporaryExposureKey tek) {
-        HKDFBytesGenerator generator = new HKDFBytesGenerator(new SHA256Digest());
-        generator.init(new HKDFParameters(tek.getKey(),
-                null,
-                RPIK_INFO.getBytes(StandardCharsets.UTF_8)));
-        byte[] rawRPIK = new byte[RollingProximityIdentifierKey.RPIK_LENGTH];
-        generator.generateBytes(rawRPIK, 0, RollingProximityIdentifierKey.RPIK_LENGTH);
+        byte[] rawRPIK = generateHKDFBytes(
+                tek,
+                RPIK_INFO.getBytes(StandardCharsets.UTF_8),
+                RollingProximityIdentifierKey.RPIK_LENGTH
+        );
         return new RollingProximityIdentifierKey(rawRPIK);
     }
 
     public static AssociatedEncryptedMetadataKey generateAEMK(TemporaryExposureKey tek) {
-        HKDFBytesGenerator generator = new HKDFBytesGenerator(new SHA256Digest());
-        generator.init(new HKDFParameters(tek.getKey(),
-                null,
-                AEMK_INFO.getBytes(StandardCharsets.UTF_8)));
-        byte[] rawAEMK = new byte[AssociatedEncryptedMetadataKey.AEMK_LENGTH];
-        generator.generateBytes(rawAEMK, 0, AssociatedEncryptedMetadataKey.AEMK_LENGTH);
+        byte[] rawAEMK = generateHKDFBytes(
+                tek,
+                AEMK_INFO.getBytes(StandardCharsets.UTF_8),
+                AssociatedEncryptedMetadataKey.AEMK_LENGTH
+        );
         return new AssociatedEncryptedMetadataKey(rawAEMK);
     }
 

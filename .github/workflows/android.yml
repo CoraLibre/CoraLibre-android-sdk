@@ -6,7 +6,7 @@ jobs:
   test:
     name: "Run SDK Tests"
     runs-on: macos-latest # enables hardware acceleration in the virtual machine
-    
+
     steps:
     - uses: actions/checkout@v2
     - name: set up JDK 1.8
@@ -18,4 +18,8 @@ jobs:
       with:
         api-level: 29
         script: cd coralibre-sdk; ./gradlew connectedAndroidTest
-
+    - uses: actions/upload-artifact@v2
+      if: ${{ always() }}
+      with:
+        name: reports
+        path: coralibre-sdk/sdk/build/reports
