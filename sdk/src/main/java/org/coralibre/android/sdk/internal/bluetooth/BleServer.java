@@ -11,7 +11,9 @@ package org.coralibre.android.sdk.internal.bluetooth;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
+import android.bluetooth.le.AdvertiseCallback;
 import android.bluetooth.le.AdvertiseData;
+import android.bluetooth.le.AdvertiseSettings;
 import android.bluetooth.le.AdvertisingSet;
 import android.bluetooth.le.AdvertisingSetCallback;
 import android.bluetooth.le.AdvertisingSetParameters;
@@ -19,6 +21,7 @@ import android.bluetooth.le.BluetoothLeAdvertiser;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.ParcelUuid;
+import android.util.Log;
 
 
 import java.util.UUID;
@@ -26,7 +29,7 @@ import java.util.UUID;
 import org.coralibre.android.sdk.internal.AppConfigManager;
 import org.coralibre.android.sdk.internal.crypto.ppcp.AssociatedMetadata;
 import org.coralibre.android.sdk.internal.crypto.ppcp.CryptoModule;
-import org.coralibre.android.sdk.internal.logger.Logger;
+import org.coralibre.android.sdk.internal.util.ByteToHex;
 
 import static android.bluetooth.le.AdvertisingSetParameters.INTERVAL_MEDIUM;
 import static android.bluetooth.le.AdvertisingSetParameters.TX_POWER_LOW;
@@ -43,29 +46,32 @@ public class BleServer {
 	public static final UUID TOTP_CHARACTERISTIC_UUID = UUID.fromString("8c8494e3-bab5-1848-40a0-1b06991c0001");
 
 	private final Context context;
-	private final AdvertisingSetCallback advertisingSetCallback = new AdvertisingSetCallback() {
+	private final CryptoModule cryptoModule;
+
+	private final AdvertiseCallback advertiseCallback = new AdvertiseCallback() {
 		@Override
-		public void onAdvertisingSetStarted(AdvertisingSet advertisingSet, int txPower, int status) {
-			super.onAdvertisingSetStarted(advertisingSet, txPower, status);
-			if(status == ADVERTISE_SUCCESS) {
-				Logger.i(TAG, "advertise onStartSuccess: " + advertisingSet.toString());
-				BluetoothServiceStatus.getInstance(context).updateAdvertiseStatus(BluetoothServiceStatus.ADVERTISE_OK);
-			} else {
-				Logger.e(TAG, "advertise onStartFailure: " + status);
-				BluetoothServiceStatus.getInstance(context).updateAdvertiseStatus(status);
-			}
+		public void onStartFailure(int errorCode) {
+			Log.e(TAG, "advertise onStartFailure: " + errorCode);
+			BluetoothServiceStatus.getInstance(context).updateAdvertiseStatus(errorCode);
+		}
+
+		@Override
+		public void onStartSuccess(AdvertiseSettings settingsInEffect) {
+			Log.i(TAG, "advertise onStartSuccess: " + settingsInEffect.toString());
+			BluetoothServiceStatus.getInstance(context).updateAdvertiseStatus(BluetoothServiceStatus.ADVERTISE_OK);
 		}
 	};
+
 
 	private BluetoothAdapter mAdapter;
 	private BluetoothLeAdvertiser mLeAdvertiser;
 
 	public BleServer(Context context) {
 		this.context = context;
+		cryptoModule = CryptoModule.getInstance();
 	}
 
 	private byte[] getAdvertiseData() {
-		CryptoModule cryptoModule = CryptoModule.getInstance(context);
 		return cryptoModule.getCurrentPayload().getRawPayload();
 		//TODO: add data described in here:
 		// https://covid19-static.cdn-apple.com/applications/covid19/current/static/contact-tracing/pdf/ExposureNotification-BluetoothSpecificationv1.2.pdf
@@ -86,6 +92,9 @@ public class BleServer {
 
 		AppConfigManager appConfigManager = AppConfigManager.getInstance(context);
 
+		// This allowes to set the bluetooth parameters more detailed, however it seems
+		// to only be available on phones with bluetooth 5.0 and API level 26+
+		/*
 		AdvertisingSetParameters advParameters = new AdvertisingSetParameters.Builder()
 				.setTxPowerLevel(TX_POWER_LOW)
 				.setInterval(INTERVAL_MEDIUM)
@@ -93,38 +102,39 @@ public class BleServer {
 				.setConnectable(false)
 				.build();
 
-		// This seems not to be used for advertise set. This seems to be utilized only
-		// on older devices with android 21. Leaving it in as a comment for a possible
-		// legacy version of the SDK
-		/*
-		AdvertiseSettings advSettings = new AdvertiseSettings.Builder()
+		 */
+
+
+		final AdvertiseSettings advSettings = new AdvertiseSettings.Builder()
 				.setTxPowerLevel(AdvertiseSettings.ADVERTISE_TX_POWER_LOW)
 				.setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_BALANCED)
 				.setConnectable(false)
 				.setTimeout(0)
 				.build();
-		*/
 
-		CryptoModule.getInstance(context).setMetadata(
-				new AssociatedMetadata(PPCP_VERSION_MAJOR, PPCP_VERSION_MINOR, advParameters.getTxPowerLevel()));
+		//TODO: replace this with a real value
+		final char mockTXPowerlevel = (char) 0;
+		CryptoModule.getInstance().setMetadata(
+				new AssociatedMetadata(PPCP_VERSION_MAJOR, PPCP_VERSION_MINOR, mockTXPowerlevel));
 
-		AdvertiseData advData = new AdvertiseData.Builder()
+		cryptoModule.renewPayload();
+		final AdvertiseData advData = new AdvertiseData.Builder()
 				.setIncludeDeviceName(false)
 				.setIncludeTxPowerLevel(false)
 				.addServiceUuid(new ParcelUuid(SERVICE_UUID))
 				.addServiceData(new ParcelUuid(SERVICE_UUID), getAdvertiseData())
 				.build();
 
-		mLeAdvertiser.startAdvertisingSet(advParameters, advData, null, null, null, advertisingSetCallback);
-		Logger.d(TAG, "started advertising (only advertiseData), powerLevel "
-				+ advParameters.getTxPowerLevel());
+		mLeAdvertiser.startAdvertising(advSettings, advData, advertiseCallback);
+		Log.d(TAG, "started advertising (only advertiseData), powerLevel (CAUTION THIS IS A MOCK): "
+				+ ((int) mockTXPowerlevel));
 
 		return BluetoothState.ENABLED;
 	}
 
 	public void stopAdvertising() {
 		if (mLeAdvertiser != null) {
-			mLeAdvertiser.stopAdvertisingSet(advertisingSetCallback);
+			mLeAdvertiser.stopAdvertising(advertiseCallback);
 		}
 	}
 

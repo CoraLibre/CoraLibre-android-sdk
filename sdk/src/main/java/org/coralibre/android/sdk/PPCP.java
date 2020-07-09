@@ -12,6 +12,7 @@ package org.coralibre.android.sdk;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.util.Log;
 
 import androidx.core.content.ContextCompat;
 
@@ -22,7 +23,6 @@ import org.coralibre.android.sdk.internal.TracingService;
 import org.coralibre.android.sdk.internal.crypto.CryptoModule;
 import org.coralibre.android.sdk.internal.database.Database;
 import org.coralibre.android.sdk.internal.database.models.ExposureDay;
-import org.coralibre.android.sdk.internal.logger.Logger;
 import org.coralibre.android.sdk.internal.util.ProcessUtil;
 
 import java.security.PublicKey;
@@ -56,21 +56,12 @@ public class PPCP {
 	}
 
 	private static void executeInit(Context context) {
-		CryptoModule.getInstance(context).init();
 
-		new Database(context).removeOldData();
-
-		AppConfigManager appConfigManager = AppConfigManager.getInstance(context);
-		boolean advertising = appConfigManager.isAdvertisingEnabled();
-		boolean receiving = appConfigManager.isReceivingEnabled();
-		if (advertising || receiving) {
-			start(context, advertising, receiving);
-		}
 	}
 
 	private static void checkInit() throws IllegalStateException {
 		if (!PPCP.isInitialized) {
-			throw new IllegalStateException("You have to call DP3T.init() in your application onCreate()");
+			throw new IllegalStateException("You have to call PPCP.init() in your application onCreate()");
 		}
 	}
 
@@ -154,7 +145,6 @@ public class PPCP {
 
 		CryptoModule.getInstance(context).reset();
 		appConfigManager.clearPreferences();
-		Logger.clear();
 		Database db = new Database(context);
 		db.recreateTables(response -> onDeleteListener.run());
 	}

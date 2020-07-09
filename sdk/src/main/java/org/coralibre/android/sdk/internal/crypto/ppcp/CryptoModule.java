@@ -1,11 +1,6 @@
 package org.coralibre.android.sdk.internal.crypto.ppcp;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
-import android.content.SharedPreferences;
-
-import androidx.security.crypto.EncryptedSharedPreferences;
-import androidx.security.crypto.MasterKeys;
 
 import com.google.crypto.tink.subtle.Hkdf;
 
@@ -33,41 +28,57 @@ public class CryptoModule {
     public static final String AEMK_INFO = "EN-AEMK";
 
     private static CryptoModule instance;
-
-    private SharedPreferences esp;
     private ENNumber currentTekDay = new ENNumber(0);
     private RollingProximityIdentifierKey currentRPIK;
     private AssociatedEncryptedMetadataKey currentAEMK;
     private BluetoothPayload currentPayload = null;
     private AssociatedMetadata metadata = null;
+    private Database database;
 
-    public static CryptoModule getInstance(Context context) {
+    private boolean testMode;
+    private ENNumber currentIntervalForTesting;
+
+    public static CryptoModule getInstance() {
+        //TODO: use propper factory class
+        if (instance == null) {
+            instance = new CryptoModule(MockDatabase.getInstance());
+        }
+        return instance;
+    }
+
+    public CryptoModule(Database db) {
+        testMode = false; // remove this line and everything goes BOOM!!!
+        //TODO: Use propper dependency injection
+        init(db, getCurrentInterval());
+    }
+
+    /**
+     * If you call this method your warranty will be void.
+     * This Construction is only supposed to be used during testing. If app is compiled
+     * for production purpose this should be avoided.
+     **/
+    private CryptoModule(Database db, ENNumber interval) {
+        currentIntervalForTesting = interval;
+        testMode = true;
+        init(db, interval);
+    }
+
+    //TODO: Use a factory for getting a crypto module in order to do propper dependency injection.
+    private void init(Database db, ENNumber currentInterval) {
         try {
-            if (instance == null) {
-                instance = new CryptoModule();
-                String KEY_ALIAS = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC);
-                instance.esp = EncryptedSharedPreferences.create("coralibre_store",
-                        KEY_ALIAS,
-                        context,
-                        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-                        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM);
+            database = db;
 
-                //TODO: use dependency injection
-                Database database = MockDatabase.getInstance();
-                GeneratedTEK rawTek = database.getGeneratedTEK(
-                        TemporaryExposureKey.getMidnight(getCurrentInterval()));
-                if(rawTek == null) {
-                    instance.updateTEK();
-                } else {
-                    TemporaryExposureKey tek = new TemporaryExposureKey(rawTek.getInterval(), rawTek.getKey());
-                    instance.currentTekDay = tek.getInterval();
-                    instance.currentRPIK = generateRPIK(tek);
-                    instance.currentAEMK = generateAEMK(tek);
-                }
-
+            GeneratedTEK rawTek = database.getGeneratedTEK(
+                    TemporaryExposureKey.getMidnight(currentInterval));
+            if (rawTek == null) {
+                updateTEK();
+            } else {
+                TemporaryExposureKey tek = new TemporaryExposureKey(rawTek.getInterval(), rawTek.getKey());
+                currentTekDay = tek.getInterval();
+                currentRPIK = generateRPIK(tek);
+                currentAEMK = generateAEMK(tek);
             }
-            return instance;
-        } catch(Exception e) {
+        } catch (Exception e) {
             throw new CryptoException("could not crate new CryptoModule instance", e);
         }
     }
@@ -76,11 +87,11 @@ public class CryptoModule {
         return new ENNumber(System.currentTimeMillis() / 1000L, true);
     }
 
-    private static TemporaryExposureKey getNewRandomTEK() {
+    private TemporaryExposureKey getNewRandomTEK() {
         try {
             KeyGenerator keyGenerator = KeyGenerator.getInstance("HmacSHA256");
             SecretKey secretKey = keyGenerator.generateKey();
-            ENNumber now = getCurrentInterval();
+            ENNumber now = testMode ? currentIntervalForTesting : getCurrentInterval();
             return new TemporaryExposureKey(now, secretKey.getEncoded());
         } catch (Exception e) {
             throw new CryptoException(e);
@@ -121,8 +132,8 @@ public class CryptoModule {
         return new AssociatedEncryptedMetadataKey(rawAEMK);
     }
 
-    public static RollingProximityIdentifier generateRPI(RollingProximityIdentifierKey rpik) {
-        return generateRPI(rpik, getCurrentInterval());
+    public RollingProximityIdentifier generateRPI(RollingProximityIdentifierKey rpik) {
+        return generateRPI(rpik, testMode ? currentIntervalForTesting : getCurrentInterval());
     }
 
     public static RollingProximityIdentifier generateRPI(RollingProximityIdentifierKey rpik,
@@ -157,8 +168,8 @@ public class CryptoModule {
     }
 
     public static AssociatedEncryptedMetadata encryptAM(AssociatedMetadata am,
-                                                     RollingProximityIdentifier rpi,
-                                                     AssociatedEncryptedMetadataKey aemk) {
+                                                        RollingProximityIdentifier rpi,
+                                                        AssociatedEncryptedMetadataKey aemk) {
         try {
             SecretKey keySpec = new SecretKeySpec(aemk.getKey(), "AES");
             IvParameterSpec ivSpec = new IvParameterSpec(rpi.getData());
@@ -192,31 +203,35 @@ public class CryptoModule {
         return decryptAEM(aem, rpi, generateAEMK(tek));
     }
 
-    private void updateTEK() {
-        if(!currentTekDay.equals(
-                TemporaryExposureKey.getMidnight(getCurrentInterval()))) {
+    public void updateTEK() {
+        System.out.println(TemporaryExposureKey.getMidnight(testMode ? currentIntervalForTesting : getCurrentInterval()).get());
+        if (!currentTekDay.equals(
+                TemporaryExposureKey.getMidnight(testMode ? currentIntervalForTesting : getCurrentInterval()))) {
             TemporaryExposureKey currentTek = getNewRandomTEK();
             currentTekDay = currentTek.getInterval();
             currentRPIK = generateRPIK(currentTek);
             currentAEMK = generateAEMK(currentTek);
 
-            //TODO: use dependency injection
-            Database database = MockDatabase.getInstance();
             database.addGeneratedTEK(new GeneratedTEKImpl(currentTekDay, currentTek.getKey()));
         }
     }
 
-    public BluetoothPayload getCurrentPayload() {
-        if(metadata == null) throw new CryptoException("Associated metadata has not yet been set.");
+    public void renewPayload() {
+        if (metadata == null)
+            throw new CryptoException("Associated metadata has not yet been set.");
 
-        if(currentPayload == null
-                || !currentPayload.getInterval().equals(getCurrentInterval())) {
+        if (currentPayload == null
+                || !currentPayload.getInterval().equals(testMode ? currentIntervalForTesting : getCurrentInterval())){
             updateTEK();
-            RollingProximityIdentifier currentRPI = generateRPI(currentRPIK, getCurrentInterval());
+            RollingProximityIdentifier currentRPI = generateRPI(currentRPIK, testMode ? currentIntervalForTesting : getCurrentInterval());
             AssociatedEncryptedMetadata currentAEM = encryptAM(metadata, currentRPI, currentAEMK);
             currentPayload = new BluetoothPayload(currentRPI, currentAEM);
         }
+    }
 
+    public BluetoothPayload getCurrentPayload() {
+        if (currentPayload == null)
+            throw new CryptoException("You need to run renewPayload() before calling getCurrentPayload() for the first time.");
         return currentPayload;
     }
 

@@ -3,7 +3,7 @@ package org.coralibre.android.sdk.internal.crypto.ppcp;
 import java.security.InvalidParameterException;
 
 public class AssociatedEncryptedMetadata {
-    private static final byte[] data = new byte[AssociatedMetadata.AEM_LENGTH];
+    private final byte[] data = new byte[AssociatedMetadata.AEM_LENGTH];
 
     public AssociatedEncryptedMetadata(byte[] rawAEM) {
         if(rawAEM.length != AssociatedMetadata.AEM_LENGTH) throw new InvalidParameterException("wrong rawAEM size");

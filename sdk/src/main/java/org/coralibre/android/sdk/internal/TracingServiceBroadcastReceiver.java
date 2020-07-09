@@ -12,26 +12,22 @@ package org.coralibre.android.sdk.internal;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
+
 import androidx.core.content.ContextCompat;
 
-import org.coralibre.android.sdk.internal.logger.Logger;
 
 public class TracingServiceBroadcastReceiver extends BroadcastReceiver {
 
-	public static final String TAG = "TracingServiceBroadcastReceiver";
+    public static final String TAG = "TracingServiceBroadcastReceiver";
 
-	@Override
-	public void onReceive(Context context, Intent i) {
-		Logger.d(TAG, "received broadcast to start service");
-		AppConfigManager appConfigManager = AppConfigManager.getInstance(context);
-		boolean advertising = appConfigManager.isAdvertisingEnabled();
-		boolean receiving = appConfigManager.isReceivingEnabled();
-		if (advertising || receiving) {
-			Intent intent = new Intent(context, TracingService.class).setAction(i.getAction());
-			intent.putExtra(TracingService.EXTRA_ADVERTISE, advertising);
-			intent.putExtra(TracingService.EXTRA_RECEIVE, receiving);
-			ContextCompat.startForegroundService(context, intent);
-		}
-	}
+    @Override
+    public void onReceive(Context context, Intent i) {
+        Log.d(TAG, "received broadcast to start service");
+        Intent intent = new Intent(context, TracingService.class).setAction(i.getAction());
+        intent.putExtra(TracingService.EXTRA_ADVERTISE, true);
+        intent.putExtra(TracingService.EXTRA_RECEIVE, true);
+        ContextCompat.startForegroundService(context, intent);
+    }
 
 }

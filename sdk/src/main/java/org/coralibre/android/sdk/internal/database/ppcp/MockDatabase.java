@@ -25,8 +25,9 @@ public class MockDatabase implements Database {
         return database;
     }
 
-    private MockDatabase() {
-
+    public void clearDatabase() {
+        collectedPackagesByInterval = new HashMap<>();
+        generatedTEKs = new ArrayList<>();
     }
 
     @Override
@@ -93,5 +94,4 @@ public class MockDatabase implements Database {
             }
         }
     }
-
 }

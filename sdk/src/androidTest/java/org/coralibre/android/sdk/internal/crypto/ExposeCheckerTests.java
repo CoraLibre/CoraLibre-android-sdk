@@ -1,6 +1,5 @@
 package org.coralibre.android.sdk.internal.crypto;
 
-import android.util.Log;
 import android.util.Pair;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -12,7 +11,7 @@ import org.coralibre.android.sdk.internal.crypto.ppcp.TemporaryExposureKey;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import static org.coralibre.android.sdk.internal.crypto.ppcp.RollingProximityIdentifier.RPI_SIZE;
+import static org.coralibre.android.sdk.internal.crypto.ppcp.RollingProximityIdentifier.RPI_LENGTH;
 import static org.coralibre.android.sdk.internal.crypto.ppcp.TemporaryExposureKey.TEK_LENGTH;
 import static org.coralibre.android.sdk.internal.crypto.ppcp.TemporaryExposureKey.TEK_ROLLING_PERIOD;
 import static org.junit.Assert.assertArrayEquals;
@@ -36,7 +35,7 @@ public class ExposeCheckerTests {
     }
 
     private static RollingProximityIdentifier rollingProximityIdentifier(long rawENNumber, String hex) {
-        assertEquals(2*RPI_SIZE, hex.length());
+        assertEquals(2* RPI_LENGTH, hex.length());
         return new RollingProximityIdentifier(hex2byte(hex), new ENNumber(rawENNumber));
     }
 
