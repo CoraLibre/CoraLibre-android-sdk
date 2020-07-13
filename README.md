@@ -4,7 +4,7 @@ CoraLibre-android-sdk
 ![cora-libreicon](https://user-images.githubusercontent.com/1891273/85005834-9cda9d80-b159-11ea-83d9-52d8c662a31d.png)
 
 This code is based on the [DP-3T prestandard android-sdk code](https://github.com/DP-3T/dp3t-sdk-android/tree/prestandard).
-It aims to be compatible with the Apple/Google developed [Privacy-Preserving Contact Tracing](https://www.apple.com/covid19/contacttracing/) (PPCP) protocoll.
+It aims to be compatible with the Apple/Google developed [Privacy-Preserving Contact Tracing](https://www.apple.com/covid19/contacttracing/) (PPCP) protocol.
 So far it is behaving more like DP-3T but we aim to transform it to be PPCP compatible. (We are makeing progress, the new CryptoModule seems to work right already.)
 
 ## Todo
