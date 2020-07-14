@@ -27,7 +27,7 @@ https://github.com/DP-3T/documents/blob/master/DP3T%20White%20Paper.pdf
 
 ## How to get started
 
-So far everything is developed by Unit Testing. Before you can start make sure you know android and are able to handle working with git(hub). 
+So far everything is developed by Unit Testing. Before you can start make sure you know android and are able to work with git(hub) repositories. 
 Here are a few steps to "boot" you up into the project:
 
 1. First read the documents that are listed above in the [documentation](#documentation) section.
