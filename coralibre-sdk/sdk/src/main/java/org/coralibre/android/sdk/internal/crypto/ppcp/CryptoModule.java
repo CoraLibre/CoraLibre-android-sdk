@@ -12,7 +12,6 @@ import com.google.crypto.tink.subtle.Hkdf;
 import org.coralibre.android.sdk.internal.database.ppcp.Database;
 import org.coralibre.android.sdk.internal.database.ppcp.MockDatabase;
 import org.coralibre.android.sdk.internal.database.ppcp.model.GeneratedTEK;
-import org.coralibre.android.sdk.internal.database.ppcp.model.GeneratedTEKImpl;
 
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
@@ -202,7 +201,7 @@ public class CryptoModule {
 
             //TODO: use dependency injection
             Database database = MockDatabase.getInstance();
-            database.addGeneratedTEK(new GeneratedTEKImpl(currentTekDay, currentTek.getKey()));
+            database.addGeneratedTEK(new GeneratedTEK(currentTekDay, currentTek.getKey()));
         }
     }
 
