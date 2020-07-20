@@ -1,6 +1,5 @@
 package org.coralibre.android.sdk.internal.crypto;
 
-import android.util.Log;
 import android.util.Pair;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;

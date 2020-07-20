@@ -1,6 +1,5 @@
 package org.coralibre.android.sdk.internal.crypto.ppcp;
 
-import java.nio.charset.StandardCharsets;
 import java.security.InvalidParameterException;
 import java.util.Arrays;
 
