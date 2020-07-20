@@ -10,6 +10,7 @@ import androidx.security.crypto.MasterKeys;
 import com.google.crypto.tink.subtle.Hkdf;
 
 import org.coralibre.android.sdk.internal.database.ppcp.Database;
+import org.coralibre.android.sdk.internal.database.ppcp.DatabaseAccess;
 import org.coralibre.android.sdk.internal.database.ppcp.MockDatabase;
 import org.coralibre.android.sdk.internal.database.ppcp.model.GeneratedTEK;
 
@@ -51,8 +52,7 @@ public class CryptoModule {
                         EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
                         EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM);
 
-                //TODO: use dependency injection
-                Database database = MockDatabase.getInstance();
+                Database database = DatabaseAccess.getDefaultDatabaseInstance();
                 GeneratedTEK rawTek = database.getGeneratedTEK(
                         TemporaryExposureKey.getMidnight(getCurrentInterval()));
                 if(rawTek == null) {
@@ -199,8 +199,7 @@ public class CryptoModule {
             currentRPIK = generateRPIK(currentTek);
             currentAEMK = generateAEMK(currentTek);
 
-            //TODO: use dependency injection
-            Database database = MockDatabase.getInstance();
+            Database database = DatabaseAccess.getDefaultDatabaseInstance();
             database.addGeneratedTEK(new GeneratedTEK(currentTekDay, currentTek.getKey()));
         }
     }

@@ -29,6 +29,7 @@ import org.coralibre.android.sdk.internal.crypto.ppcp.CryptoModule;
 import org.coralibre.android.sdk.internal.crypto.ppcp.BluetoothPayload;
 import org.coralibre.android.sdk.internal.crypto.ppcp.ENNumber;
 import org.coralibre.android.sdk.internal.database.ppcp.Database;
+import org.coralibre.android.sdk.internal.database.ppcp.DatabaseAccess;
 import org.coralibre.android.sdk.internal.database.ppcp.MockDatabase;
 import org.coralibre.android.sdk.internal.database.ppcp.model.CapturedData;
 import org.coralibre.android.sdk.internal.logger.Logger;
@@ -176,8 +177,7 @@ public class BleClient {
     public synchronized void stop() {
         stopScan();
 
-        //TODO: Use dependency injection
-        Database database = MockDatabase.getInstance();
+        Database database = DatabaseAccess.getDefaultDatabaseInstance();
 
         for (CollectedDatumInstance data : collectedData) {
             database.addCapturedPayload(new CapturedData(data.getTimestamp(),
