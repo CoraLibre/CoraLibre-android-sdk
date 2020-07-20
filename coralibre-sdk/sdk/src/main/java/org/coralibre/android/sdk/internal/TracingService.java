@@ -174,27 +174,32 @@ public class TracingService extends Service {
             contentIntent = PendingIntent.getActivity(this, 0, launchIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         }
 
-        TracingStatus status = PPCP.getStatus(this);
+        // TODO: Fix the PPCP.getStatus(...) method that is used in the following, then uncomment all the
+        //  code using the TracingStatus. This is an artifact of the database rework...
+
+//        TracingStatus status = PPCP.getStatus(this);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
                 .setOngoing(true)
                 .setSmallIcon(R.drawable.ic_coralibre)
                 .setContentIntent(contentIntent);
 
-        if (status.getErrors().size() > 0) {
-            String errorText = getNotificationErrorText(status.getErrors());
-            builder.setContentTitle(getString(R.string.ppcp_sdk_service_notification_title))
-                    .setContentText(errorText)
-                    .setStyle(new NotificationCompat.BigTextStyle().bigText(errorText))
-                    .setPriority(NotificationCompat.PRIORITY_DEFAULT);
-        } else {
+//        if (status.getErrors().size() > 0) {
+//            String errorText = getNotificationErrorText(status.getErrors());
+//            builder.setContentTitle(getString(R.string.ppcp_sdk_service_notification_title))
+//                    .setContentText(errorText)
+//                    .setStyle(new NotificationCompat.BigTextStyle().bigText(errorText))
+//                    .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+//        } else {
             String text = getString(R.string.ppcp_sdk_service_notification_text);
             builder.setContentTitle(getString(R.string.ppcp_sdk_service_notification_title))
                     .setContentText(text)
                     .setStyle(new NotificationCompat.BigTextStyle().bigText(text))
                     .setPriority(NotificationCompat.PRIORITY_LOW)
                     .build();
-        }
+//        }
+
+        // end of TODO
 
         return builder.build();
     }

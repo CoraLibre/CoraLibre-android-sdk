@@ -15,4 +15,6 @@ public interface Database {
     Iterable<IntervalOfCapturedData> getAllCollectedPayload();
 
     void truncateLast14Days();
+
+    void clearAllData();
 }

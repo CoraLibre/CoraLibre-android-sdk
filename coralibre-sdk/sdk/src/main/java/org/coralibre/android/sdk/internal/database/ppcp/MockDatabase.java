@@ -83,4 +83,11 @@ public class MockDatabase implements Database {
         }
     }
 
+
+    @Override
+    public void clearAllData() {
+        collectedPackagesByInterval = new HashMap<>();
+        generatedTEKs = new ArrayList<>();
+    }
+
 }
