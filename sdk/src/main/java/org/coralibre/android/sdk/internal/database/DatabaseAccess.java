@@ -13,9 +13,8 @@ public class DatabaseAccess {
 
     private static void createDefaultDatabaseInstance(Context appContext) {
         // To change (default) database type, only change the following line:
-
-        //defaultDatabaseInstance = new MockDatabase();
         defaultDatabaseInstance = new PersistentDatabase(appContext, true);
+            // TODO: Set inMemoryMock parameter to false to use real persistent database.
     }
 
 
