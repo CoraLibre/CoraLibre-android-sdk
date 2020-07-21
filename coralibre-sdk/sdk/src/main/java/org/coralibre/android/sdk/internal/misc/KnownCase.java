@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: MPL-2.0
  */
-package org.coralibre.android.sdk.internal.database.models;
+package org.coralibre.android.sdk.internal.misc;
 
 public class KnownCase {
 

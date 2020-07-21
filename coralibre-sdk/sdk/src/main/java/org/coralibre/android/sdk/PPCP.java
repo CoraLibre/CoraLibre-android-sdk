@@ -17,18 +17,13 @@ import androidx.core.content.ContextCompat;
 
 import org.coralibre.android.sdk.internal.AppConfigManager;
 import org.coralibre.android.sdk.internal.BroadcastHelper;
-import org.coralibre.android.sdk.internal.ErrorHelper;
 import org.coralibre.android.sdk.internal.TracingService;
 import org.coralibre.android.sdk.internal.crypto.CryptoModule;
-import org.coralibre.android.sdk.internal.database.models.ExposureDay;
-import org.coralibre.android.sdk.internal.database.ppcp.Database;
-import org.coralibre.android.sdk.internal.database.ppcp.DatabaseAccess;
+import org.coralibre.android.sdk.internal.database.DatabaseAccess;
 import org.coralibre.android.sdk.internal.logger.Logger;
 import org.coralibre.android.sdk.internal.util.ProcessUtil;
 
 import java.security.PublicKey;
-import java.util.Collection;
-import java.util.List;
 
 public class PPCP {
 

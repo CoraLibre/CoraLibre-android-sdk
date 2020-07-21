@@ -1,10 +1,10 @@
-package org.coralibre.android.sdk.internal.database.ppcp;
+package org.coralibre.android.sdk.internal.database;
 
 
 import org.coralibre.android.sdk.internal.crypto.ppcp.ENNumber;
-import org.coralibre.android.sdk.internal.database.ppcp.model.CapturedData;
-import org.coralibre.android.sdk.internal.database.ppcp.model.GeneratedTEK;
-import org.coralibre.android.sdk.internal.database.ppcp.model.IntervalOfCapturedData;
+import org.coralibre.android.sdk.internal.database.model.CapturedData;
+import org.coralibre.android.sdk.internal.database.model.GeneratedTEK;
+import org.coralibre.android.sdk.internal.database.model.IntervalOfCapturedData;
 
 public interface Database {
     void addCapturedPayload(CapturedData collectedPayload);
