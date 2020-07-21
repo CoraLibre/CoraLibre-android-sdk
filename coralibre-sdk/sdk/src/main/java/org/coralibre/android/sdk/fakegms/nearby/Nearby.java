@@ -1,12 +1,14 @@
 package org.coralibre.android.sdk.fakegms.nearby;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import org.coralibre.android.sdk.fakegms.nearby.exposurenotification.ExposureConfiguration;
 import org.coralibre.android.sdk.fakegms.nearby.exposurenotification.ExposureInformation;
 import org.coralibre.android.sdk.fakegms.nearby.exposurenotification.ExposureSummary;
 import org.coralibre.android.sdk.fakegms.nearby.exposurenotification.TemporaryExposureKey;
 import org.coralibre.android.sdk.fakegms.tasks.Task;
 import org.coralibre.android.sdk.fakegms.tasks.TaskAutorunOnceListenersThere;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.util.List;
@@ -25,7 +27,7 @@ public class Nearby {
     private static Nearby instance = null;
 
 
-    public static Nearby getExposureNotificationClient(@NotNull Object context) {
+    public static Nearby getExposureNotificationClient(@NonNull Object context) {
         // This strange type name mismatching is expected by the rki app.
 
         if (instance == null) {
@@ -84,11 +86,25 @@ public class Nearby {
     }
 
 
-    public Task<Void> provideDiagnosisKeys(
-            List<File> keyFiles,
-            ExposureConfiguration configuration, // might be null!
-            String token
-    ) {
+    /**
+     * Adds keys of infected people contained in {@code keyFiles} to the database and
+     * provides to the client the {@code exposureConfiguration} to use to calculate risk
+     *
+     * @see <a href="https://developers.google.com/android/exposure-notifications/exposure-notifications-api#providediagnosiskeys">description on developers.google.com</a>
+     * @param keyFiles a list of files to extract the keys of confirmed cases from, obtained from
+     *                 an internet-accessible server. The file format is described
+     *                 <a href="https://developers.google.com/android/exposure-notifications/exposure-key-file-format">on developers.google.com</a>
+     *                 [TODO still unused]
+     * @param exposureConfiguration the configuration to use to calculate risk exposure, needs to
+     *                              be provided before calling {@link #getExposureSummary(String)}
+     *                              and {@link #getExposureInformation(String)}
+     * @param token identifier that could be randomly generated for every call or reused to group
+     *              together results in calls to {@link #getExposureSummary(String)}
+     *              and {@link #getExposureInformation(String)} [TODO still unused]
+     * @return a runnable task
+     */
+    public Task<Void> provideDiagnosisKeys(final List<File> keyFiles,
+            @Nullable final ExposureConfiguration exposureConfiguration, final String token) {
         return new TaskAutorunOnceListenersThere<Void>() {
             @Override
             public void runInternal() {
