@@ -1,12 +1,12 @@
-package org.coralibre.android.sdk.internal.database.ppcp;
+package org.coralibre.android.sdk.internal.database;
 
 import org.coralibre.android.sdk.internal.crypto.ppcp.CryptoModule;
 import org.coralibre.android.sdk.internal.crypto.ppcp.ENNumber;
 import org.coralibre.android.sdk.internal.crypto.ppcp.TemporaryExposureKey;
-import org.coralibre.android.sdk.internal.database.ppcp.model.CapturedData;
-import org.coralibre.android.sdk.internal.database.ppcp.model.GeneratedTEK;
-import org.coralibre.android.sdk.internal.database.ppcp.model.IntervalOfCapturedData;
-import org.coralibre.android.sdk.internal.database.ppcp.model.IntervalOfCapturedDataImpl;
+import org.coralibre.android.sdk.internal.database.model.CapturedData;
+import org.coralibre.android.sdk.internal.database.model.GeneratedTEK;
+import org.coralibre.android.sdk.internal.database.model.IntervalOfCapturedData;
+import org.coralibre.android.sdk.internal.database.model.IntervalOfCapturedDataImpl;
 
 import java.util.ArrayList;
 import java.util.HashMap;

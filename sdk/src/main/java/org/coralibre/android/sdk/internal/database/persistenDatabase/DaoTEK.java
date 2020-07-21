@@ -1,4 +1,4 @@
-package org.coralibre.android.sdk.internal.database.ppcp.persistenDatabase;
+package org.coralibre.android.sdk.internal.database.persistenDatabase;
 
 
 import androidx.room.Dao;

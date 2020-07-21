@@ -17,7 +17,7 @@ import android.util.Pair;
 import androidx.security.crypto.EncryptedSharedPreferences;
 import androidx.security.crypto.MasterKeys;
 
-import org.coralibre.android.sdk.internal.database.models.Contact;
+import org.coralibre.android.sdk.internal.misc.Contact;
 import org.coralibre.android.sdk.internal.util.DayDate;
 import org.coralibre.android.sdk.internal.util.Json;
 

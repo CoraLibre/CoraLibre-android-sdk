@@ -17,7 +17,7 @@ import android.content.Context;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
 
-import org.coralibre.android.sdk.internal.database.models.Handshake;
+import org.coralibre.android.sdk.internal.misc.Handshake;
 import org.coralibre.android.sdk.internal.util.DayDate;
 import org.junit.Test;
 import org.junit.runner.RunWith;

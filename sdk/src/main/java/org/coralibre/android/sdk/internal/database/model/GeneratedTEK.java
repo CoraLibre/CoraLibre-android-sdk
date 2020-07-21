@@ -1,4 +1,4 @@
-package org.coralibre.android.sdk.internal.database.ppcp.model;
+package org.coralibre.android.sdk.internal.database.model;
 
 
 import org.coralibre.android.sdk.internal.crypto.ppcp.ENNumber;

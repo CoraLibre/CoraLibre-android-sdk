@@ -1,6 +1,6 @@
 package org.coralibre.android.sdk.fakegms.nearby.exposurenotification;
 
-import org.coralibre.android.sdk.internal.database.ppcp.model.CapturedData;
+import org.coralibre.android.sdk.internal.database.model.CapturedData;
 
 /**
  * Contains the parameters of the risk calculation algorithm. In particular:

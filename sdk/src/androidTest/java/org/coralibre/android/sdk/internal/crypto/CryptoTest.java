@@ -18,7 +18,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.coralibre.android.sdk.internal.database.models.Contact;
+import org.coralibre.android.sdk.internal.misc.Contact;
 import org.coralibre.android.sdk.internal.util.DayDate;
 import org.junit.Test;
 import org.junit.runner.RunWith;

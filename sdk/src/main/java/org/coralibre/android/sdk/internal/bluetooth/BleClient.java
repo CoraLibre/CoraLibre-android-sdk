@@ -30,11 +30,12 @@ import org.coralibre.android.sdk.internal.BroadcastHelper;
 import org.coralibre.android.sdk.internal.crypto.ppcp.CryptoModule;
 import org.coralibre.android.sdk.internal.crypto.ppcp.BluetoothPayload;
 import org.coralibre.android.sdk.internal.crypto.ppcp.ENNumber;
-import org.coralibre.android.sdk.internal.database.ppcp.Database;
-import org.coralibre.android.sdk.internal.database.ppcp.DatabaseAccess;
-import org.coralibre.android.sdk.internal.database.ppcp.MockDatabase;
-import org.coralibre.android.sdk.internal.database.ppcp.model.CapturedData;
 import org.coralibre.android.sdk.internal.util.ByteToHex;
+import org.coralibre.android.sdk.internal.database.Database;
+import org.coralibre.android.sdk.internal.database.DatabaseAccess;
+import org.coralibre.android.sdk.internal.database.model.CapturedData;
+import org.coralibre.android.sdk.internal.logger.Logger;
+
 
 import static org.coralibre.android.sdk.internal.bluetooth.BleServer.SERVICE_UUID;
 

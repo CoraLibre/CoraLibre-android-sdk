@@ -4,10 +4,9 @@ import android.annotation.SuppressLint;
 
 import com.google.crypto.tink.subtle.Hkdf;
 
-import org.coralibre.android.sdk.internal.database.ppcp.Database;
-import org.coralibre.android.sdk.internal.database.ppcp.DatabaseAccess;
-import org.coralibre.android.sdk.internal.database.ppcp.MockDatabase;
-import org.coralibre.android.sdk.internal.database.ppcp.model.GeneratedTEK;
+import org.coralibre.android.sdk.internal.database.Database;
+import org.coralibre.android.sdk.internal.database.DatabaseAccess;
+import org.coralibre.android.sdk.internal.database.model.GeneratedTEK;
 
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
