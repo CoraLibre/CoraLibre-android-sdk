@@ -75,4 +75,9 @@ public class ENNumber {
     public int hashCode() {
         return Objects.hash(val);
     }
+
+    @Override
+    public String toString() {
+        return Long.toString(val);
+    }
 }

@@ -19,10 +19,12 @@ import android.bluetooth.le.ScanSettings;
 import android.content.Context;
 import android.os.Build;
 import android.os.ParcelUuid;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import org.coralibre.android.sdk.BuildConfig;
 import org.coralibre.android.sdk.internal.AppConfigManager;
 import org.coralibre.android.sdk.internal.BroadcastHelper;
 import org.coralibre.android.sdk.internal.crypto.ppcp.CryptoModule;
@@ -31,7 +33,7 @@ import org.coralibre.android.sdk.internal.crypto.ppcp.ENNumber;
 import org.coralibre.android.sdk.internal.database.ppcp.Database;
 import org.coralibre.android.sdk.internal.database.ppcp.MockDatabase;
 import org.coralibre.android.sdk.internal.database.ppcp.model.CapturedData;
-import org.coralibre.android.sdk.internal.logger.Logger;
+import org.coralibre.android.sdk.internal.util.ByteToHex;
 
 import static org.coralibre.android.sdk.internal.bluetooth.BleServer.SERVICE_UUID;
 
@@ -121,7 +123,7 @@ public class BleClient {
             @Override
             public void onBatchScanResults(List<ScanResult> results) {
                 bluetoothServiceStatus.updateScanStatus(BluetoothServiceStatus.SCAN_OK);
-                Logger.d(TAG, "Batch size " + results.size());
+                if (BuildConfig.DEBUG) Log.d(TAG, "Batch size " + results.size());
                 for (ScanResult result : results) {
                     onScanResult(0, result);
                 }
@@ -129,12 +131,12 @@ public class BleClient {
 
             public void onScanFailed(int errorCode) {
                 bluetoothServiceStatus.updateScanStatus(errorCode);
-                Logger.e(TAG, "error: " + errorCode);
+                Log.e(TAG, "error: " + errorCode);
             }
         };
 
         bleScanner.startScan(scanFilters, scanSettings, bleScanCallback);
-        Logger.i(TAG, "started BLE scanner, scanMode: " + scanSettings.getScanMode() + " scanFilters: " + scanFilters.size());
+        Log.i(TAG, "started BLE scanner, scanMode: " + scanSettings.getScanMode() + " scanFilters: " + scanFilters.size());
 
         return BluetoothState.ENABLED;
     }
@@ -149,13 +151,19 @@ public class BleClient {
             byte rssi = (byte) scanResult.getRssi();
             byte[] rawPayload = scanResult.getScanRecord().getServiceData(new ParcelUuid(SERVICE_UUID));
             BluetoothPayload payload = new BluetoothPayload(rawPayload, currentInterval);
-            Logger.d(TAG, "found " + deviceAddr + "; rssi: " + scanResult.getRssi());
+            if (BuildConfig.DEBUG) {
+                Log.d(TAG, "found " + deviceAddr +
+                        "; rssi: " + scanResult.getRssi() +
+                        "; data: [" + ByteToHex.toString(rawPayload) +
+                        "]; size: " + rawPayload.length);
+            }
+
 
             // no we are not checking for duplicates. We need duplicates for the
             // risk calculation later
             collectedData.add(new CollectedDatumInstance(payload, rssi, now));
         } catch (Exception e) {
-            Logger.e(TAG, e);
+            Log.e(TAG, e.toString());
         }
     }
 
@@ -167,7 +175,7 @@ public class BleClient {
             return;
         }
         if (bleScanner != null) {
-            Logger.i(TAG, "stopping BLE scanner");
+            Log.i(TAG, "stopping BLE scanner");
             bleScanner.stopScan(bleScanCallback);
             bleScanner = null;
         }

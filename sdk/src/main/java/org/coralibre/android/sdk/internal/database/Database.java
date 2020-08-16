@@ -194,11 +194,6 @@ public class Database {
 			}
 
 			SQLiteDatabase db = databaseOpenHelper.getWritableDatabase();
-			if (!BuildConfig.FLAVOR.equals("calibration")) {
-				//unless in calibration mode, delete handshakes after converting them to contacts
-				db.delete(Handshakes.TABLE_NAME, Handshakes.TIMESTAMP + " < ?",
-						new String[] { "" + currentEpochStart });
-			}
 			removeOldData();
 		});
 	}

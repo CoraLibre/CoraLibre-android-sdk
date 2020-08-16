@@ -5,17 +5,29 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import org.coralibre.android.sdk.internal.crypto.ppcp.AssociatedEncryptedMetadata;
 import org.coralibre.android.sdk.internal.crypto.ppcp.AssociatedEncryptedMetadataKey;
 import org.coralibre.android.sdk.internal.crypto.ppcp.AssociatedMetadata;
+import org.coralibre.android.sdk.internal.crypto.ppcp.BluetoothPayload;
 import org.coralibre.android.sdk.internal.crypto.ppcp.CryptoModule;
 import org.coralibre.android.sdk.internal.crypto.ppcp.ENNumber;
 import org.coralibre.android.sdk.internal.crypto.ppcp.PaddedData;
 import org.coralibre.android.sdk.internal.crypto.ppcp.RollingProximityIdentifier;
 import org.coralibre.android.sdk.internal.crypto.ppcp.RollingProximityIdentifierKey;
 import org.coralibre.android.sdk.internal.crypto.ppcp.TemporaryExposureKey;
+import org.coralibre.android.sdk.internal.database.ppcp.Database;
+import org.coralibre.android.sdk.internal.database.ppcp.MockDatabase;
+import org.coralibre.android.sdk.internal.database.ppcp.model.GeneratedTEK;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.util.Arrays;
+
+import static org.coralibre.android.sdk.internal.crypto.ppcp.AssociatedMetadata.AEM_LENGTH;
+import static org.coralibre.android.sdk.internal.crypto.ppcp.RollingProximityIdentifier.RPI_LENGTH;
+import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(AndroidJUnit4.class)
@@ -82,6 +94,8 @@ public class CryptoModuleTests {
             -7
     };
 
+    private static final AssociatedMetadata mockAem = new AssociatedMetadata(1, 0, -2);
+
     private static final byte[] AM_VAL_V3_2_MINUS16db = {(byte) 0b11100000, (byte) 0xF0, 0x00, 0x00};
 
     private static final byte[] TEK_VAL2 = ByteHelper.hexStringToByteArray("2765f41dbaa6306a264391913bf48723");
@@ -96,6 +110,23 @@ public class CryptoModuleTests {
     private static final byte[] TEK_VAL3_AEMK = ByteHelper.hexStringToByteArray("a1d0bd6f94b053cf622ca88194e20611");
     private static final byte[] TEK_VAL3_AEM = ByteHelper.hexStringToByteArray("a3e9517f");
 
+    private static CryptoModule getMockedTimeCryptoModule(Database db, long ennumber) throws Exception {
+        Class cryptoModuleClass = Class.forName("org.coralibre.android.sdk.internal.crypto.ppcp.CryptoModule");
+        Constructor<CryptoModule>  cryptoModuleConstructor = cryptoModuleClass.getDeclaredConstructor(Database.class, ENNumber.class);
+        cryptoModuleConstructor.setAccessible(true);
+        return cryptoModuleConstructor.newInstance(db, new ENNumber(ennumber));
+    }
+
+    private static void setCurrentENNumber(CryptoModule cryptoModule, long newennumber) throws Exception {
+        Field currentIntervalField = CryptoModule.class.getDeclaredField("currentIntervalForTesting");
+        currentIntervalField.setAccessible(true);
+        currentIntervalField.set(cryptoModule, new ENNumber(newennumber));
+    }
+
+    @Test
+    public void testGetCurrentInterval() {
+        assertEquals(CryptoModule.getCurrentInterval(), new ENNumber(System.currentTimeMillis() / 1000L, true));
+    }
 
     @Test
     public void testGenerateRPIK() throws Exception {
@@ -115,7 +146,7 @@ public class CryptoModuleTests {
     public void testEncryptDecryptRPI() throws Exception {
         RollingProximityIdentifierKey rpik = new RollingProximityIdentifierKey(RPIK_VAL1);
         //encrypt
-        RollingProximityIdentifier rpi = CryptoModule.generateRPI(rpik);
+        RollingProximityIdentifier rpi = new CryptoModule(new MockDatabase()).generateRPI(rpik);
         //decrypt
         PaddedData pd = CryptoModule.decryptRPI(rpi, rpik);
         assertTrue("RPI decryption failed", pd.isRPIInfoValid());
@@ -169,4 +200,80 @@ public class CryptoModuleTests {
         assertEquals(12, am.getTransmitPowerLevel());
     }
 
+    @Test
+    public void testInitialTEKGeneration() throws Exception {
+        Database db = new MockDatabase();
+        CryptoModule crypto = getMockedTimeCryptoModule(db, 1000);
+        int i = 0;
+        for(GeneratedTEK tek : db.getAllGeneratedTEKs())
+            i++;
+        assertEquals(1, i);
+    }
+
+    @Test
+    public void testUpdateTEKDontUpdateOnSameDay() throws Exception {
+        Database db = new MockDatabase();
+        CryptoModule crypto = getMockedTimeCryptoModule(db,1050);
+        setCurrentENNumber(crypto, 1100);
+        crypto.updateTEK();
+        int i = 0;
+        for(GeneratedTEK tek : db.getAllGeneratedTEKs())
+            i++;
+        assertEquals(1, i);
+    }
+
+    @Test
+    public void testUpdateTEKUpdateOnDifferentDays() throws Exception {
+        Database db = new MockDatabase();
+        CryptoModule crypto = getMockedTimeCryptoModule(db, 1000);
+        setCurrentENNumber(crypto, 1100);
+        crypto.updateTEK();
+        int i = 0;
+        for(GeneratedTEK tek : db.getAllGeneratedTEKs())
+            i++;
+        assertEquals(2, i);
+    }
+
+    @Test
+    public void testGetCurrentRPI() throws Exception {
+        Database db = new MockDatabase();
+        CryptoModule crypto = getMockedTimeCryptoModule(db, 1000);
+        crypto.setMetadata(mockAem);
+        crypto.renewPayload();
+        BluetoothPayload payload = crypto.getCurrentPayload();
+        assertEquals(AEM_LENGTH, payload.getAem().getData().length);
+        assertEquals(1000, payload.getInterval().get());
+        assertEquals(RPI_LENGTH, payload.getRpi().getData().length);
+    }
+
+    @Test
+    public void testGetCurrentRPINotRollingWithinOneInterval() throws Exception {
+        Database db = new MockDatabase();
+        CryptoModule crypto = getMockedTimeCryptoModule(db, 1000);
+        crypto.setMetadata(mockAem);
+        crypto.renewPayload();
+        BluetoothPayload payload1 = crypto.getCurrentPayload();
+        crypto.renewPayload();
+        BluetoothPayload payload2 = crypto.getCurrentPayload();
+        assertEquals(1000, payload1.getInterval().get());
+        assertEquals(1000, payload2.getInterval().get());
+        assertArrayEquals(payload1.getAem().getData(), payload2.getAem().getData());
+        assertArrayEquals(payload1.getRpi().getData(), payload2.getRpi().getData());
+    }
+
+    @Test
+    public void testGetCurrentRPIRollingWithinDifferentIntervals() throws Exception {
+        Database db = new MockDatabase();
+        CryptoModule crypto = getMockedTimeCryptoModule(db,1000);
+        crypto.setMetadata(mockAem);
+        crypto.renewPayload();
+        BluetoothPayload payload1 = crypto.getCurrentPayload();
+        setCurrentENNumber(crypto, 1001);
+        crypto.renewPayload();
+        BluetoothPayload payload2 = crypto.getCurrentPayload();
+        assertEquals(1000, payload1.getInterval().get());
+        assertEquals(1001, payload2.getInterval().get());
+        assertFalse(Arrays.equals(payload1.getAem().getData(), payload2.getAem().getData()));
+        assertFalse(Arrays.equals(payload1.getRpi().getData(), payload2.getRpi().getData()));
+    }
 }

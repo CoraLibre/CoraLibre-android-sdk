@@ -11,6 +11,8 @@ package org.coralibre.android.sdk.internal;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteException;
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.work.*;
 
@@ -22,7 +24,6 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import org.coralibre.android.sdk.TracingStatus.ErrorState;
 import org.coralibre.android.sdk.internal.backend.proto.Exposed;
 import org.coralibre.android.sdk.internal.database.Database;
-import org.coralibre.android.sdk.internal.logger.Logger;
 
 /**
  * Originally retrieved diagnosis keys from backend and inserted them into backend.
@@ -60,7 +61,7 @@ public class SyncWorker extends Worker {
 	@NonNull
 	@Override
 	public Result doWork() {
-		Logger.d(TAG, "start SyncWorker");
+		Log.d(TAG, "start SyncWorker");
 		Context context = getApplicationContext();
 
 		long scanInterval = AppConfigManager.getInstance(getApplicationContext()).getScanInterval();
@@ -70,10 +71,10 @@ public class SyncWorker extends Worker {
 		try {
 			doSync(context);
 		} catch (IOException | SQLiteException e) {
-			Logger.d(TAG, "SyncWorker finished with exception " + e.getMessage());
+			Log.d(TAG, "SyncWorker finished with exception " + e.getMessage());
 			return Result.retry();
 		}
-		Logger.d(TAG, "SyncWorker finished with success");
+		Log.d(TAG, "SyncWorker finished with success");
 		return Result.success();
 	}
 
@@ -81,12 +82,12 @@ public class SyncWorker extends Worker {
 			throws IOException,SQLiteException {
 		try {
 			doSyncInternal(context);
-			Logger.i(TAG, "synced");
+			Log.i(TAG, "synced");
 			AppConfigManager.getInstance(context).setLastSyncNetworkSuccess(true);
 			//SyncErrorState.getInstance().setSyncError(null);
 			BroadcastHelper.sendErrorUpdateBroadcast(context);
 		} catch (IOException | SQLiteException e) {
-			Logger.e(TAG, e);
+			Log.e(TAG, e.toString());
 			AppConfigManager.getInstance(context).setLastSyncNetworkSuccess(false);
 			ErrorState syncError;
 			if (e instanceof InvalidProtocolBufferException) {
