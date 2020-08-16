@@ -19,12 +19,14 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.ParcelUuid;
 import android.util.Log;
-
 import org.coralibre.android.sdk.BuildConfig;
 import org.coralibre.android.sdk.internal.AppConfigManager;
 import org.coralibre.android.sdk.internal.crypto.AssociatedMetadata;
 import org.coralibre.android.sdk.internal.crypto.CryptoModule;
+import org.coralibre.android.sdk.internal.device_info.DeviceInfo;
+import org.coralibre.android.sdk.internal.device_info.DeviceList;
 
+import java.io.IOException;
 import java.util.UUID;
 
 public class BleServer {
@@ -107,10 +109,17 @@ public class BleServer {
 				.setTimeout(0)
 				.build();
 
-		//TODO: replace this with a real value
-		final char mockTXPowerlevel = (char) 0;
-		CryptoModule.getInstance().setMetadata(
-				new AssociatedMetadata(PPCP_VERSION_MAJOR, PPCP_VERSION_MINOR, mockTXPowerlevel));
+
+        final DeviceInfo deviceInfo;
+        try {
+            deviceInfo = DeviceList.getOwnDeviceInfo(context);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        final char txPowerLevel = (char) deviceInfo.getTx();
+        CryptoModule.getInstance().setMetadata(
+            new AssociatedMetadata(PPCP_VERSION_MAJOR, PPCP_VERSION_MINOR, txPowerLevel));
+
 
 		cryptoModule.renewPayload();
 		final AdvertiseData advData = new AdvertiseData.Builder()
@@ -122,8 +131,8 @@ public class BleServer {
 
 		mLeAdvertiser.startAdvertising(advSettings, advData, advertiseCallback);
 		if (BuildConfig.DEBUG) {
-			Log.d(TAG, "started advertising (only advertiseData),"
-					+ "powerLevel (CAUTION THIS IS A MOCK): " + ((int) mockTXPowerlevel));
+            Log.d(TAG, "started advertising (only advertiseData), powerLevel: "
+                + ((int) txPowerLevel));
 		}
 
 		return BluetoothState.ENABLED;
@@ -139,5 +148,4 @@ public class BleServer {
 		stopAdvertising();
 		mAdapter = null;
 	}
-
 }
