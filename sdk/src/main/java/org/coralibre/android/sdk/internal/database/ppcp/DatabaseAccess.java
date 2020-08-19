@@ -1,5 +1,7 @@
 package org.coralibre.android.sdk.internal.database.ppcp;
 
+import android.app.Application;
+
 import org.coralibre.android.sdk.internal.database.ppcp.Database;
 
 import android.content.Context;

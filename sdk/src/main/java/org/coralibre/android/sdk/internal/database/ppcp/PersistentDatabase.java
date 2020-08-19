@@ -110,4 +110,11 @@ public class PersistentDatabase implements Database {
         db.daoCapturedData().truncateOldData(lastIntervalToKeep);
         db.daoTEK().truncateOldData(lastIntervalToKeep);
     }
+
+
+    @Override
+    public void clearAllData() {
+        db.daoCapturedData().clearAllData();
+        db.daoTEK().clearAllData();
+    }
 }

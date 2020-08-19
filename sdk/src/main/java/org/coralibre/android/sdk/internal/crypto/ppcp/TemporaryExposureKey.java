@@ -1,12 +1,6 @@
 package org.coralibre.android.sdk.internal.crypto.ppcp;
 
-import android.util.Pair;
-
 import java.security.InvalidParameterException;
-import java.security.NoSuchAlgorithmException;
-
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
 
 public class TemporaryExposureKey {
     public static final int TEK_ROLLING_PERIOD = 144; //defined as 10min units

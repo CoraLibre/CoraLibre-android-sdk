@@ -21,8 +21,10 @@ import org.coralibre.android.sdk.internal.BroadcastHelper;
 import org.coralibre.android.sdk.internal.ErrorHelper;
 import org.coralibre.android.sdk.internal.TracingService;
 import org.coralibre.android.sdk.internal.crypto.CryptoModule;
-import org.coralibre.android.sdk.internal.database.Database;
 import org.coralibre.android.sdk.internal.database.models.ExposureDay;
+import org.coralibre.android.sdk.internal.database.ppcp.Database;
+import org.coralibre.android.sdk.internal.database.ppcp.DatabaseAccess;
+import org.coralibre.android.sdk.internal.logger.Logger;
 import org.coralibre.android.sdk.internal.util.ProcessUtil;
 
 import java.security.PublicKey;
@@ -40,6 +42,8 @@ public class PPCP {
 	public static void init(Context context) {
 		// TODO: there's no else branch, that's bad.
 		if (ProcessUtil.isMainProcess(context)) {
+			DatabaseAccess.init(context);
+				// TODO check: is this indeed the app context?
 			executeInit(context);
 			PPCP.isInitialized = true;
 		}
@@ -56,7 +60,14 @@ public class PPCP {
 	}
 
 	private static void executeInit(Context context) {
+		DatabaseAccess.getDefaultDatabaseInstance().truncateLast14Days();
 
+		AppConfigManager appConfigManager = AppConfigManager.getInstance(context);
+		boolean advertising = appConfigManager.isAdvertisingEnabled();
+		boolean receiving = appConfigManager.isReceivingEnabled();
+		if (advertising || receiving) {
+			start(context, advertising, receiving);
+		}
 	}
 
 	private static void checkInit() throws IllegalStateException {
@@ -87,11 +98,14 @@ public class PPCP {
 		return appConfigManager.isAdvertisingEnabled() || appConfigManager.isReceivingEnabled();
 	}
 
-	public static TracingStatus getStatus(Context context) {
+	// TODO: Fix / reimplement the following method, if needed. It currently depends on the old
+	//  database stuff, which is not used in coralibre.
+/*	public static TracingStatus getStatus(Context context) {
 		checkInit();
-		Database database = new Database(context);
+		Database database = DatabaseAccess.getDefaultDatabaseInstance();
 		AppConfigManager appConfigManager = AppConfigManager.getInstance(context);
 		Collection<TracingStatus.ErrorState> errorStates = ErrorHelper.checkTracingErrorStatus(context);
+
 		List<ExposureDay> exposureDays = database.getExposureDays();
 		InfectionStatus infectionStatus;
 		if (appConfigManager.getIAmInfected()) {
@@ -110,7 +124,7 @@ public class PPCP {
 				exposureDays,
 				errorStates
 		);
-	}
+	}*/
 
 	public static void stop(Context context) {
 		checkInit();
@@ -145,8 +159,9 @@ public class PPCP {
 
 		CryptoModule.getInstance(context).reset();
 		appConfigManager.clearPreferences();
-		Database db = new Database(context);
-		db.recreateTables(response -> onDeleteListener.run());
+		Logger.clear();
+
+		DatabaseAccess.getDefaultDatabaseInstance().clearAllData();
 	}
 
 }
