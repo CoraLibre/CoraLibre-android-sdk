@@ -34,7 +34,6 @@ import org.coralibre.android.sdk.internal.util.ByteToHex;
 import org.coralibre.android.sdk.internal.database.Database;
 import org.coralibre.android.sdk.internal.database.DatabaseAccess;
 import org.coralibre.android.sdk.internal.database.model.CapturedData;
-import org.coralibre.android.sdk.internal.logger.Logger;
 
 
 import static org.coralibre.android.sdk.internal.bluetooth.BleServer.SERVICE_UUID;

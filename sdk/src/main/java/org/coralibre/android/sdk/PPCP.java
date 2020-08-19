@@ -21,7 +21,6 @@ import org.coralibre.android.sdk.internal.BroadcastHelper;
 import org.coralibre.android.sdk.internal.TracingService;
 import org.coralibre.android.sdk.internal.crypto.CryptoModule;
 import org.coralibre.android.sdk.internal.database.DatabaseAccess;
-import org.coralibre.android.sdk.internal.logger.Logger;
 import org.coralibre.android.sdk.internal.util.ProcessUtil;
 
 import java.security.PublicKey;
@@ -56,6 +55,8 @@ public class PPCP {
 
 	private static void executeInit(Context context) {
 		DatabaseAccess.getDefaultDatabaseInstance().truncateLast14Days();
+			// TODO: Schedule the truncation to happen regularly and asynchronously instead of
+			//  (only) performing it here.
 
 		AppConfigManager appConfigManager = AppConfigManager.getInstance(context);
 		boolean advertising = appConfigManager.isAdvertisingEnabled();
@@ -92,34 +93,10 @@ public class PPCP {
 		AppConfigManager appConfigManager = AppConfigManager.getInstance(context);
 		return appConfigManager.isAdvertisingEnabled() || appConfigManager.isReceivingEnabled();
 	}
-
-	// TODO: Fix / reimplement the following method, if needed. It currently depends on the old
-	//  database stuff, which is not used in coralibre.
-/*	public static TracingStatus getStatus(Context context) {
-		checkInit();
-		Database database = DatabaseAccess.getDefaultDatabaseInstance();
-		AppConfigManager appConfigManager = AppConfigManager.getInstance(context);
-		Collection<TracingStatus.ErrorState> errorStates = ErrorHelper.checkTracingErrorStatus(context);
-
-		List<ExposureDay> exposureDays = database.getExposureDays();
-		InfectionStatus infectionStatus;
-		if (appConfigManager.getIAmInfected()) {
-			infectionStatus = InfectionStatus.INFECTED;
-		} else if (exposureDays.size() > 0) {
-			infectionStatus = InfectionStatus.EXPOSED;
-		} else {
-			infectionStatus = InfectionStatus.HEALTHY;
-		}
-		return new TracingStatus(
-				database.getContacts().size(),
-				appConfigManager.isAdvertisingEnabled(),
-				appConfigManager.isReceivingEnabled(),
-				appConfigManager.getLastSyncDate(),
-				infectionStatus,
-				exposureDays,
-				errorStates
-		);
-	}*/
+	
+	//public static TracingStatus getStatus(Context context) {
+		// TODO: Implement
+	//}
 
 	public static void stop(Context context) {
 		checkInit();
@@ -154,7 +131,6 @@ public class PPCP {
 
 		CryptoModule.getInstance(context).reset();
 		appConfigManager.clearPreferences();
-		Logger.clear();
 
 		DatabaseAccess.getDefaultDatabaseInstance().clearAllData();
 	}

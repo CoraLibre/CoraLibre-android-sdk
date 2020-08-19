@@ -7,6 +7,7 @@ import com.google.crypto.tink.subtle.Hkdf;
 import org.coralibre.android.sdk.internal.database.Database;
 import org.coralibre.android.sdk.internal.database.DatabaseAccess;
 import org.coralibre.android.sdk.internal.database.model.GeneratedTEK;
+import org.coralibre.android.sdk.internal.database.DatabaseAccess;
 
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
@@ -39,16 +40,16 @@ public class CryptoModule {
     private ENNumber currentIntervalForTesting;
 
     public static CryptoModule getInstance() {
-        //TODO: use propper factory class
+        //TODO: use proper factory class
         if (instance == null) {
-            instance = new CryptoModule(MockDatabase.getInstance());
+            instance = new CryptoModule(DatabaseAccess.getDefaultDatabaseInstance());
         }
         return instance;
     }
 
     public CryptoModule(Database db) {
         testMode = false; // remove this line and everything goes BOOM!!!
-        //TODO: Use propper dependency injection
+        //TODO: Use proper dependency injection
         init(db, getCurrentInterval());
     }
 
@@ -63,7 +64,7 @@ public class CryptoModule {
         init(db, interval);
     }
 
-    //TODO: Use a factory for getting a crypto module in order to do propper dependency injection.
+    //TODO: Use a factory for getting a crypto module in order to do proper dependency injection.
     private void init(Database db, ENNumber currentInterval) {
         try {
             database = db;

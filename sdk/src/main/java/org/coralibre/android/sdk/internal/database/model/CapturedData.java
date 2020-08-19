@@ -9,8 +9,11 @@ import org.coralibre.android.sdk.internal.crypto.ppcp.ENNumber;
 public class CapturedData {
 
 
+    /**
+     *  Milliseconds since Epoch.
+     */
+    private final long captureTimestamp;
 
-    private final long captureTimestamp; // in milliseconds since Epoch
     private final ENNumber enNumber;
 
     /** in dB */

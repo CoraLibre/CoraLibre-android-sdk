@@ -14,7 +14,7 @@ import org.coralibre.android.sdk.internal.database.model.IntervalOfCapturedData;
 import org.coralibre.android.sdk.internal.database.model.IntervalOfCapturedDataImpl;
 import org.coralibre.android.sdk.internal.database.model.entity.EntityCapturedData;
 import org.coralibre.android.sdk.internal.database.model.entity.EntityGeneratedTEK;
-import org.coralibre.android.sdk.internal.database.persistenDatabase.RoomDatabaseAbstrImpl;
+import org.coralibre.android.sdk.internal.database.persistent.RoomDatabaseDelegate;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -23,20 +23,32 @@ import java.util.Map;
 
 public class PersistentDatabase implements Database {
 
+    // TODO: Since we're storing very sensitive data here, we should probably encrypt the database
+    //  using SQLCipher
+
+
     private final String dbName = "db";
-    private final RoomDatabaseAbstrImpl db;
+    private final RoomDatabaseDelegate db;
 
 
+    /**
+     * Creates a persistent database (equivalent to calling the other constructor with inMemory = false).
+     * @param context   The context for the database. This is usually the Application context.
+     */
     public PersistentDatabase(@NonNull Context context) {
         this(context, false);
     }
 
 
-    public PersistentDatabase(@NonNull Context context, boolean inMemoryMock) {
-        if (inMemoryMock) {
-            db = Room.inMemoryDatabaseBuilder(context, RoomDatabaseAbstrImpl.class).build();
+    /**
+     * @param context   The context for the database. This is usually the Application context.
+     * @param inMemory  If true, an inMemoryDatabaseBuilder is used for creating, resulting in stored data disappearing when the process is killed. Otherwise, a databaseBuilder is used, for aan actually persistent database.
+     */
+    public PersistentDatabase(@NonNull Context context, boolean inMemory) {
+        if (inMemory) {
+            db = Room.inMemoryDatabaseBuilder(context, RoomDatabaseDelegate.class).build();
         } else {
-            db = Room.databaseBuilder(context, RoomDatabaseAbstrImpl.class, dbName).build();
+            db = Room.databaseBuilder(context, RoomDatabaseDelegate.class, dbName).build();
         }
     }
 

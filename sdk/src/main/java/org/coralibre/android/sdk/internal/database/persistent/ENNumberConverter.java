@@ -1,4 +1,4 @@
-package org.coralibre.android.sdk.internal.database.persistenDatabase;
+package org.coralibre.android.sdk.internal.database.persistent;
 
 import androidx.room.TypeConverter;
 
