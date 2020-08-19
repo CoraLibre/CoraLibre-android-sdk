@@ -16,19 +16,7 @@ import java.util.Map;
 public class MockDatabase implements Database {
     private Map<ENNumber, IntervalOfCapturedData> collectedPackagesByInterval = new HashMap<>();
     private List<GeneratedTEK> generatedTEKs = new ArrayList<>();
-
-    private static MockDatabase database = null;
-
-    public static MockDatabase getInstance() {
-        if (database == null)
-            database = new MockDatabase();
-        return database;
-    }
-
-    public void clearDatabase() {
-        collectedPackagesByInterval = new HashMap<>();
-        generatedTEKs = new ArrayList<>();
-    }
+    
 
     @Override
     public void addCapturedPayload(CapturedData collectedPayload) {

@@ -5,6 +5,7 @@ import android.annotation.SuppressLint;
 import com.google.crypto.tink.subtle.Hkdf;
 
 import org.coralibre.android.sdk.internal.database.ppcp.Database;
+import org.coralibre.android.sdk.internal.database.ppcp.DatabaseAccess;
 import org.coralibre.android.sdk.internal.database.ppcp.MockDatabase;
 import org.coralibre.android.sdk.internal.database.ppcp.model.GeneratedTEK;
 
@@ -33,6 +34,7 @@ public class CryptoModule {
     private BluetoothPayload currentPayload = null;
     private AssociatedMetadata metadata = null;
     private Database database;
+
 
     private boolean testMode;
     private ENNumber currentIntervalForTesting;
@@ -211,8 +213,7 @@ public class CryptoModule {
             currentRPIK = generateRPIK(currentTek);
             currentAEMK = generateAEMK(currentTek);
 
-            //TODO: use dependency injection
-            Database database = MockDatabase.getInstance();
+            Database database = DatabaseAccess.getDefaultDatabaseInstance();
             database.addGeneratedTEK(new GeneratedTEK(currentTekDay, currentTek.getKey()));
         }
     }
