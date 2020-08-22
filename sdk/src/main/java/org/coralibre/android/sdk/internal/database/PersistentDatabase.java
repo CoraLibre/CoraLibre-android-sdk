@@ -80,8 +80,10 @@ public class PersistentDatabase implements Database {
     public GeneratedTEK getGeneratedTEK(ENNumber interval) {
         List<EntityGeneratedTEK> teks = db.daoTEK().getTekByEnNumber(interval);
         if (teks.size() != 1) {
-            throw new StorageException("When attempting to query TEK for interval number, exactly " +
-                    "1 TEK should be returned from the database, but I found " + teks.size() +
+            throw new StorageException("When attempting to query TEK for interval number " +
+                    interval.toString() +
+                    ", exactly 1 TEK should be returned from the database, but I found " +
+                    teks.size() +
                     " in the database.");
         }
         return teks.get(0).toGeneratedTEK();
