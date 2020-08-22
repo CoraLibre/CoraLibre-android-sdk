@@ -7,11 +7,19 @@ import org.coralibre.android.sdk.internal.database.model.GeneratedTEK;
 import org.coralibre.android.sdk.internal.database.model.IntervalOfCapturedData;
 
 public interface Database {
-    void addCapturedPayload(CapturedData collectedPayload);
+
     void addGeneratedTEK(GeneratedTEK generatedTEK);
+    void addCapturedPayload(CapturedData collectedPayload);
+
+    boolean hasTEKForInterval(ENNumber interval);
+
+    /**
+     * @param interval  An interval for that a temporary exposure key exists
+     * @throws StorageException if there is no key for that interval
+     */
+    GeneratedTEK getGeneratedTEK(ENNumber interval) throws StorageException;
 
     Iterable<GeneratedTEK> getAllGeneratedTEKs();
-    GeneratedTEK getGeneratedTEK(ENNumber interval);
     Iterable<IntervalOfCapturedData> getAllCollectedPayload();
 
     void truncateLast14Days();

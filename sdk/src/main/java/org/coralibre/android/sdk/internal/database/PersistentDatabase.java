@@ -54,27 +54,27 @@ public class PersistentDatabase implements Database {
 
 
     @Override
-    public void addCapturedPayload(CapturedData collectedPayload) {
-        db.daoCapturedData().insertCapturedData(
-                new EntityCapturedData(collectedPayload)
-        );
-    }
-
-    @Override
     public void addGeneratedTEK(GeneratedTEK generatedTEK) {
         db.daoTEK().insertTEK(
                 new EntityGeneratedTEK(generatedTEK)
         );
     }
 
+
     @Override
-    public Iterable<GeneratedTEK> getAllGeneratedTEKs() {
-        List<GeneratedTEK> result = new LinkedList<>();
-        for (EntityGeneratedTEK e : db.daoTEK().getAllGeneratedTEKs()) {
-            result.add(e.toGeneratedTEK());
-        }
-        return result;
+    public void addCapturedPayload(CapturedData collectedPayload) {
+        db.daoCapturedData().insertCapturedData(
+                new EntityCapturedData(collectedPayload)
+        );
     }
+
+
+    @Override
+    public boolean hasTEKForInterval(ENNumber interval) {
+        List<EntityGeneratedTEK> teks = db.daoTEK().getTekByEnNumber(interval);
+        return (teks.size() != 0);
+    }
+
 
     @Override
     public GeneratedTEK getGeneratedTEK(ENNumber interval) {
@@ -87,6 +87,16 @@ public class PersistentDatabase implements Database {
                     " in the database.");
         }
         return teks.get(0).toGeneratedTEK();
+    }
+
+
+    @Override
+    public Iterable<GeneratedTEK> getAllGeneratedTEKs() {
+        List<GeneratedTEK> result = new LinkedList<>();
+        for (EntityGeneratedTEK e : db.daoTEK().getAllGeneratedTEKs()) {
+            result.add(e.toGeneratedTEK());
+        }
+        return result;
     }
 
 
