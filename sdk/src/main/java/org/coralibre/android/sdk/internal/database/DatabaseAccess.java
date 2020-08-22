@@ -40,5 +40,18 @@ public class DatabaseAccess {
     }
 
 
+    /**
+     * Clears the db field and sets the state to uninitialized. Only intended to be used after
+     * unit tests, so that the next tests can initialize a fresh db without an exception being
+     * thrown.
+     */
+    public static void deInit() {
+        if (!isInitialized) {
+            throw new StorageException("Cannot forget database that is not known/existent.");
+        }
+        defaultDatabaseInstance = null;
+        isInitialized = false;
+    }
+
 
 }

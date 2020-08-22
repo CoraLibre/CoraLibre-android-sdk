@@ -1,6 +1,7 @@
 package org.coralibre.android.sdk.internal.crypto.ppcp;
 
 import android.annotation.SuppressLint;
+import android.util.Log;
 
 import com.google.crypto.tink.subtle.Hkdf;
 
@@ -69,11 +70,11 @@ public class CryptoModule {
         try {
             database = db;
 
-            GeneratedTEK rawTek = database.getGeneratedTEK(
-                    TemporaryExposureKey.getMidnight(currentInterval));
-            if (rawTek == null) {
+            ENNumber intervalNumberMidnight = TemporaryExposureKey.getMidnight(currentInterval);
+            if (! database.hasTEKForInterval(intervalNumberMidnight)) {
                 updateTEK();
             } else {
+                GeneratedTEK rawTek = database.getGeneratedTEK(intervalNumberMidnight);
                 TemporaryExposureKey tek = new TemporaryExposureKey(rawTek.getInterval(), rawTek.getKey());
                 currentTekDay = tek.getInterval();
                 currentRPIK = generateRPIK(tek);

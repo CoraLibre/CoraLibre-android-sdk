@@ -8,6 +8,7 @@ import org.coralibre.android.sdk.internal.crypto.ppcp.ENNumber;
 import org.coralibre.android.sdk.internal.database.model.CapturedData;
 import org.coralibre.android.sdk.internal.database.model.GeneratedTEK;
 import org.coralibre.android.sdk.internal.database.model.IntervalOfCapturedData;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,6 +30,14 @@ public class DatabaseTests {
         // https://stackoverflow.com/questions/52873173/migrating-junit4-tests-to-androidx-what-causes-delegate-runner-could-not-be-lo
 
         DatabaseAccess.init(InstrumentationRegistry.getInstrumentation().getContext());
+    }
+
+
+    @AfterClass
+    public static void deInit() {
+        // If this call is not performed, tests from other classes where the database's init is
+        // called might not run, since db reinitialization would throw an exception:
+        DatabaseAccess.deInit();
     }
 
 
