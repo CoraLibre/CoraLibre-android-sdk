@@ -16,14 +16,18 @@ import android.util.Log;
 
 import androidx.core.content.ContextCompat;
 
+import org.coralibre.android.sdk.BuildConfig;
+
 
 public class TracingServiceBroadcastReceiver extends BroadcastReceiver {
 
-    public static final String TAG = "TS BroadcastReceiver";
+    public static final String TAG = "TS BroadcastReceiver"; // 23 chars is the maximum length
 
     @Override
     public void onReceive(Context context, Intent i) {
-        Log.d(TAG, "received broadcast to start service");
+        if (BuildConfig.DEBUG) {
+            Log.d(TAG, "received broadcast to start service");
+        }
         Intent intent = new Intent(context, TracingService.class).setAction(i.getAction());
         intent.putExtra(TracingService.EXTRA_ADVERTISE, true);
         intent.putExtra(TracingService.EXTRA_RECEIVE, true);

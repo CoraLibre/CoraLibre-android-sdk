@@ -28,6 +28,7 @@ import androidx.core.app.NotificationCompat;
 
 import java.util.Collection;
 
+import org.coralibre.android.sdk.BuildConfig;
 import org.coralibre.android.sdk.PPCP;
 import org.coralibre.android.sdk.R;
 import org.coralibre.android.sdk.TracingStatus;
@@ -70,7 +71,9 @@ public class TracingService extends Service {
             if (BluetoothAdapter.ACTION_STATE_CHANGED.equals(intent.getAction())) {
                 int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1);
                 if (state == BluetoothAdapter.STATE_OFF || state == BluetoothAdapter.STATE_ON) {
-                    Log.w(TAG, BluetoothAdapter.ACTION_STATE_CHANGED);
+                    if (BuildConfig.DEBUG) {
+                        Log.d(TAG, BluetoothAdapter.ACTION_STATE_CHANGED);
+                    }
                     BluetoothServiceStatus.resetInstance();
                     BroadcastHelper.sendErrorUpdateBroadcast(context);
                 }
@@ -82,7 +85,9 @@ public class TracingService extends Service {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (LocationManager.MODE_CHANGED_ACTION.equals(intent.getAction())) {
-                Log.w(TAG, LocationManager.MODE_CHANGED_ACTION);
+                if (BuildConfig.DEBUG) {
+                    Log.d(TAG, LocationManager.MODE_CHANGED_ACTION);
+                }
                 BroadcastHelper.sendErrorUpdateBroadcast(context);
             }
         }
@@ -108,7 +113,9 @@ public class TracingService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.d(TAG, "onCreate()");
+        if (BuildConfig.DEBUG) {
+            Log.d(TAG, "onCreate()");
+        }
 
         isFinishing = false;
 
@@ -142,7 +149,9 @@ public class TracingService extends Service {
             wl.acquire();
         }
 
-        Log.i(TAG, "onStartCommand() with " + intent.getAction());
+        if (BuildConfig.DEBUG) {
+            Log.d(TAG, "onStartCommand() with " + intent.getAction());
+        }
 
         startAdvertising = intent.getBooleanExtra(EXTRA_ADVERTISE, true);
         startReceiving = intent.getBooleanExtra(EXTRA_RECEIVE, true);
@@ -318,7 +327,9 @@ public class TracingService extends Service {
     }
 
     private BluetoothState startClient() {
-        Log.d(TAG, "request to restart client");
+        if (BuildConfig.DEBUG) {
+            Log.d(TAG, "request to restart client");
+        }
         stopClient();
 
         if (startReceiving) {
@@ -349,7 +360,9 @@ public class TracingService extends Service {
 
     @Override
     public void onDestroy() {
-        Log.i(TAG, "onDestroy()");
+        if (BuildConfig.DEBUG) {
+            Log.d(TAG, "onDestroy()");
+        }
 
         unregisterReceiver(errorsUpdateReceiver);
         unregisterReceiver(bluetoothStateChangeReceiver);
