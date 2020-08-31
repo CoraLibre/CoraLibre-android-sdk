@@ -16,9 +16,6 @@ plugins {
 }
 apply plugin: 'kotlin-android'
 
-apply plugin: 'com.github.dcendents.android-maven'
-group='com.github.CoraLibre'
-
 android {
 	compileSdkVersion 29
 
@@ -35,7 +32,7 @@ android {
 		buildConfigField "long", "BUILD_TIME", System.currentTimeMillis() + "L"
 	}
 
-	defaultPublishConfig "productionRelease"
+	defaultPublishConfig "release"
 
 	flavorDimensions "version"
 
@@ -81,12 +78,23 @@ protobuf {
 }
 
 task androidSourcesJar(type: Jar) {
-	archiveClassifier = 'sources'
+	archiveClassifier.set('sources')
 	from android.sourceSets.main.java.srcDirs
 }
 
-artifacts {
-	archives androidSourcesJar
+afterEvaluate {
+	publishing {
+		publications {
+			release(MavenPublication) {
+				from components.release
+				artifact androidSourcesJar
+
+				groupId = System.getenv('GROUP')
+				artifactId = System.getenv('ARTIFACT')
+				version = System.getenv('VERSION')
+			}
+		}
+	}
 }
 
 ext.readProperty = { paramName ->
@@ -130,7 +138,4 @@ dependencies {
 	androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
     implementation "androidx.core:core-ktx:+"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-}
-repositories {
-    mavenCentral()
 }
