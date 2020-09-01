@@ -1,6 +1,7 @@
 package org.coralibre.android.sdk.internal.crypto;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import org.coralibre.android.sdk.internal.crypto.ppcp.AssociatedEncryptedMetadata;
 import org.coralibre.android.sdk.internal.crypto.ppcp.AssociatedEncryptedMetadataKey;
@@ -12,9 +13,13 @@ import org.coralibre.android.sdk.internal.crypto.ppcp.PaddedData;
 import org.coralibre.android.sdk.internal.crypto.ppcp.RollingProximityIdentifier;
 import org.coralibre.android.sdk.internal.crypto.ppcp.RollingProximityIdentifierKey;
 import org.coralibre.android.sdk.internal.crypto.ppcp.TemporaryExposureKey;
-import org.coralibre.android.sdk.internal.database.ppcp.Database;
-import org.coralibre.android.sdk.internal.database.ppcp.MockDatabase;
-import org.coralibre.android.sdk.internal.database.ppcp.model.GeneratedTEK;
+import org.coralibre.android.sdk.internal.database.Database;
+import org.coralibre.android.sdk.internal.database.DatabaseAccess;
+import org.coralibre.android.sdk.internal.database.model.GeneratedTEK;
+
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -110,6 +115,30 @@ public class CryptoModuleTests {
     private static final byte[] TEK_VAL3_AEMK = ByteHelper.hexStringToByteArray("a1d0bd6f94b053cf622ca88194e20611");
     private static final byte[] TEK_VAL3_AEM = ByteHelper.hexStringToByteArray("a3e9517f");
 
+
+    @BeforeClass
+    public static void initGlobal() {
+        // Static, since otherwise JUnit throws an exception:
+        // https://stackoverflow.com/questions/733037/why-isnt-my-beforeclass-method-running/733042#733042
+        // Also see:
+        // https://stackoverflow.com/questions/52873173/migrating-junit4-tests-to-androidx-what-causes-delegate-runner-could-not-be-lo
+
+        DatabaseAccess.init(InstrumentationRegistry.getInstrumentation().getContext());
+    }
+
+    @AfterClass
+    public static void deInit() {
+        // If this call is not performed, tests from other classes where the database's init is
+        // called might not run, since db reinitialization would throw an exception:
+        DatabaseAccess.deInit();
+    }
+
+    @Before
+    public void clearDb() {
+        DatabaseAccess.getDefaultDatabaseInstance().clearAllData();
+    }
+
+
     private static CryptoModule getMockedTimeCryptoModule(Database db, long ennumber) throws Exception {
         Class cryptoModuleClass = Class.forName("org.coralibre.android.sdk.internal.crypto.ppcp.CryptoModule");
         Constructor<CryptoModule>  cryptoModuleConstructor = cryptoModuleClass.getDeclaredConstructor(Database.class, ENNumber.class);
@@ -146,7 +175,7 @@ public class CryptoModuleTests {
     public void testEncryptDecryptRPI() throws Exception {
         RollingProximityIdentifierKey rpik = new RollingProximityIdentifierKey(RPIK_VAL1);
         //encrypt
-        RollingProximityIdentifier rpi = new CryptoModule(new MockDatabase()).generateRPI(rpik);
+        RollingProximityIdentifier rpi = new CryptoModule(DatabaseAccess.getDefaultDatabaseInstance()).generateRPI(rpik);
         //decrypt
         PaddedData pd = CryptoModule.decryptRPI(rpi, rpik);
         assertTrue("RPI decryption failed", pd.isRPIInfoValid());
@@ -202,7 +231,7 @@ public class CryptoModuleTests {
 
     @Test
     public void testInitialTEKGeneration() throws Exception {
-        Database db = new MockDatabase();
+        Database db = DatabaseAccess.getDefaultDatabaseInstance();
         CryptoModule crypto = getMockedTimeCryptoModule(db, 1000);
         int i = 0;
         for(GeneratedTEK tek : db.getAllGeneratedTEKs())
@@ -212,7 +241,7 @@ public class CryptoModuleTests {
 
     @Test
     public void testUpdateTEKDontUpdateOnSameDay() throws Exception {
-        Database db = new MockDatabase();
+        Database db = DatabaseAccess.getDefaultDatabaseInstance();
         CryptoModule crypto = getMockedTimeCryptoModule(db,1050);
         setCurrentENNumber(crypto, 1100);
         crypto.updateTEK();
@@ -224,7 +253,7 @@ public class CryptoModuleTests {
 
     @Test
     public void testUpdateTEKUpdateOnDifferentDays() throws Exception {
-        Database db = new MockDatabase();
+        Database db = DatabaseAccess.getDefaultDatabaseInstance();
         CryptoModule crypto = getMockedTimeCryptoModule(db, 1000);
         setCurrentENNumber(crypto, 1100);
         crypto.updateTEK();
@@ -236,7 +265,7 @@ public class CryptoModuleTests {
 
     @Test
     public void testGetCurrentRPI() throws Exception {
-        Database db = new MockDatabase();
+        Database db = DatabaseAccess.getDefaultDatabaseInstance();
         CryptoModule crypto = getMockedTimeCryptoModule(db, 1000);
         crypto.setMetadata(mockAem);
         crypto.renewPayload();
@@ -248,7 +277,7 @@ public class CryptoModuleTests {
 
     @Test
     public void testGetCurrentRPINotRollingWithinOneInterval() throws Exception {
-        Database db = new MockDatabase();
+        Database db = DatabaseAccess.getDefaultDatabaseInstance();
         CryptoModule crypto = getMockedTimeCryptoModule(db, 1000);
         crypto.setMetadata(mockAem);
         crypto.renewPayload();
@@ -263,7 +292,7 @@ public class CryptoModuleTests {
 
     @Test
     public void testGetCurrentRPIRollingWithinDifferentIntervals() throws Exception {
-        Database db = new MockDatabase();
+        Database db = DatabaseAccess.getDefaultDatabaseInstance();
         CryptoModule crypto = getMockedTimeCryptoModule(db,1000);
         crypto.setMetadata(mockAem);
         crypto.renewPayload();

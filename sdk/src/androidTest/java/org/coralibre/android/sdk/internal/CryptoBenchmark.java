@@ -18,7 +18,7 @@ import java.util.ArrayList;
 
 import org.coralibre.android.sdk.internal.crypto.CryptoModule;
 import org.coralibre.android.sdk.internal.crypto.EphId;
-import org.coralibre.android.sdk.internal.database.models.Contact;
+import org.coralibre.android.sdk.internal.misc.Contact;
 import org.coralibre.android.sdk.internal.util.DayDate;
 import org.junit.Rule;
 import org.junit.Test;

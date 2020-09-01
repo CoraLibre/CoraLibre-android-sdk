@@ -1,7 +1,20 @@
-package org.coralibre.android.sdk.internal.database.ppcp.model;
+package org.coralibre.android.sdk.internal.database.model;
+
+
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+
+import org.coralibre.android.sdk.internal.crypto.ppcp.ENNumber;
 
 public class CapturedData {
-    private long captureTimestamp; // in milliseconds since Epoch
+
+
+    /**
+     *  Milliseconds since Epoch.
+     */
+    private final long captureTimestamp;
+
+    private final ENNumber enNumber;
 
     /** in dB */
     private byte rssi;
@@ -11,12 +24,17 @@ public class CapturedData {
 
     public CapturedData(long captureTimestamp, byte rssi, byte[] payload) {
         this.captureTimestamp = captureTimestamp;
+        this.enNumber = new ENNumber(captureTimestamp, true);
         this.rssi = rssi;
         this.payload = payload;
     }
 
     public Long getCaptureTimestamp() {
         return captureTimestamp;
+    }
+
+    public ENNumber getEnNumber() {
+        return enNumber;
     }
 
     public byte getRssi() {

@@ -16,8 +16,8 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.coralibre.android.sdk.internal.AppConfigManager;
-import org.coralibre.android.sdk.internal.database.models.Contact;
-import org.coralibre.android.sdk.internal.database.models.Handshake;
+import org.coralibre.android.sdk.internal.misc.Contact;
+import org.coralibre.android.sdk.internal.misc.Handshake;
 
 public class ContactsFactory {
 

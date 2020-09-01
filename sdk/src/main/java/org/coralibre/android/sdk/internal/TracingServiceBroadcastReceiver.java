@@ -19,7 +19,7 @@ import androidx.core.content.ContextCompat;
 
 public class TracingServiceBroadcastReceiver extends BroadcastReceiver {
 
-    public static final String TAG = "TracingServiceBroadcastReceiver";
+    public static final String TAG = "TS BroadcastReceiver";
 
     @Override
     public void onReceive(Context context, Intent i) {

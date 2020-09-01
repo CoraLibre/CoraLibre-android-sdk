@@ -1,13 +1,14 @@
 package org.coralibre.android.sdk.internal.crypto.ppcp;
 
 import android.annotation.SuppressLint;
+import android.util.Log;
 
 import com.google.crypto.tink.subtle.Hkdf;
 
-import org.coralibre.android.sdk.internal.database.ppcp.Database;
-import org.coralibre.android.sdk.internal.database.ppcp.MockDatabase;
-import org.coralibre.android.sdk.internal.database.ppcp.model.GeneratedTEK;
-import org.coralibre.android.sdk.internal.database.ppcp.model.GeneratedTEKImpl;
+import org.coralibre.android.sdk.internal.database.Database;
+import org.coralibre.android.sdk.internal.database.DatabaseAccess;
+import org.coralibre.android.sdk.internal.database.model.GeneratedTEK;
+import org.coralibre.android.sdk.internal.database.DatabaseAccess;
 
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
@@ -35,20 +36,21 @@ public class CryptoModule {
     private AssociatedMetadata metadata = null;
     private Database database;
 
+
     private boolean testMode;
     private ENNumber currentIntervalForTesting;
 
     public static CryptoModule getInstance() {
-        //TODO: use propper factory class
+        //TODO: use proper factory class
         if (instance == null) {
-            instance = new CryptoModule(MockDatabase.getInstance());
+            instance = new CryptoModule(DatabaseAccess.getDefaultDatabaseInstance());
         }
         return instance;
     }
 
     public CryptoModule(Database db) {
         testMode = false; // remove this line and everything goes BOOM!!!
-        //TODO: Use propper dependency injection
+        //TODO: Use proper dependency injection
         init(db, getCurrentInterval());
     }
 
@@ -63,16 +65,16 @@ public class CryptoModule {
         init(db, interval);
     }
 
-    //TODO: Use a factory for getting a crypto module in order to do propper dependency injection.
+    //TODO: Use a factory for getting a crypto module in order to do proper dependency injection.
     private void init(Database db, ENNumber currentInterval) {
         try {
             database = db;
 
-            GeneratedTEK rawTek = database.getGeneratedTEK(
-                    TemporaryExposureKey.getMidnight(currentInterval));
-            if (rawTek == null) {
+            ENNumber intervalNumberMidnight = TemporaryExposureKey.getMidnight(currentInterval);
+            if (! database.hasTEKForInterval(intervalNumberMidnight)) {
                 updateTEK();
             } else {
+                GeneratedTEK rawTek = database.getGeneratedTEK(intervalNumberMidnight);
                 TemporaryExposureKey tek = new TemporaryExposureKey(rawTek.getInterval(), rawTek.getKey());
                 currentTekDay = tek.getInterval();
                 currentRPIK = generateRPIK(tek);
@@ -212,7 +214,8 @@ public class CryptoModule {
             currentRPIK = generateRPIK(currentTek);
             currentAEMK = generateAEMK(currentTek);
 
-            database.addGeneratedTEK(new GeneratedTEKImpl(currentTekDay, currentTek.getKey()));
+            Database database = DatabaseAccess.getDefaultDatabaseInstance();
+            database.addGeneratedTEK(new GeneratedTEK(currentTekDay, currentTek.getKey()));
         }
     }
 

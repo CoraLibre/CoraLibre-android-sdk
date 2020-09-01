@@ -12,7 +12,7 @@ package org.coralibre.android.sdk;
 import java.util.Collection;
 import java.util.List;
 
-import org.coralibre.android.sdk.internal.database.models.ExposureDay;
+import org.coralibre.android.sdk.internal.misc.ExposureDay;
 
 public class TracingStatus {
 
