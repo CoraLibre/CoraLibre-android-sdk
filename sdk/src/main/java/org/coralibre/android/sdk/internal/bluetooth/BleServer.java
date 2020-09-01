@@ -26,6 +26,7 @@ import android.util.Log;
 
 import java.util.UUID;
 
+import org.coralibre.android.sdk.BuildConfig;
 import org.coralibre.android.sdk.internal.AppConfigManager;
 import org.coralibre.android.sdk.internal.crypto.ppcp.AssociatedMetadata;
 import org.coralibre.android.sdk.internal.crypto.ppcp.CryptoModule;
@@ -51,13 +52,15 @@ public class BleServer {
 	private final AdvertiseCallback advertiseCallback = new AdvertiseCallback() {
 		@Override
 		public void onStartFailure(int errorCode) {
-			Log.e(TAG, "advertise onStartFailure: " + errorCode);
+			Log.e(TAG, "advertise onStartFailure(), errorCode: " + errorCode);
 			BluetoothServiceStatus.getInstance(context).updateAdvertiseStatus(errorCode);
 		}
 
 		@Override
 		public void onStartSuccess(AdvertiseSettings settingsInEffect) {
-			Log.i(TAG, "advertise onStartSuccess: " + settingsInEffect.toString());
+			if (BuildConfig.DEBUG) {
+				Log.d(TAG, "advertise onStartSuccess(), settingsInEffect: " + settingsInEffect.toString());
+			}
 			BluetoothServiceStatus.getInstance(context).updateAdvertiseStatus(BluetoothServiceStatus.ADVERTISE_OK);
 		}
 	};
@@ -126,8 +129,10 @@ public class BleServer {
 				.build();
 
 		mLeAdvertiser.startAdvertising(advSettings, advData, advertiseCallback);
-		Log.d(TAG, "started advertising (only advertiseData), powerLevel (CAUTION THIS IS A MOCK): "
-				+ ((int) mockTXPowerlevel));
+		if (BuildConfig.DEBUG) {
+			Log.d(TAG, "started advertising (only advertiseData),"
+					+ "powerLevel (CAUTION THIS IS A MOCK): " + ((int) mockTXPowerlevel));
+		}
 
 		return BluetoothState.ENABLED;
 	}

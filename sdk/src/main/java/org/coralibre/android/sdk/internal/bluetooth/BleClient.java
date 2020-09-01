@@ -124,7 +124,9 @@ public class BleClient {
             @Override
             public void onBatchScanResults(List<ScanResult> results) {
                 bluetoothServiceStatus.updateScanStatus(BluetoothServiceStatus.SCAN_OK);
-                if (BuildConfig.DEBUG) Log.d(TAG, "Batch size " + results.size());
+                if (BuildConfig.DEBUG) {
+                    Log.d(TAG, "Batch size " + results.size());
+                }
                 for (ScanResult result : results) {
                     onScanResult(0, result);
                 }
@@ -132,12 +134,15 @@ public class BleClient {
 
             public void onScanFailed(int errorCode) {
                 bluetoothServiceStatus.updateScanStatus(errorCode);
-                Log.e(TAG, "error: " + errorCode);
+                Log.e(TAG, "onScanFailed(), errorCode: " + errorCode);
             }
         };
 
         bleScanner.startScan(scanFilters, scanSettings, bleScanCallback);
-        Log.i(TAG, "started BLE scanner, scanMode: " + scanSettings.getScanMode() + " scanFilters: " + scanFilters.size());
+        if (BuildConfig.DEBUG) {
+            Log.d(TAG, "started BLE scanner, scanMode: " + scanSettings.getScanMode()
+                    + " scanFilters: " + scanFilters.size());
+        }
 
         return BluetoothState.ENABLED;
     }
@@ -164,7 +169,7 @@ public class BleClient {
             // risk calculation later
             collectedData.add(new CollectedDatumInstance(payload, rssi, now));
         } catch (Exception e) {
-            Log.e(TAG, e.toString());
+            e.printStackTrace();
         }
     }
 
@@ -176,7 +181,9 @@ public class BleClient {
             return;
         }
         if (bleScanner != null) {
-            Log.i(TAG, "stopping BLE scanner");
+            if (BuildConfig.DEBUG) {
+                Log.d(TAG, "stopping BLE scanner");
+            }
             bleScanner.stopScan(bleScanCallback);
             bleScanner = null;
         }
