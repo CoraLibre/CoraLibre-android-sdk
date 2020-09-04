@@ -35,7 +35,7 @@ public class AppConfigManager {
 	private static final BluetoothTxPowerLevel DEFAULT_BLUETOOTH_POWER_LEVEL = BluetoothTxPowerLevel.ADVERTISE_TX_POWER_ULTRA_LOW;
 	private static final BluetoothAdvertiseMode DEFAULT_BLUETOOTH_ADVERTISE_MODE = BluetoothAdvertiseMode.ADVERTISE_MODE_BALANCED;
 
-	private static final String PREFS_NAME = "dp3t_sdk_preferences";
+	private static final String PREFS_NAME = "coralibre_sdk_preferences";
 	private static final String PREF_ADVERTISING_ENABLED = "advertisingEnabled";
 	private static final String PREF_RECEIVING_ENABLED = "receivingEnabled";
 	private static final String PREF_CALIBRATION_TEST_DEVICE_NAME = "calibrationTestDeviceName";

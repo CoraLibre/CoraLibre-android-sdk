@@ -25,7 +25,7 @@ import java.security.PublicKey;
 
 public class PPCP {
 
-	private static final String TAG = "DP3T Interface";
+	private static final String TAG = "PPCP Interface";
 
 	public static final String UPDATE_INTENT_ACTION = "org.coralibre.android.sdk.UPDATE_ACTION";
 

@@ -12,5 +12,5 @@
 <full-backup-content>
 	<exclude
 		domain="sharedpref"
-		path="dp3t_sdk_preferences.xml" />
+		path="coralibre_sdk_preferences.xml" />
 </full-backup-content>
