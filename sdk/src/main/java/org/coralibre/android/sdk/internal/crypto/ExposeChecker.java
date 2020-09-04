@@ -1,15 +1,15 @@
-package org.coralibre.android.sdk.internal.crypto.ppcp;
+package org.coralibre.android.sdk.internal.crypto;
 
 import android.util.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.coralibre.android.sdk.internal.crypto.ppcp.CryptoModule.FUZZY_COMPARE_TIME_DEVIATION;
-import static org.coralibre.android.sdk.internal.crypto.ppcp.CryptoModule.generateRPI;
-import static org.coralibre.android.sdk.internal.crypto.ppcp.CryptoModule.generateRPIK;
-import static org.coralibre.android.sdk.internal.crypto.ppcp.TemporaryExposureKey.TEK_ROLLING_PERIOD;
-import static org.coralibre.android.sdk.internal.crypto.ppcp.TemporaryExposureKey.getMidnight;
+import static org.coralibre.android.sdk.internal.crypto.CryptoModule.FUZZY_COMPARE_TIME_DEVIATION;
+import static org.coralibre.android.sdk.internal.crypto.CryptoModule.generateRPI;
+import static org.coralibre.android.sdk.internal.crypto.CryptoModule.generateRPIK;
+import static org.coralibre.android.sdk.internal.crypto.TemporaryExposureKey.TEK_ROLLING_PERIOD;
+import static org.coralibre.android.sdk.internal.crypto.TemporaryExposureKey.getMidnight;
 
 public class ExposeChecker {
     public static List<RollingProximityIdentifier> generateAllRPIForADay(TemporaryExposureKey tek) {

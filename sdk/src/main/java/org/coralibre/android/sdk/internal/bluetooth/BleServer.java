@@ -28,8 +28,8 @@ import java.util.UUID;
 
 import org.coralibre.android.sdk.BuildConfig;
 import org.coralibre.android.sdk.internal.AppConfigManager;
-import org.coralibre.android.sdk.internal.crypto.ppcp.AssociatedMetadata;
-import org.coralibre.android.sdk.internal.crypto.ppcp.CryptoModule;
+import org.coralibre.android.sdk.internal.crypto.AssociatedMetadata;
+import org.coralibre.android.sdk.internal.crypto.CryptoModule;
 import org.coralibre.android.sdk.internal.util.ByteToHex;
 
 import static android.bluetooth.le.AdvertisingSetParameters.INTERVAL_MEDIUM;

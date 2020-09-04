@@ -3,8 +3,8 @@ package org.coralibre.android.sdk.internal.database;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
 
-import org.coralibre.android.sdk.internal.crypto.ppcp.CryptoModule;
-import org.coralibre.android.sdk.internal.crypto.ppcp.ENNumber;
+import org.coralibre.android.sdk.internal.crypto.CryptoModule;
+import org.coralibre.android.sdk.internal.crypto.ENNumber;
 import org.coralibre.android.sdk.internal.database.model.CapturedData;
 import org.coralibre.android.sdk.internal.database.model.GeneratedTEK;
 import org.coralibre.android.sdk.internal.database.model.IntervalOfCapturedData;

@@ -1,7 +1,7 @@
 package org.coralibre.android.sdk.internal.database.model;
 
 
-import org.coralibre.android.sdk.internal.crypto.ppcp.ENNumber;
+import org.coralibre.android.sdk.internal.crypto.ENNumber;
 
 
 public class GeneratedTEK {

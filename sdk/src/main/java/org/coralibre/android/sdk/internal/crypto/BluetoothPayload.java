@@ -1,9 +1,9 @@
-package org.coralibre.android.sdk.internal.crypto.ppcp;
+package org.coralibre.android.sdk.internal.crypto;
 
 import java.security.InvalidParameterException;
 
-import static org.coralibre.android.sdk.internal.crypto.ppcp.AssociatedMetadata.AEM_LENGTH;
-import static org.coralibre.android.sdk.internal.crypto.ppcp.RollingProximityIdentifier.RPI_LENGTH;
+import static org.coralibre.android.sdk.internal.crypto.AssociatedMetadata.AEM_LENGTH;
+import static org.coralibre.android.sdk.internal.crypto.RollingProximityIdentifier.RPI_LENGTH;
 
 public class BluetoothPayload {
     public static final int PAYLOAD_LENGTH = RPI_LENGTH + AEM_LENGTH;
