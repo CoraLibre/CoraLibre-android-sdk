@@ -4,7 +4,6 @@ import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
 import org.coralibre.android.sdk.internal.crypto.ENNumber;
-import org.coralibre.android.sdk.internal.database.model.CapturedData;
 import org.coralibre.android.sdk.internal.database.model.GeneratedTEK;
 
 

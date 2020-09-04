@@ -4,23 +4,19 @@ import android.util.Pair;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
-import org.coralibre.android.sdk.internal.crypto.ENNumber;
-import org.coralibre.android.sdk.internal.crypto.ExposeChecker;
-import org.coralibre.android.sdk.internal.crypto.RollingProximityIdentifier;
-import org.coralibre.android.sdk.internal.crypto.TemporaryExposureKey;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import static org.coralibre.android.sdk.internal.crypto.RollingProximityIdentifier.RPI_LENGTH;
 import static org.coralibre.android.sdk.internal.crypto.TemporaryExposureKey.TEK_LENGTH;
 import static org.coralibre.android.sdk.internal.crypto.TemporaryExposureKey.TEK_ROLLING_PERIOD;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 @RunWith(AndroidJUnit4.class)
 public class ExposeCheckerTests {

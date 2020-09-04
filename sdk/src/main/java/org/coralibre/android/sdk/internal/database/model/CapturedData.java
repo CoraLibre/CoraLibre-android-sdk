@@ -1,9 +1,6 @@
 package org.coralibre.android.sdk.internal.database.model;
 
 
-import androidx.room.Entity;
-import androidx.room.PrimaryKey;
-
 import org.coralibre.android.sdk.internal.crypto.ENNumber;
 
 public class CapturedData {

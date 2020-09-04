@@ -21,20 +21,19 @@ import android.os.Build;
 import android.os.ParcelUuid;
 import android.util.Log;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.coralibre.android.sdk.BuildConfig;
 import org.coralibre.android.sdk.internal.AppConfigManager;
 import org.coralibre.android.sdk.internal.BroadcastHelper;
-import org.coralibre.android.sdk.internal.crypto.CryptoModule;
 import org.coralibre.android.sdk.internal.crypto.BluetoothPayload;
+import org.coralibre.android.sdk.internal.crypto.CryptoModule;
 import org.coralibre.android.sdk.internal.crypto.ENNumber;
-import org.coralibre.android.sdk.internal.util.ByteToHex;
 import org.coralibre.android.sdk.internal.database.Database;
 import org.coralibre.android.sdk.internal.database.DatabaseAccess;
 import org.coralibre.android.sdk.internal.database.model.CapturedData;
+import org.coralibre.android.sdk.internal.util.ByteToHex;
 
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.coralibre.android.sdk.internal.bluetooth.BleServer.SERVICE_UUID;
 

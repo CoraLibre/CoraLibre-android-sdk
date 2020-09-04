@@ -1,7 +1,6 @@
 package org.coralibre.android.sdk.internal.crypto;
 
 import java.security.InvalidParameterException;
-import java.security.MessageDigest;
 
 public class RollingProximityIdentifierKey {
     public static final int RPIK_LENGTH = 16; // unit is bytes

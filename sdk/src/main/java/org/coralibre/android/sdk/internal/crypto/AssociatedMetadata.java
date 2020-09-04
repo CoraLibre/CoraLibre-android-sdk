@@ -1,7 +1,5 @@
 package org.coralibre.android.sdk.internal.crypto;
 
-import android.util.Log;
-
 import java.security.InvalidParameterException;
 
 public class AssociatedMetadata {

@@ -3,16 +3,6 @@ package org.coralibre.android.sdk.internal.crypto;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
 
-import org.coralibre.android.sdk.internal.crypto.AssociatedEncryptedMetadata;
-import org.coralibre.android.sdk.internal.crypto.AssociatedEncryptedMetadataKey;
-import org.coralibre.android.sdk.internal.crypto.AssociatedMetadata;
-import org.coralibre.android.sdk.internal.crypto.BluetoothPayload;
-import org.coralibre.android.sdk.internal.crypto.CryptoModule;
-import org.coralibre.android.sdk.internal.crypto.ENNumber;
-import org.coralibre.android.sdk.internal.crypto.PaddedData;
-import org.coralibre.android.sdk.internal.crypto.RollingProximityIdentifier;
-import org.coralibre.android.sdk.internal.crypto.RollingProximityIdentifierKey;
-import org.coralibre.android.sdk.internal.crypto.TemporaryExposureKey;
 import org.coralibre.android.sdk.internal.database.Database;
 import org.coralibre.android.sdk.internal.database.DatabaseAccess;
 import org.coralibre.android.sdk.internal.database.model.GeneratedTEK;
@@ -29,7 +19,6 @@ import java.util.Arrays;
 
 import static org.coralibre.android.sdk.internal.crypto.AssociatedMetadata.AEM_LENGTH;
 import static org.coralibre.android.sdk.internal.crypto.RollingProximityIdentifier.RPI_LENGTH;
-import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

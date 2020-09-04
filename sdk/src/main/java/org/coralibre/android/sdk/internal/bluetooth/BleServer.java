@@ -14,26 +14,18 @@ import android.bluetooth.BluetoothManager;
 import android.bluetooth.le.AdvertiseCallback;
 import android.bluetooth.le.AdvertiseData;
 import android.bluetooth.le.AdvertiseSettings;
-import android.bluetooth.le.AdvertisingSet;
-import android.bluetooth.le.AdvertisingSetCallback;
-import android.bluetooth.le.AdvertisingSetParameters;
 import android.bluetooth.le.BluetoothLeAdvertiser;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.ParcelUuid;
 import android.util.Log;
 
-
-import java.util.UUID;
-
 import org.coralibre.android.sdk.BuildConfig;
 import org.coralibre.android.sdk.internal.AppConfigManager;
 import org.coralibre.android.sdk.internal.crypto.AssociatedMetadata;
 import org.coralibre.android.sdk.internal.crypto.CryptoModule;
-import org.coralibre.android.sdk.internal.util.ByteToHex;
 
-import static android.bluetooth.le.AdvertisingSetParameters.INTERVAL_MEDIUM;
-import static android.bluetooth.le.AdvertisingSetParameters.TX_POWER_LOW;
+import java.util.UUID;
 
 public class BleServer {
 

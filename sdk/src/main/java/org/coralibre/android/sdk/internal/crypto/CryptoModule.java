@@ -1,14 +1,12 @@
 package org.coralibre.android.sdk.internal.crypto;
 
 import android.annotation.SuppressLint;
-import android.util.Log;
 
 import com.google.crypto.tink.subtle.Hkdf;
 
 import org.coralibre.android.sdk.internal.database.Database;
 import org.coralibre.android.sdk.internal.database.DatabaseAccess;
 import org.coralibre.android.sdk.internal.database.model.GeneratedTEK;
-import org.coralibre.android.sdk.internal.database.DatabaseAccess;
 
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
