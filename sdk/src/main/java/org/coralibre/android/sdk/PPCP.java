@@ -108,14 +108,6 @@ public class PPCP {
 		BroadcastHelper.sendUpdateBroadcast(context);
 	}
 
-	public static void setMatchingParameters(Context context, float contactAttenuationThreshold, int numberOfWindowsForExposure) {
-		checkInit();
-
-		AppConfigManager appConfigManager = AppConfigManager.getInstance(context);
-		appConfigManager.setContactAttenuationThreshold(contactAttenuationThreshold);
-		appConfigManager.setNumberOfWindowsForExposure(numberOfWindowsForExposure);
-	}
-
 	public static IntentFilter getUpdateIntentFilter() {
 		return new IntentFilter(PPCP.UPDATE_INTENT_ACTION);
 	}
