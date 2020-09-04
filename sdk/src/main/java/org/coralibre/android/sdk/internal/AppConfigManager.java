@@ -12,6 +12,10 @@ package org.coralibre.android.sdk.internal;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import org.coralibre.android.sdk.internal.bluetooth.BluetoothScanMode;
+import org.coralibre.android.sdk.internal.bluetooth.old.BluetoothAdvertiseMode;
+import org.coralibre.android.sdk.internal.bluetooth.old.BluetoothTxPowerLevel;
+
 public class AppConfigManager {
 
 	private static AppConfigManager instance;

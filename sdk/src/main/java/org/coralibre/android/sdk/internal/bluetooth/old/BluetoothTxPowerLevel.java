@@ -7,19 +7,19 @@
  *
  * SPDX-License-Identifier: MPL-2.0
  */
-
-package org.coralibre.android.sdk.internal;
+package org.coralibre.android.sdk.internal.bluetooth.old;
 
 import android.bluetooth.le.AdvertiseSettings;
 
-public enum BluetoothAdvertiseMode {
-	ADVERTISE_MODE_LOW_POWER(AdvertiseSettings.ADVERTISE_MODE_LOW_POWER),
-	ADVERTISE_MODE_BALANCED(AdvertiseSettings.ADVERTISE_MODE_BALANCED),
-	ADVERTISE_MODE_LOW_LATENCY(AdvertiseSettings.ADVERTISE_MODE_LOW_LATENCY);
+public enum BluetoothTxPowerLevel {
+	ADVERTISE_TX_POWER_ULTRA_LOW(AdvertiseSettings.ADVERTISE_TX_POWER_ULTRA_LOW),
+	ADVERTISE_TX_POWER_LOW(AdvertiseSettings.ADVERTISE_TX_POWER_LOW),
+	ADVERTISE_TX_POWER_MEDIUM(AdvertiseSettings.ADVERTISE_TX_POWER_MEDIUM),
+	ADVERTISE_TX_POWER_HIGH(AdvertiseSettings.ADVERTISE_TX_POWER_HIGH);
 
 	private final int systemValue;
 
-	BluetoothAdvertiseMode(final int systemValue) {
+	BluetoothTxPowerLevel(final int systemValue) {
 		this.systemValue = systemValue;
 	}
 

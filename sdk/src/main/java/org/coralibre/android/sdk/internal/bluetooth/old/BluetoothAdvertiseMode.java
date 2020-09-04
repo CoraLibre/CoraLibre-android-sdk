@@ -7,19 +7,19 @@
  *
  * SPDX-License-Identifier: MPL-2.0
  */
-package org.coralibre.android.sdk.internal;
 
-import android.bluetooth.le.ScanSettings;
+package org.coralibre.android.sdk.internal.bluetooth.old;
 
-public enum BluetoothScanMode {
-	SCAN_MODE_LOW_POWER(ScanSettings.SCAN_MODE_LOW_POWER),
-	SCAN_MODE_BALANCED(ScanSettings.SCAN_MODE_BALANCED),
-	SCAN_MODE_LOW_LATENCY(ScanSettings.SCAN_MODE_LOW_LATENCY),
-	SCAN_MODE_OPPORTUNISTIC(ScanSettings.SCAN_MODE_OPPORTUNISTIC);
+import android.bluetooth.le.AdvertiseSettings;
+
+public enum BluetoothAdvertiseMode {
+	ADVERTISE_MODE_LOW_POWER(AdvertiseSettings.ADVERTISE_MODE_LOW_POWER),
+	ADVERTISE_MODE_BALANCED(AdvertiseSettings.ADVERTISE_MODE_BALANCED),
+	ADVERTISE_MODE_LOW_LATENCY(AdvertiseSettings.ADVERTISE_MODE_LOW_LATENCY);
 
 	private final int systemValue;
 
-	BluetoothScanMode(final int systemValue) {
+	BluetoothAdvertiseMode(final int systemValue) {
 		this.systemValue = systemValue;
 	}
 
