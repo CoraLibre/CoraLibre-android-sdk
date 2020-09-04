@@ -12,14 +12,12 @@ package org.coralibre.android.sdk;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.util.Log;
 
 import androidx.core.content.ContextCompat;
 
 import org.coralibre.android.sdk.internal.AppConfigManager;
 import org.coralibre.android.sdk.internal.BroadcastHelper;
 import org.coralibre.android.sdk.internal.TracingService;
-import org.coralibre.android.sdk.internal.crypto.CryptoModule;
 import org.coralibre.android.sdk.internal.database.DatabaseAccess;
 import org.coralibre.android.sdk.internal.util.ProcessUtil;
 
@@ -129,7 +127,6 @@ public class PPCP {
 			throw new IllegalStateException("Tracking must be stopped for clearing the local data");
 		}
 
-		CryptoModule.getInstance(context).reset();
 		appConfigManager.clearPreferences();
 
 		DatabaseAccess.getDefaultDatabaseInstance().clearAllData();
