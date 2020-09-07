@@ -8,84 +8,56 @@ import org.coralibre.android.sdk.fakegms.nearby.exposurenotification.ExposureNot
 import org.coralibre.android.sdk.fakegms.nearby.exposurenotification.ExposureSummary;
 import org.coralibre.android.sdk.fakegms.nearby.exposurenotification.TemporaryExposureKey;
 import org.coralibre.android.sdk.fakegms.tasks.Task;
-import org.coralibre.android.sdk.fakegms.tasks.TaskAutorunOnceListenersThere;
+import org.coralibre.android.sdk.fakegms.tasks.Tasks;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.List;
 
 final class ExposureNotificationClientImpl implements ExposureNotificationClient {
 
     @Override
     public Task<Void> start() {
-        return new TaskAutorunOnceListenersThere<Void>() {
-            @Override
-            public void runInternal() {
-                // TODO: Implement!
-            }
-        };
+        // TODO: Implement!
+        return Tasks.forResult(null);
     }
 
     @Override
     public Task<Void> stop() {
-        return new TaskAutorunOnceListenersThere<Void>() {
-            @Override
-            public void runInternal() {
-                // TODO: Implement!
-            }
-        };
+        // TODO: Implement!
+        return Tasks.forResult(null);
     }
 
     @Override
     public Task<Boolean> isEnabled() {
-        return new TaskAutorunOnceListenersThere<Boolean>() {
-            @Override
-            public void runInternal() {
-                // TODO: Implement!
-            }
-        };
+        // TODO: Implement!
+        return Tasks.forResult(true);
     }
 
     @Override
-
     public Task<List<TemporaryExposureKey>> getTemporaryExposureKeyHistory() {
-        return new TaskAutorunOnceListenersThere<List<TemporaryExposureKey>>() {
-            @Override
-            public void runInternal() {
-                // TODO: Implement!
-            }
-        };
+        // TODO: Implement!
+        return Tasks.forResult(Collections.emptyList());
     }
 
     @Override
     public Task<Void> provideDiagnosisKeys(final List<File> keyFiles,
                                            @Nullable final ExposureConfiguration exposureConfiguration,
                                            final String token) {
-        return new TaskAutorunOnceListenersThere<Void>() {
-            @Override
-            public void runInternal() {
-                // TODO: Implement!
-            }
-        };
+        // TODO: Implement!
+        return Tasks.forResult(null);
     }
 
     @Override
     public Task<ExposureSummary> getExposureSummary(String token) {
-        return new TaskAutorunOnceListenersThere<ExposureSummary>() {
-            @Override
-            public void runInternal() {
-                // TODO: Implement!
-            }
-        };
+        // TODO: Implement!
+        return Tasks.forResult(null);
     }
 
     @Override
     public Task<List<ExposureInformation>> getExposureInformation(String token) {
-        return new TaskAutorunOnceListenersThere<List<ExposureInformation>>() {
-            @Override
-            public void runInternal() {
-                // TODO: Implement!
-                // See src/deviceForTesters/java/de.rki.coronawarnapp/TestRiskLevelCalculation.kt
-            }
-        };
+        // TODO: Implement!
+        // See src/deviceForTesters/java/de.rki.coronawarnapp/TestRiskLevelCalculation.kt
+        return Tasks.forResult(Collections.emptyList());
     }
 }

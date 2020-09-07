@@ -1,23 +1,18 @@
 package org.coralibre.android.sdk.fakegms.tasks;
 
+import androidx.annotation.NonNull;
+
+/**
+ * Minimal Task class providing interfaces currently required by the RKI app.
+ */
 public abstract class Task<T> {
-    // Minimal Task class providing interfaces currently required by the RKI app.
+    public abstract boolean isComplete();
 
+    public abstract boolean isSuccessful();
 
-    protected OnSuccessListener<? super T> listenerSuccess = null;
-    protected OnFailureListener listenerFailure = null;
+    @NonNull
+    public abstract Task<T> addOnSuccessListener(OnSuccessListener<? super T> listener);
 
-
-    public Task<T>
-    addOnSuccessListener (OnSuccessListener<? super T> listener) {
-        this.listenerSuccess = listener;
-        return this;
-    }
-
-    public Task<T>
-    addOnFailureListener (OnFailureListener listener) {
-        this.listenerFailure = listener;
-        return this;
-    }
-
+    @NonNull
+    public abstract Task<T> addOnFailureListener(OnFailureListener listener);
 }
