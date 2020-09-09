@@ -15,6 +15,7 @@ import androidx.annotation.NonNull;
  */
 @Deprecated
 public abstract class TaskAutorunOnceListenersThere<T> extends Task<T> {
+    // Set to true, once the task starts running, but never set to false again.
     private boolean runInvoked = false;
     private OnSuccessListener<? super T> listenerSuccess;
     private OnFailureListener listenerFailure;
@@ -46,10 +47,9 @@ public abstract class TaskAutorunOnceListenersThere<T> extends Task<T> {
     @Override
     public boolean isSuccessful() {
         // Doing legacy non-implementations a favor.
-        return true;
+        return runInvoked;
     }
 
-    // Set to true, once the task starts running, but never set to false again.
     @NonNull
     @Override
     public final Task<T> addOnSuccessListener(OnSuccessListener<? super T> listener) {
