@@ -13,7 +13,15 @@ import java.util.concurrent.FutureTask;
 final class ExecutorTask<T> extends Task<T> {
 
     private final FutureTask<T> task;
+    /**
+     * Contains all listeners to be called on success. Access should be synchronized by using the
+     * ExecutorTask object as a lock.
+     */
     private final List<OnSuccessListener<? super T>> successListeners;
+    /**
+     * Contains all listeners to be called on failure. Access should be synchronized by using the
+     * ExecutorTask object as a lock.
+     */
     private final List<OnFailureListener> failureListeners;
 
     ExecutorTask(@NonNull Executor executor, @NonNull Callable<T> callable) {
@@ -34,6 +42,7 @@ final class ExecutorTask<T> extends Task<T> {
     public Task<T> addOnSuccessListener(OnSuccessListener<? super T> listener) {
         synchronized (this) {
             if (isSuccessful()) {
+                // Call listener immediately, no need to add it to the list
                 listener.onSuccess(getResult());
             } else if (!isComplete()) {
                 successListeners.add(listener);
@@ -49,6 +58,7 @@ final class ExecutorTask<T> extends Task<T> {
             if (!isComplete()) {
                 failureListeners.add(listener);
             } else if (!isSuccessful()) {
+                // Call listener immediately, no need to add it to the list
                 listener.onFailure(getException());
             }
         }
@@ -126,12 +136,14 @@ final class ExecutorTask<T> extends Task<T> {
                 for (OnSuccessListener<? super T> listener : successListeners) {
                     mainExecutor.execute(() -> listener.onSuccess(result));
                 }
+                // The listeners won't be called again, so we can clear the list.
                 successListeners.clear();
             } else {
                 Exception exception = getException();
                 for (OnFailureListener listener : failureListeners) {
                     mainExecutor.execute(() -> listener.onFailure(exception));
                 }
+                // The listeners won't be called again, so we can clear the list.
                 failureListeners.clear();
             }
         }
