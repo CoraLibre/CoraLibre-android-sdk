@@ -40,11 +40,8 @@ public class ResultTaskTest {
 
     @Test
     public void nonnullSingleSuccessListenerCalled() throws InterruptedException {
-        String value = AsyncTestUtil.waitUntilSet((result, continuation) -> {
-            stringTask.addOnSuccessListener((s) -> {
-                result.set(s);
-                continuation.run();
-            });
+        String value = AsyncTestUtil.waitUntilSet((result) -> {
+            stringTask.addOnSuccessListener((s) -> result.set(s));
         });
 
         assertEquals(TEST_STRING, value);
@@ -52,11 +49,8 @@ public class ResultTaskTest {
 
     @Test
     public void nullSingleSuccessListenerCalled() throws InterruptedException {
-        Void value = AsyncTestUtil.waitUntilSet((result, continuation) -> {
-            nullTask.addOnSuccessListener((s) -> {
-                result.set(s);
-                continuation.run();
-            });
+        Void value = AsyncTestUtil.waitUntilSet((result) -> {
+            nullTask.addOnSuccessListener((s) -> result.set(s));
         });
 
         assertNull(value);
@@ -64,11 +58,8 @@ public class ResultTaskTest {
 
     @Test
     public void successListenerCalledOnMainThread() throws InterruptedException {
-        Thread executingThread = AsyncTestUtil.waitUntilSet((result, continuation) -> {
-            stringTask.addOnSuccessListener((s) -> {
-                result.set(Thread.currentThread());
-                continuation.run();
-            });
+        Thread executingThread = AsyncTestUtil.waitUntilSet((result) -> {
+            stringTask.addOnSuccessListener((s) -> result.set(Thread.currentThread()));
         });
 
         assertEquals(Looper.getMainLooper().getThread(), executingThread);
@@ -77,11 +68,8 @@ public class ResultTaskTest {
     @Test
     public void failureListenerNotCalled() throws InterruptedException {
         expected.expect(InterruptedException.class);
-        AsyncTestUtil.waitUntilSet((result, continuation) -> {
-            stringTask.addOnFailureListener((e) -> {
-                result.set(e);
-                continuation.run();
-            });
+        AsyncTestUtil.waitUntilSet((result) -> {
+            stringTask.addOnFailureListener((e) -> result.set(e));
         });
     }
 }

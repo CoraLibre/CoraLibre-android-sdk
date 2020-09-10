@@ -14,11 +14,8 @@ public class TaskExecutorsTest {
     @Test
     public void executedOnMainThread() throws InterruptedException {
         Executor executor = TaskExecutors.MAIN_THREAD;
-        Thread executorThread = AsyncTestUtil.waitUntilSet((result, continuation) -> {
-            executor.execute(() -> {
-                result.set(Thread.currentThread());
-                continuation.run();
-            });
+        Thread executorThread = AsyncTestUtil.waitUntilSet((result) -> {
+            executor.execute(() -> result.set(Thread.currentThread()));
         });
 
         assertEquals(Looper.getMainLooper().getThread(), executorThread);
