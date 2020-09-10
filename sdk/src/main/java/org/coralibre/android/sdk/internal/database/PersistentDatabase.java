@@ -5,9 +5,9 @@ import android.content.Context;
 import androidx.annotation.NonNull;
 import androidx.room.Room;
 
-import org.coralibre.android.sdk.internal.crypto.ppcp.CryptoModule;
-import org.coralibre.android.sdk.internal.crypto.ppcp.ENNumber;
-import org.coralibre.android.sdk.internal.crypto.ppcp.TemporaryExposureKey;
+import org.coralibre.android.sdk.internal.crypto.CryptoModule;
+import org.coralibre.android.sdk.internal.crypto.ENNumber;
+import org.coralibre.android.sdk.internal.crypto.TemporaryExposureKey;
 import org.coralibre.android.sdk.internal.database.model.CapturedData;
 import org.coralibre.android.sdk.internal.database.model.GeneratedTEK;
 import org.coralibre.android.sdk.internal.database.model.IntervalOfCapturedData;

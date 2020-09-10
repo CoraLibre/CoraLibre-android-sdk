@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: MPL-2.0
  */
-package org.coralibre.android.sdk.internal;
+package org.coralibre.android.sdk.internal.error.old;
 
 import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
@@ -16,15 +16,16 @@ import android.bluetooth.le.ScanCallback;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.PowerManager;
+
 import androidx.core.content.ContextCompat;
+
+import org.coralibre.android.sdk.internal.bluetooth.BluetoothServiceStatus;
+import org.coralibre.android.sdk.internal.util.LocationServiceUtil;
 
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.coralibre.android.sdk.TracingStatus.ErrorState;
-import org.coralibre.android.sdk.internal.bluetooth.BluetoothServiceStatus;
-import org.coralibre.android.sdk.internal.util.LocationServiceUtil;
 
 public class ErrorHelper {
 

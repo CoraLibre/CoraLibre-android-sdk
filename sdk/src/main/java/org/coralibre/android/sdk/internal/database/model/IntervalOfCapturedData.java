@@ -1,6 +1,6 @@
 package org.coralibre.android.sdk.internal.database.model;
 
-import org.coralibre.android.sdk.internal.crypto.ppcp.ENNumber;
+import org.coralibre.android.sdk.internal.crypto.ENNumber;
 
 import java.util.List;
 

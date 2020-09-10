@@ -3,16 +3,6 @@ package org.coralibre.android.sdk.internal.crypto;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
 
-import org.coralibre.android.sdk.internal.crypto.ppcp.AssociatedEncryptedMetadata;
-import org.coralibre.android.sdk.internal.crypto.ppcp.AssociatedEncryptedMetadataKey;
-import org.coralibre.android.sdk.internal.crypto.ppcp.AssociatedMetadata;
-import org.coralibre.android.sdk.internal.crypto.ppcp.BluetoothPayload;
-import org.coralibre.android.sdk.internal.crypto.ppcp.CryptoModule;
-import org.coralibre.android.sdk.internal.crypto.ppcp.ENNumber;
-import org.coralibre.android.sdk.internal.crypto.ppcp.PaddedData;
-import org.coralibre.android.sdk.internal.crypto.ppcp.RollingProximityIdentifier;
-import org.coralibre.android.sdk.internal.crypto.ppcp.RollingProximityIdentifierKey;
-import org.coralibre.android.sdk.internal.crypto.ppcp.TemporaryExposureKey;
 import org.coralibre.android.sdk.internal.database.Database;
 import org.coralibre.android.sdk.internal.database.DatabaseAccess;
 import org.coralibre.android.sdk.internal.database.model.GeneratedTEK;
@@ -27,9 +17,8 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 
-import static org.coralibre.android.sdk.internal.crypto.ppcp.AssociatedMetadata.AEM_LENGTH;
-import static org.coralibre.android.sdk.internal.crypto.ppcp.RollingProximityIdentifier.RPI_LENGTH;
-import static org.hamcrest.Matchers.not;
+import static org.coralibre.android.sdk.internal.crypto.AssociatedMetadata.AEM_LENGTH;
+import static org.coralibre.android.sdk.internal.crypto.RollingProximityIdentifier.RPI_LENGTH;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -140,7 +129,7 @@ public class CryptoModuleTests {
 
 
     private static CryptoModule getMockedTimeCryptoModule(Database db, long ennumber) throws Exception {
-        Class cryptoModuleClass = Class.forName("org.coralibre.android.sdk.internal.crypto.ppcp.CryptoModule");
+        Class cryptoModuleClass = Class.forName("org.coralibre.android.sdk.internal.crypto.CryptoModule");
         Constructor<CryptoModule>  cryptoModuleConstructor = cryptoModuleClass.getDeclaredConstructor(Database.class, ENNumber.class);
         cryptoModuleConstructor.setAccessible(true);
         return cryptoModuleConstructor.newInstance(db, new ENNumber(ennumber));

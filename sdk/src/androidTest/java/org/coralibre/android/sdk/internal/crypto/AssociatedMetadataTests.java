@@ -2,7 +2,6 @@ package org.coralibre.android.sdk.internal.crypto;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
-import org.coralibre.android.sdk.internal.crypto.ppcp.AssociatedMetadata;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 

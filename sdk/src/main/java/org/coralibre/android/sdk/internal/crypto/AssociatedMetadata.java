@@ -1,6 +1,4 @@
-package org.coralibre.android.sdk.internal.crypto.ppcp;
-
-import android.util.Log;
+package org.coralibre.android.sdk.internal.crypto;
 
 import java.security.InvalidParameterException;
 

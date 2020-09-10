@@ -1,4 +1,4 @@
-package org.coralibre.android.sdk.internal.crypto.ppcp;
+package org.coralibre.android.sdk.internal.crypto;
 
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidParameterException;

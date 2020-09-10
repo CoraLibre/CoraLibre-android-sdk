@@ -6,7 +6,7 @@ import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 
-import org.coralibre.android.sdk.internal.crypto.ppcp.ENNumber;
+import org.coralibre.android.sdk.internal.crypto.ENNumber;
 import org.coralibre.android.sdk.internal.database.model.entity.EntityGeneratedTEK;
 
 import java.util.List;

@@ -12,14 +12,12 @@ package org.coralibre.android.sdk;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.util.Log;
 
 import androidx.core.content.ContextCompat;
 
 import org.coralibre.android.sdk.internal.AppConfigManager;
 import org.coralibre.android.sdk.internal.BroadcastHelper;
 import org.coralibre.android.sdk.internal.TracingService;
-import org.coralibre.android.sdk.internal.crypto.CryptoModule;
 import org.coralibre.android.sdk.internal.database.DatabaseAccess;
 import org.coralibre.android.sdk.internal.util.ProcessUtil;
 
@@ -27,7 +25,7 @@ import java.security.PublicKey;
 
 public class PPCP {
 
-	private static final String TAG = "DP3T Interface";
+	private static final String TAG = "PPCP Interface";
 
 	public static final String UPDATE_INTENT_ACTION = "org.coralibre.android.sdk.UPDATE_ACTION";
 
@@ -110,14 +108,6 @@ public class PPCP {
 		BroadcastHelper.sendUpdateBroadcast(context);
 	}
 
-	public static void setMatchingParameters(Context context, float contactAttenuationThreshold, int numberOfWindowsForExposure) {
-		checkInit();
-
-		AppConfigManager appConfigManager = AppConfigManager.getInstance(context);
-		appConfigManager.setContactAttenuationThreshold(contactAttenuationThreshold);
-		appConfigManager.setNumberOfWindowsForExposure(numberOfWindowsForExposure);
-	}
-
 	public static IntentFilter getUpdateIntentFilter() {
 		return new IntentFilter(PPCP.UPDATE_INTENT_ACTION);
 	}
@@ -129,7 +119,6 @@ public class PPCP {
 			throw new IllegalStateException("Tracking must be stopped for clearing the local data");
 		}
 
-		CryptoModule.getInstance(context).reset();
 		appConfigManager.clearPreferences();
 
 		DatabaseAccess.getDefaultDatabaseInstance().clearAllData();

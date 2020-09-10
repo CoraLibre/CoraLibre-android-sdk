@@ -4,23 +4,19 @@ import android.util.Pair;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
-import org.coralibre.android.sdk.internal.crypto.ppcp.ENNumber;
-import org.coralibre.android.sdk.internal.crypto.ppcp.ExposeChecker;
-import org.coralibre.android.sdk.internal.crypto.ppcp.RollingProximityIdentifier;
-import org.coralibre.android.sdk.internal.crypto.ppcp.TemporaryExposureKey;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import static org.coralibre.android.sdk.internal.crypto.ppcp.RollingProximityIdentifier.RPI_LENGTH;
-import static org.coralibre.android.sdk.internal.crypto.ppcp.TemporaryExposureKey.TEK_LENGTH;
-import static org.coralibre.android.sdk.internal.crypto.ppcp.TemporaryExposureKey.TEK_ROLLING_PERIOD;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import static org.coralibre.android.sdk.internal.crypto.RollingProximityIdentifier.RPI_LENGTH;
+import static org.coralibre.android.sdk.internal.crypto.TemporaryExposureKey.TEK_LENGTH;
+import static org.coralibre.android.sdk.internal.crypto.TemporaryExposureKey.TEK_ROLLING_PERIOD;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 
 @RunWith(AndroidJUnit4.class)
 public class ExposeCheckerTests {

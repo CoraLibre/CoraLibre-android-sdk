@@ -12,14 +12,5 @@
 <full-backup-content>
 	<exclude
 		domain="sharedpref"
-		path="dp3t_sdk_preferences.xml" />
-	<exclude
-		domain="sharedpref"
-		path="dp3t_store.xml" />
-	<exclude
-		domain="database"
-		path="dp3t_sdk.db" />
-	<exclude
-		domain="database"
-		path="dp3t_sdk_log.db" />
+		path="coralibre_sdk_preferences.xml" />
 </full-backup-content>

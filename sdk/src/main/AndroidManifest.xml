@@ -31,7 +31,7 @@
 		android:name="android.hardware.location"
 		android:required="false" />
 
-	<application android:fullBackupContent="@xml/dp3t_sdk_backup_rules">
+	<application android:fullBackupContent="@xml/coralibre_sdk_backup_rules">
 
 		<service
 			android:name="org.coralibre.android.sdk.internal.TracingService"

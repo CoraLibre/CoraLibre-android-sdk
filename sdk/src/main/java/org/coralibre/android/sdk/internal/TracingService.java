@@ -9,7 +9,12 @@
  */
 package org.coralibre.android.sdk.internal;
 
-import android.app.*;
+import android.app.AlarmManager;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -26,12 +31,8 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 
-import java.util.Collection;
-
 import org.coralibre.android.sdk.BuildConfig;
-import org.coralibre.android.sdk.PPCP;
 import org.coralibre.android.sdk.R;
-import org.coralibre.android.sdk.TracingStatus;
 import org.coralibre.android.sdk.internal.bluetooth.BleClient;
 import org.coralibre.android.sdk.internal.bluetooth.BleServer;
 import org.coralibre.android.sdk.internal.bluetooth.BluetoothServiceStatus;
@@ -198,16 +199,6 @@ public class TracingService extends Service {
                 .build();
 
         return builder.build();
-    }
-
-    private String getNotificationErrorText(Collection<TracingStatus.ErrorState> errors) {
-        StringBuilder sb = new StringBuilder(getString(R.string.ppcp_sdk_service_notification_errors)).append("\n");
-        String sep = "";
-        for (TracingStatus.ErrorState error : errors) {
-            sb.append(sep).append(getString(error.getErrorString()));
-            sep = ", ";
-        }
-        return sb.toString();
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)

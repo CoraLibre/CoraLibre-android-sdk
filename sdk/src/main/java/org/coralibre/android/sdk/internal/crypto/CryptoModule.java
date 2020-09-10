@@ -1,299 +1,246 @@
-/*
- * Copyright (c) 2020 Ubique Innovation AG <https://www.ubique.ch>
- *
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at https://mozilla.org/MPL/2.0/.
- *
- * SPDX-License-Identifier: MPL-2.0
- */
 package org.coralibre.android.sdk.internal.crypto;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.util.Pair;
 
-import androidx.security.crypto.EncryptedSharedPreferences;
-import androidx.security.crypto.MasterKeys;
+import com.google.crypto.tink.subtle.Hkdf;
 
-import org.coralibre.android.sdk.internal.misc.Contact;
-import org.coralibre.android.sdk.internal.util.DayDate;
-import org.coralibre.android.sdk.internal.util.Json;
+import org.coralibre.android.sdk.internal.database.Database;
+import org.coralibre.android.sdk.internal.database.DatabaseAccess;
+import org.coralibre.android.sdk.internal.database.model.GeneratedTEK;
 
-import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
-import javax.crypto.Mac;
-import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
-import static org.coralibre.android.sdk.internal.util.Base64Util.toBase64;
 
 public class CryptoModule {
+    private static final String TAG = CryptoModule.class.getName();
 
-	public static final int EPHID_LENGTH = 16;
+    public static final int TEK_MAX_STORE_TIME = 14; //defined as days
+    public static final int FUZZY_COMPARE_TIME_DEVIATION = 12; //defined int 10min units
+    public static final String RPIK_INFO = "EN-RPIK";
+    public static final String AEMK_INFO = "EN-AEMK";
 
-	public static final int NUMBER_OF_DAYS_TO_KEEP_DATA = 21;
-	public static final int NUMBER_OF_DAYS_TO_KEEP_EXPOSED_DAYS = 10;
-	private static final int NUMBER_OF_EPOCHS_PER_DAY = 24 * 4;
-	public static final int MILLISECONDS_PER_EPOCH = 24 * 60 * 60 * 1000 / NUMBER_OF_EPOCHS_PER_DAY;
-	private static final byte[] BROADCAST_KEY = "broadcast key".getBytes();
-
-	private static final String KEY_SK_LIST_JSON = "SK_LIST_JSON";
-	private static final String KEY_EPHIDS_TODAY_JSON = "EPHIDS_TODAY_JSON";
-
-	private static CryptoModule instance;
-
-	private SharedPreferences esp;
-
-	public static CryptoModule getInstance(Context context) {
-		if (instance == null) {
-			instance = new CryptoModule();
-			try {
-				String KEY_ALIAS = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC);
-				instance.esp = EncryptedSharedPreferences.create("dp3t_store",
-						KEY_ALIAS,
-						context,
-						EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-						EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM);
-			} catch (GeneralSecurityException | IOException ex) {
-				ex.printStackTrace();
-			}
-		}
-		return instance;
-	}
-
-	public boolean init() {
-		try {
-			String stringKey = esp.getString(KEY_SK_LIST_JSON, null);
-			if (stringKey != null) return true; //key already exists
-			SKList skList = new SKList();
-			skList.add(Pair.create(new DayDate(System.currentTimeMillis()), getNewRandomKey()));
-			storeSKList(skList);
-			return true;
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
-		return false;
-	}
-
-	public byte[] getNewRandomKey() throws NoSuchAlgorithmException {
-		KeyGenerator keyGenerator = KeyGenerator.getInstance("HmacSHA256");
-		SecretKey secretKey = keyGenerator.generateKey();
-		return secretKey.getEncoded();
-	}
-
-	protected SKList getSKList() {
-		String skListJson = esp.getString(KEY_SK_LIST_JSON, null);
-		return Json.safeFromJson(skListJson, SKList.class, SKList::new);
-	}
-
-	private void storeSKList(SKList skList) {
-		esp.edit().putString(KEY_SK_LIST_JSON, Json.toJson(skList)).apply();
-	}
-
-	protected byte[] getSKt1(byte[] SKt0) {
-		try {
-			MessageDigest digest = MessageDigest.getInstance("SHA-256");
-			byte[] SKt1 = digest.digest(SKt0);
-			return SKt1;
-		} catch (NoSuchAlgorithmException e) {
-			throw new IllegalStateException("SHA-256 algorithm must be present!");
-		}
-	}
-
-	private void rotateSK() {
-		SKList skList = getSKList();
-		DayDate nextDay = skList.get(0).first.getNextDay();
-		byte[] SKt1 = getSKt1(skList.get(0).second);
-		skList.add(0, Pair.create(nextDay, SKt1));
-		List<Pair<DayDate, byte[]>> subList = skList.subList(0, Math.min(NUMBER_OF_DAYS_TO_KEEP_DATA, skList.size()));
-		skList = new SKList();
-		skList.addAll(subList);
-		storeSKList(skList);
-	}
-
-	protected byte[] getCurrentSK(DayDate day) {
-		SKList SKList = getSKList();
-		while (SKList.get(0).first.isBefore(day)) {
-			rotateSK();
-			SKList = getSKList();
-		}
-		assert SKList.get(0).first.equals(day);
-		return SKList.get(0).second;
-	}
-
-	protected List<EphId> createEphIds(byte[] SK, boolean shuffle) {
-		try {
-			Mac mac = Mac.getInstance("HmacSHA256");
-			mac.init(new SecretKeySpec(SK, "HmacSHA256"));
-			mac.update(BROADCAST_KEY);
-			byte[] prf = mac.doFinal();
-
-			//generate EphIDs
-			SecretKeySpec keySpec = new SecretKeySpec(prf, "AES");
-			Cipher cipher = Cipher.getInstance("AES/CTR/NoPadding");
-			byte[] counter = new byte[16];
-			cipher.init(Cipher.ENCRYPT_MODE, keySpec, new IvParameterSpec(counter));
-			ArrayList<EphId> ephIds = new ArrayList<>();
-			byte[] emptyArray = new byte[EPHID_LENGTH];
-			for (int i = 0; i < NUMBER_OF_EPOCHS_PER_DAY; i++) {
-				ephIds.add(new EphId(cipher.update(emptyArray)));
-			}
-			if (shuffle) {
-				Collections.shuffle(ephIds, new SecureRandom());
-			}
-			return ephIds;
-		} catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException e) {
-			throw new IllegalStateException("HmacSHA256 and AES algorithms must be present!", e);
-		}
-	}
-
-	private static int getEpochCounter(long time) {
-		DayDate day = new DayDate(time);
-		return (int) (time - day.getStartOfDayTimestamp()) / MILLISECONDS_PER_EPOCH;
-	}
-
-	public long getCurrentEpochStart() {
-		long now = System.currentTimeMillis();
-		return getEpochStart(now);
-	}
-
-	public static long getEpochStart(long time) {
-		DayDate currentDay = new DayDate(time);
-		return currentDay.getStartOfDayTimestamp() + getEpochCounter(time) * MILLISECONDS_PER_EPOCH;
-	}
-
-	private EphIdsForDay getStoredEphIdsForToday() {
-		String ephIdsJson = esp.getString(KEY_EPHIDS_TODAY_JSON, "null");
-		return Json.safeFromJson(ephIdsJson, EphIdsForDay.class, () -> null);
-	}
-
-	private void storeEphIdsForToday(EphIdsForDay ephIdsForDay) {
-		esp.edit().putString(KEY_EPHIDS_TODAY_JSON, Json.toJson(ephIdsForDay)).apply();
-	}
-
-	protected List<EphId> getEphIdsForToday(DayDate currentDay) {
-		EphIdsForDay ephIdsForDay = getStoredEphIdsForToday();
-		if (ephIdsForDay == null || !ephIdsForDay.dayDate.equals(currentDay)) {
-			byte[] SK = getCurrentSK(currentDay);
-			ephIdsForDay = new EphIdsForDay();
-			ephIdsForDay.dayDate = currentDay;
-			ephIdsForDay.ephIds = createEphIds(SK, true);
-			storeEphIdsForToday(ephIdsForDay);
-		}
-		return ephIdsForDay.ephIds;
-	}
-
-	public EphId getCurrentEphId() {
-		long now = System.currentTimeMillis();
-		DayDate currentDay = new DayDate(now);
-		return getEphIdsForToday(currentDay).get(getEpochCounter(now));
-	}
-
-	public void checkContacts(byte[] sk, long onsetDate, long bucketTime, GetContactsCallback contactCallback,
-			MatchCallback matchCallback) {
-		DayDate dayToTest = new DayDate(onsetDate);
-		byte[] skForDay = sk;
-		while (dayToTest.isBeforeOrEquals(bucketTime)) {
-			long contactTimeFrom = dayToTest.getStartOfDayTimestamp();
-			long contactTimeUntil = Math.min(dayToTest.getNextDay().getStartOfDayTimestamp(), bucketTime);
-			List<Contact> contactsOnDay = contactCallback.getContacts(contactTimeFrom, contactTimeUntil);
-			if (contactsOnDay.size() > 0) {
-				//generate all ephIds for day
-				HashSet<EphId> ephIdHashSet = new HashSet<>(createEphIds(skForDay, false));
-
-				//check all contacts if they match any of the ephIds
-				for (Contact contact : contactsOnDay) {
-					if (ephIdHashSet.contains(contact.getEphId())) {
-						matchCallback.contactMatched(contact);
-					}
-				}
-			}
-
-			//update day to next day and rotate sk accordingly
-			dayToTest = dayToTest.getNextDay();
-			skForDay = getSKt1(skForDay);
-		}
-	}
-
-	public ExposeeData getSecretKeyForPublishing(DayDate date) {
-		// TODO This method will probably be required in a different form
-		SKList skList = getSKList();
-		for (Pair<DayDate, byte[]> daySKPair : skList) {
-			if (daySKPair.first.equals(date)) {
-				return new ExposeeData(
-						toBase64(daySKPair.second),
-						daySKPair.first.getStartOfDayTimestamp());
-			}
-		}
-		if (date.isBefore(skList.get(skList.size() - 1).first)) {
-			return new ExposeeData(
-					toBase64(skList.get(skList.size() - 1).second),
-					skList.get(skList.size() - 1).first.getStartOfDayTimestamp()					);
-		}
-		return null;
-	}
-
-	@SuppressLint("ApplySharedPref")
-	public void reset() {
-		try {
-			esp.edit().clear().commit();
-			init();
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
-	}
-
-	public interface GetContactsCallback {
-		/**
-		 * @param timeFrom timestamp inclusive
-		 * @param timeUntil timestamp exclusive
-		 */
-		List<Contact> getContacts(long timeFrom, long timeUntil);
-
-	}
+    private static CryptoModule instance;
+    private ENNumber currentTekDay = new ENNumber(0);
+    private RollingProximityIdentifierKey currentRPIK;
+    private AssociatedEncryptedMetadataKey currentAEMK;
+    private BluetoothPayload currentPayload = null;
+    private AssociatedMetadata metadata = null;
+    private Database database;
 
 
-	public interface MatchCallback {
+    private boolean testMode;
+    private ENNumber currentIntervalForTesting;
 
-		void contactMatched(Contact contact);
+    public static CryptoModule getInstance() {
+        //TODO: use proper factory class
+        if (instance == null) {
+            instance = new CryptoModule(DatabaseAccess.getDefaultDatabaseInstance());
+        }
+        return instance;
+    }
 
-	}
+    public CryptoModule(Database db) {
+        testMode = false; // remove this line and everything goes BOOM!!!
+        //TODO: Use proper dependency injection
+        init(db, getCurrentInterval());
+    }
+
+    /**
+     * If you call this method your warranty will be void.
+     * This Construction is only supposed to be used during testing. If app is compiled
+     * for production purpose this should be avoided.
+     **/
+    private CryptoModule(Database db, ENNumber interval) {
+        currentIntervalForTesting = interval;
+        testMode = true;
+        init(db, interval);
+    }
+
+    //TODO: Use a factory for getting a crypto module in order to do proper dependency injection.
+    private void init(Database db, ENNumber currentInterval) {
+        try {
+            database = db;
+
+            ENNumber intervalNumberMidnight = TemporaryExposureKey.getMidnight(currentInterval);
+            if (! database.hasTEKForInterval(intervalNumberMidnight)) {
+                updateTEK();
+            } else {
+                GeneratedTEK rawTek = database.getGeneratedTEK(intervalNumberMidnight);
+                TemporaryExposureKey tek = new TemporaryExposureKey(rawTek.getInterval(), rawTek.getKey());
+                currentTekDay = tek.getInterval();
+                currentRPIK = generateRPIK(tek);
+                currentAEMK = generateAEMK(tek);
+            }
+        } catch (Exception e) {
+            throw new CryptoException("could not crate new CryptoModule instance", e);
+        }
+    }
+
+    public static ENNumber getCurrentInterval() {
+        return new ENNumber(System.currentTimeMillis() / 1000L, true);
+    }
+
+    private TemporaryExposureKey getNewRandomTEK() {
+        try {
+            KeyGenerator keyGenerator = KeyGenerator.getInstance("HmacSHA256");
+            SecretKey secretKey = keyGenerator.generateKey();
+            ENNumber now = testMode ? currentIntervalForTesting : getCurrentInterval();
+            return new TemporaryExposureKey(now, secretKey.getEncoded());
+        } catch (Exception e) {
+            throw new CryptoException(e);
+        }
+    }
+
+    private static byte[] generateHKDFBytes(TemporaryExposureKey tek, byte[] info, int length) {
+        try {
+            return Hkdf.computeHkdf(
+                    "HMACSHA256",
+                    tek.getKey(),
+                    null,
+                    info,
+                    length
+            );
+        } catch (GeneralSecurityException e) {
+            // Could only happen if MAC algorithm isn't supported or size is too big,
+            // both of which shouldn't ever happen here.
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static RollingProximityIdentifierKey generateRPIK(TemporaryExposureKey tek) {
+        byte[] rawRPIK = generateHKDFBytes(
+                tek,
+                RPIK_INFO.getBytes(StandardCharsets.UTF_8),
+                RollingProximityIdentifierKey.RPIK_LENGTH
+        );
+        return new RollingProximityIdentifierKey(rawRPIK);
+    }
+
+    public static AssociatedEncryptedMetadataKey generateAEMK(TemporaryExposureKey tek) {
+        byte[] rawAEMK = generateHKDFBytes(
+                tek,
+                AEMK_INFO.getBytes(StandardCharsets.UTF_8),
+                AssociatedEncryptedMetadataKey.AEMK_LENGTH
+        );
+        return new AssociatedEncryptedMetadataKey(rawAEMK);
+    }
+
+    public RollingProximityIdentifier generateRPI(RollingProximityIdentifierKey rpik) {
+        return generateRPI(rpik, testMode ? currentIntervalForTesting : getCurrentInterval());
+    }
+
+    public static RollingProximityIdentifier generateRPI(RollingProximityIdentifierKey rpik,
+                                                         ENNumber interval) {
+        try {
+            SecretKeySpec keySpec = new SecretKeySpec(rpik.getKey(), "AES");
+            // normally ECB is a bad idea, but in this case we just want to encrypt a single block
+            @SuppressLint("GetInstance")
+            Cipher cipher = Cipher.getInstance("AES/ECB/NoPadding");
+            cipher.init(Cipher.ENCRYPT_MODE, keySpec);
+
+            PaddedData paddedData = new PaddedData(interval);
+            return new RollingProximityIdentifier(cipher.update(paddedData.getData()), interval);
+        } catch (Exception e) {
+            throw new CryptoException(e);
+        }
+    }
+
+    public static PaddedData decryptRPI(RollingProximityIdentifier rpi,
+                                        RollingProximityIdentifierKey rpik) {
+        try {
+            SecretKeySpec keySpec = new SecretKeySpec(rpik.getKey(), "AES");
+            // normally ECB is a bad idea, but in this case we just want to encrypt a single block
+            @SuppressLint("GetInstance")
+            Cipher cipher = Cipher.getInstance("AES/ECB/NoPadding");
+            cipher.init(Cipher.DECRYPT_MODE, keySpec);
+
+            return new PaddedData(cipher.update(rpi.getData()));
+        } catch (Exception e) {
+            throw new CryptoException(e);
+        }
+    }
+
+    public static AssociatedEncryptedMetadata encryptAM(AssociatedMetadata am,
+                                                        RollingProximityIdentifier rpi,
+                                                        AssociatedEncryptedMetadataKey aemk) {
+        try {
+            SecretKey keySpec = new SecretKeySpec(aemk.getKey(), "AES");
+            IvParameterSpec ivSpec = new IvParameterSpec(rpi.getData());
+            Cipher cipher = Cipher.getInstance("AES/CTR/NoPadding");
+            cipher.init(Cipher.ENCRYPT_MODE, keySpec, ivSpec);
+
+            return new AssociatedEncryptedMetadata(cipher.update(am.getData()));
+        } catch (Exception e) {
+            throw new CryptoException(e);
+        }
+    }
+
+    public static AssociatedMetadata decryptAEM(AssociatedEncryptedMetadata aem,
+                                                RollingProximityIdentifier rpi,
+                                                AssociatedEncryptedMetadataKey aemk) {
+        try {
+            SecretKey keySpec = new SecretKeySpec(aemk.getKey(), "AES");
+            IvParameterSpec ivSpec = new IvParameterSpec(rpi.getData());
+            Cipher cipher = Cipher.getInstance("AES/CTR/NoPadding");
+            cipher.init(Cipher.DECRYPT_MODE, keySpec, ivSpec);
+
+            return new AssociatedMetadata(cipher.update(aem.getData()));
+        } catch (Exception e) {
+            throw new CryptoException(e);
+        }
+    }
+
+    public static AssociatedMetadata decryptAEM(AssociatedEncryptedMetadata aem,
+                                                RollingProximityIdentifier rpi,
+                                                TemporaryExposureKey tek) {
+        return decryptAEM(aem, rpi, generateAEMK(tek));
+    }
+
+    public void updateTEK() {
+        System.out.println(TemporaryExposureKey.getMidnight(testMode ? currentIntervalForTesting : getCurrentInterval()).get());
+        if (!currentTekDay.equals(
+                TemporaryExposureKey.getMidnight(testMode ? currentIntervalForTesting : getCurrentInterval()))) {
+            TemporaryExposureKey currentTek = getNewRandomTEK();
+            currentTekDay = currentTek.getInterval();
+            currentRPIK = generateRPIK(currentTek);
+            currentAEMK = generateAEMK(currentTek);
+
+            Database database = DatabaseAccess.getDefaultDatabaseInstance();
+            database.addGeneratedTEK(new GeneratedTEK(currentTekDay, currentTek.getKey()));
+        }
+    }
+
+    public void renewPayload() {
+        if (metadata == null)
+            throw new CryptoException("Associated metadata has not yet been set.");
+
+        if (currentPayload == null
+                || !currentPayload.getInterval().equals(testMode ? currentIntervalForTesting : getCurrentInterval())){
+            updateTEK();
+            RollingProximityIdentifier currentRPI = generateRPI(currentRPIK, testMode ? currentIntervalForTesting : getCurrentInterval());
+            AssociatedEncryptedMetadata currentAEM = encryptAM(metadata, currentRPI, currentAEMK);
+            currentPayload = new BluetoothPayload(currentRPI, currentAEM);
+        }
+    }
+
+    public BluetoothPayload getCurrentPayload() {
+        if (currentPayload == null)
+            throw new CryptoException("You need to run renewPayload() before calling getCurrentPayload() for the first time.");
+        return currentPayload;
+    }
+
+    public AssociatedMetadata getMetadata() {
+        return metadata;
+    }
+
+    public void setMetadata(AssociatedMetadata metadata) {
+        this.metadata = metadata;
+    }
 }
-
-/**
- * Temporary data structure until the fate of getSecretKeyForPublishing is decided
- */
-class ExposeeData {
-	private final String key;
-	private final long keyDate;
-
-	public ExposeeData(String key, long keyDate) {
-		this.key = key;
-		this.keyDate = keyDate;
-	}
-
-	public String getKey() {
-		return key;
-	}
-
-	public long getKeyDate() {
-		return keyDate;
-	}
-}
-
