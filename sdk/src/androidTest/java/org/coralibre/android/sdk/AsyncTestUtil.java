@@ -32,6 +32,9 @@ public final class AsyncTestUtil {
             if (!result.compareAndSet(null, t)) {
                 throw new IllegalStateException("May only set result once!");
             }
+            // We do this in a separate thread because we want to make sure the outer thread is
+            // already waiting when we call signal(), but the lock call would immediately work if
+            // this lambda is called on the same thread, as the lock is reentrant.
             new Thread(() -> {
                 lock.lock();
                 try {

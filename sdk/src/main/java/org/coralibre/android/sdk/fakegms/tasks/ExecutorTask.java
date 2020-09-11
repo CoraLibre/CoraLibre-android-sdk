@@ -43,7 +43,7 @@ final class ExecutorTask<T> extends Task<T> {
         synchronized (this) {
             if (isSuccessful()) {
                 // Call listener immediately, no need to add it to the list
-                listener.onSuccess(getResult());
+                TaskExecutors.MAIN_THREAD.execute(() -> listener.onSuccess(getResult()));
             } else if (!isComplete()) {
                 successListeners.add(listener);
             }
@@ -59,7 +59,7 @@ final class ExecutorTask<T> extends Task<T> {
                 failureListeners.add(listener);
             } else if (!isSuccessful()) {
                 // Call listener immediately, no need to add it to the list
-                listener.onFailure(getException());
+                TaskExecutors.MAIN_THREAD.execute(() -> listener.onFailure(getException()));
             }
         }
 
