@@ -29,14 +29,6 @@ public interface ExposureNotificationClient {
     public static String ACTION_EXPOSURE_STATE_UPDATED
         = "org.coralibre.android.sdk.fakegms.nearby.exposurenotification.ACTION_EXPOSURE_STATE_UPDATED";
 
-    /**
-     * The returned Task object's addOnSuccessListener(...) AND addOnFailureListener(...)
-     * both MUST be called in order for the start() call to work as expected. Otherwise,
-     * the task wont be started.
-     * This is a workaround to be able to ensure, that the listeners have actually been set before
-     * the internal task action starts, which is required to ensure that the listeners have been
-     * set before the task action finishes. Also see the TaskAutostartEnService class.
-     */
     Task<Void> start();
 
     Task<Void> stop();
