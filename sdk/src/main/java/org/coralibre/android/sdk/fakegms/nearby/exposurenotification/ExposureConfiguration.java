@@ -1,5 +1,7 @@
 package org.coralibre.android.sdk.fakegms.nearby.exposurenotification;
 
+import android.os.Parcelable;
+
 import org.coralibre.android.sdk.internal.database.model.CapturedData;
 
 /**
@@ -99,7 +101,6 @@ public class ExposureConfiguration {
      * @see <a href="https://developer.apple.com/documentation/exposurenotification/enexposureconfiguration/3601128-attenuationdurationthresholds">documentation on developer.apple.com</a>
      */
     private final int[] durationAtAttenuationThresholds;
-
 
     private ExposureConfiguration(final int minimumRiskScore,
                                   final int[] attenuationScores,
