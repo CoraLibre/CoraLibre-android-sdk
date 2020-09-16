@@ -50,8 +50,12 @@ final class ExposureNotificationClientImpl implements ExposureNotificationClient
 
     @Override
     public Task<ExposureSummary> getExposureSummary(String token) {
-        // TODO: Implement!
-        return Tasks.forResult(null);
+        return Tasks.forResult(new ExposureSummary.ExposureSummaryBuilder()
+            .setAttenuationDurations(new int[]{0, 0, 0})
+            .setMatchedKeyCount(0)
+            .setMaximumRiskScore(0)
+            .setSummationRiskScore(0)
+            .build());
     }
 
     @Override
