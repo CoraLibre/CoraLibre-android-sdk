@@ -3,7 +3,7 @@ package org.coralibre.android.sdk.internal.database.model.entity;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
-import org.coralibre.android.sdk.internal.crypto.ENNumber;
+import org.coralibre.android.sdk.internal.crypto.ENInterval;
 import org.coralibre.android.sdk.internal.database.model.GeneratedTEK;
 
 
@@ -11,7 +11,7 @@ import org.coralibre.android.sdk.internal.database.model.GeneratedTEK;
 public class EntityGeneratedTEK {
 
     @PrimaryKey
-    public ENNumber interval;
+    public ENInterval interval;
 
     public byte[] key;
 

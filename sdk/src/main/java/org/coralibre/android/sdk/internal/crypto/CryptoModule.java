@@ -27,7 +27,7 @@ public class CryptoModule {
     public static final String AEMK_INFO = "EN-AEMK";
 
     private static CryptoModule instance;
-    private ENNumber currentTekDay = new ENNumber(0);
+    private ENInterval currentTekDay = new ENInterval(0);
     private RollingProximityIdentifierKey currentRPIK;
     private AssociatedEncryptedMetadataKey currentAEMK;
     private BluetoothPayload currentPayload = null;
@@ -36,7 +36,7 @@ public class CryptoModule {
 
 
     private boolean testMode;
-    private ENNumber currentIntervalForTesting;
+    private ENInterval currentIntervalForTesting;
 
     public static CryptoModule getInstance() {
         //TODO: use proper factory class
@@ -57,18 +57,18 @@ public class CryptoModule {
      * This Construction is only supposed to be used during testing. If app is compiled
      * for production purpose this should be avoided.
      **/
-    private CryptoModule(Database db, ENNumber interval) {
+    private CryptoModule(Database db, ENInterval interval) {
         currentIntervalForTesting = interval;
         testMode = true;
         init(db, interval);
     }
 
     //TODO: Use a factory for getting a crypto module in order to do proper dependency injection.
-    private void init(Database db, ENNumber currentInterval) {
+    private void init(Database db, ENInterval currentInterval) {
         try {
             database = db;
 
-            ENNumber intervalNumberMidnight = TemporaryExposureKey.getMidnight(currentInterval);
+            ENInterval intervalNumberMidnight = TemporaryExposureKey.getMidnight(currentInterval);
             if (! database.hasTEKForInterval(intervalNumberMidnight)) {
                 updateTEK();
             } else {
@@ -83,15 +83,15 @@ public class CryptoModule {
         }
     }
 
-    public static ENNumber getCurrentInterval() {
-        return new ENNumber(System.currentTimeMillis() / 1000L, true);
+    public static ENInterval getCurrentInterval() {
+        return new ENInterval(System.currentTimeMillis() / 1000L, true);
     }
 
     private TemporaryExposureKey getNewRandomTEK() {
         try {
             KeyGenerator keyGenerator = KeyGenerator.getInstance("HmacSHA256");
             SecretKey secretKey = keyGenerator.generateKey();
-            ENNumber now = testMode ? currentIntervalForTesting : getCurrentInterval();
+            ENInterval now = testMode ? currentIntervalForTesting : getCurrentInterval();
             return new TemporaryExposureKey(now, secretKey.getEncoded());
         } catch (Exception e) {
             throw new CryptoException(e);
@@ -137,7 +137,7 @@ public class CryptoModule {
     }
 
     public static RollingProximityIdentifier generateRPI(RollingProximityIdentifierKey rpik,
-                                                         ENNumber interval) {
+                                                         ENInterval interval) {
         try {
             SecretKeySpec keySpec = new SecretKeySpec(rpik.getKey(), "AES");
             // normally ECB is a bad idea, but in this case we just want to encrypt a single block

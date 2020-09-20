@@ -26,7 +26,7 @@ import org.coralibre.android.sdk.internal.AppConfigManager;
 import org.coralibre.android.sdk.internal.BroadcastHelper;
 import org.coralibre.android.sdk.internal.crypto.BluetoothPayload;
 import org.coralibre.android.sdk.internal.crypto.CryptoModule;
-import org.coralibre.android.sdk.internal.crypto.ENNumber;
+import org.coralibre.android.sdk.internal.crypto.ENInterval;
 import org.coralibre.android.sdk.internal.database.Database;
 import org.coralibre.android.sdk.internal.database.DatabaseAccess;
 import org.coralibre.android.sdk.internal.database.model.CapturedData;
@@ -149,7 +149,7 @@ public class BleClient {
     private void onDeviceFound(ScanResult scanResult) {
         try {
             long now = System.currentTimeMillis();
-            ENNumber currentInterval = CryptoModule.getCurrentInterval();
+            ENInterval currentInterval = CryptoModule.getCurrentInterval();
             BluetoothDevice bluetoothDevice = scanResult.getDevice();
             final String deviceAddr = bluetoothDevice.getAddress();
 

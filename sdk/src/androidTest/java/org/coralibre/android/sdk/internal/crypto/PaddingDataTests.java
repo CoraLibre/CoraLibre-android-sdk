@@ -12,7 +12,7 @@ import static org.junit.Assert.assertTrue;
 
 @RunWith(AndroidJUnit4.class)
 public class PaddingDataTests {
-    private static final ENNumber TIMESTAMP_1 = new ENNumber(0x12345678L);
+    private static final ENInterval TIMESTAMP_1 = new ENInterval(0x12345678L);
     private static final byte[] PADDED_DATA_1 = new byte[] {
             69, 78, 45, 82, 80, 73,
             0, 0, 0, 0, 0, 0,

@@ -1,7 +1,7 @@
 package org.coralibre.android.sdk.internal.database.model;
 
 
-import org.coralibre.android.sdk.internal.crypto.ENNumber;
+import org.coralibre.android.sdk.internal.crypto.ENInterval;
 
 public class CapturedData {
 
@@ -11,7 +11,10 @@ public class CapturedData {
      */
     private final long captureTimestamp;
 
-    private final ENNumber enNumber;
+    /**
+     * the 10-minute interval
+     */
+    private final ENInterval enInterval;
 
     /** in dB */
     private byte rssi;
@@ -21,7 +24,7 @@ public class CapturedData {
 
     public CapturedData(long captureTimestamp, byte rssi, byte[] payload) {
         this.captureTimestamp = captureTimestamp;
-        this.enNumber = new ENNumber(captureTimestamp, true);
+        this.enInterval = new ENInterval(captureTimestamp, true);
         this.rssi = rssi;
         this.payload = payload;
     }
@@ -30,8 +33,8 @@ public class CapturedData {
         return captureTimestamp;
     }
 
-    public ENNumber getEnNumber() {
-        return enNumber;
+    public ENInterval getEnInterval() {
+        return enInterval;
     }
 
     public byte getRssi() {

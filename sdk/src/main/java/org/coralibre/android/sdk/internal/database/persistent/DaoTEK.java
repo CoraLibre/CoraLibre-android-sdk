@@ -6,7 +6,7 @@ import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 
-import org.coralibre.android.sdk.internal.crypto.ENNumber;
+import org.coralibre.android.sdk.internal.crypto.ENInterval;
 import org.coralibre.android.sdk.internal.database.model.entity.EntityGeneratedTEK;
 
 import java.util.List;
@@ -27,7 +27,7 @@ public interface DaoTEK {
 
 
     @Query("SELECT * FROM EntityGeneratedTEK WHERE interval = :interval")
-    public List<EntityGeneratedTEK> getTekByEnNumber(ENNumber interval);
+    public List<EntityGeneratedTEK> getTekByEnNumber(ENInterval interval);
 
 
     @Query("DELETE FROM EntityGeneratedTEK")

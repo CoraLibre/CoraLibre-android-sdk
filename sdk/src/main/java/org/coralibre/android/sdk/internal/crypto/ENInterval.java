@@ -5,27 +5,27 @@ import java.nio.ByteOrder;
 import java.security.InvalidParameterException;
 import java.util.Objects;
 
-public class ENNumber {
+public class ENInterval {
     public static final long MAX_UINT_32 = 4294967295L;
-    public static final long UNIX_TIME_DEVIDER = 60*10; //10 minues
+    public static final long UNIX_TIME_DEVIDER = 60*10; //10 minutes
     public static final int LONG_BYTES = 8;
     public static final int INT_BYTES = 4;
 
     private long val;
 
-    public ENNumber(ENNumber enNumber) {
-        this.val = enNumber.get();
+    public ENInterval(ENInterval enInterval) {
+        this.val = enInterval.get();
     }
 
-    public ENNumber(long rawENNumber) {
+    public ENInterval(long rawENNumber) {
         set(rawENNumber, false);
     }
 
-    public ENNumber(long input, boolean isUnixTime) {
+    public ENInterval(long input, boolean isUnixTime) {
         set(input, isUnixTime);
     }
 
-    public ENNumber(byte[] rawENNumber) {
+    public ENInterval(byte[] rawENNumber) {
         if(rawENNumber.length != INT_BYTES)
             throw new InvalidParameterException("rawENNumber has wrong size");
         byte[] rawBuffer = new byte[LONG_BYTES];
@@ -67,8 +67,8 @@ public class ENNumber {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        ENNumber enNumber = (ENNumber) o;
-        return val == enNumber.val;
+        ENInterval enInterval = (ENInterval) o;
+        return val == enInterval.val;
     }
 
     @Override

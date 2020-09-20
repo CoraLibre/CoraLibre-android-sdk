@@ -1,12 +1,12 @@
 package org.coralibre.android.sdk.internal.database.model;
 
-import org.coralibre.android.sdk.internal.crypto.ENNumber;
+import org.coralibre.android.sdk.internal.crypto.ENInterval;
 
 import java.util.List;
 
 public interface IntervalOfCapturedData {
 
-    ENNumber getInterval();
+    ENInterval getInterval();
 
     List<CapturedData> getCapturedData();
 

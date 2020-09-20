@@ -18,14 +18,14 @@ public class ExposeChecker {
                 new ArrayList<>(TemporaryExposureKey.TEK_ROLLING_PERIOD);
         RollingProximityIdentifierKey rpik = generateRPIK(tek);
         for(long i = 0; i < TemporaryExposureKey.TEK_ROLLING_PERIOD; i++) {
-            rpiList.add(generateRPI(rpik, new ENNumber(enInterval + i)));
+            rpiList.add(generateRPI(rpik, new ENInterval(enInterval + i)));
         }
         return rpiList;
     }
 
 
     private static List<TemporaryExposureKey> getMatchingTEKs(List<TemporaryExposureKey> allTEKs,
-                                                              ENNumber interval) {
+                                                              ENInterval interval) {
         List<TemporaryExposureKey> relatedTEKs = new ArrayList<>();
         for(TemporaryExposureKey key : allTEKs) {
             if(key.getInterval().equals(interval)) {
@@ -36,11 +36,11 @@ public class ExposeChecker {
     }
 
     public static List<TemporaryExposureKey> getAllRelatedTEKs(List<TemporaryExposureKey> allTEKs,
-                                                                ENNumber interval) {
-        ENNumber slotBeginning = getMidnight(
-                new ENNumber(interval.get() - FUZZY_COMPARE_TIME_DEVIATION));
-        ENNumber slotEnding = getMidnight(
-                new ENNumber(interval.get() + FUZZY_COMPARE_TIME_DEVIATION));
+                                                                ENInterval interval) {
+        ENInterval slotBeginning = getMidnight(
+                new ENInterval(interval.get() - FUZZY_COMPARE_TIME_DEVIATION));
+        ENInterval slotEnding = getMidnight(
+                new ENInterval(interval.get() + FUZZY_COMPARE_TIME_DEVIATION));
         List<TemporaryExposureKey> relatedTeKs = getMatchingTEKs(allTEKs, slotBeginning);
         if(!slotBeginning.equals(slotEnding)) {
             relatedTeKs.addAll(getMatchingTEKs(allTEKs, slotEnding));
@@ -49,7 +49,7 @@ public class ExposeChecker {
     }
 
     public static List<RollingProximityIdentifier> generateRPIsForSlot(TemporaryExposureKey tek,
-                                                                 ENNumber interval) {
+                                                                 ENInterval interval) {
         long slotBeginning = interval.get() - FUZZY_COMPARE_TIME_DEVIATION;
         if(slotBeginning < tek.getInterval().get()) {
             slotBeginning = tek.getInterval().get();
@@ -63,7 +63,7 @@ public class ExposeChecker {
                 new ArrayList<>(2 * FUZZY_COMPARE_TIME_DEVIATION + 1);
 
         for(long i = slotBeginning; i <= slotEnding; i++) {
-            generatedRPIs.add(generateRPI(rpik, new ENNumber(i)));
+            generatedRPIs.add(generateRPI(rpik, new ENInterval(i)));
         }
         return generatedRPIs;
     }

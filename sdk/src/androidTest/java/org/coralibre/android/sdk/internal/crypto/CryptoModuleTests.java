@@ -130,20 +130,20 @@ public class CryptoModuleTests {
 
     private static CryptoModule getMockedTimeCryptoModule(Database db, long ennumber) throws Exception {
         Class cryptoModuleClass = Class.forName("org.coralibre.android.sdk.internal.crypto.CryptoModule");
-        Constructor<CryptoModule>  cryptoModuleConstructor = cryptoModuleClass.getDeclaredConstructor(Database.class, ENNumber.class);
+        Constructor<CryptoModule>  cryptoModuleConstructor = cryptoModuleClass.getDeclaredConstructor(Database.class, ENInterval.class);
         cryptoModuleConstructor.setAccessible(true);
-        return cryptoModuleConstructor.newInstance(db, new ENNumber(ennumber));
+        return cryptoModuleConstructor.newInstance(db, new ENInterval(ennumber));
     }
 
     private static void setCurrentENNumber(CryptoModule cryptoModule, long newennumber) throws Exception {
         Field currentIntervalField = CryptoModule.class.getDeclaredField("currentIntervalForTesting");
         currentIntervalField.setAccessible(true);
-        currentIntervalField.set(cryptoModule, new ENNumber(newennumber));
+        currentIntervalField.set(cryptoModule, new ENInterval(newennumber));
     }
 
     @Test
     public void testGetCurrentInterval() {
-        assertEquals(CryptoModule.getCurrentInterval(), new ENNumber(System.currentTimeMillis() / 1000L, true));
+        assertEquals(CryptoModule.getCurrentInterval(), new ENInterval(System.currentTimeMillis() / 1000L, true));
     }
 
     @Test
@@ -174,7 +174,7 @@ public class CryptoModuleTests {
     public void testEncryptDecryptAEM() throws Exception {
         AssociatedMetadata am = new AssociatedMetadata(AM_VAL_V3_2_MINUS16db);
         RollingProximityIdentifier rpi = new RollingProximityIdentifier(RPI_VAL1,
-                new ENNumber(0));
+                new ENInterval(0));
         AssociatedEncryptedMetadataKey aemk = new AssociatedEncryptedMetadataKey(AEMK_VAL1);
 
         AssociatedEncryptedMetadata aem = CryptoModule.encryptAM(am, rpi, aemk);
@@ -188,8 +188,8 @@ public class CryptoModuleTests {
         TemporaryExposureKey tek = new TemporaryExposureKey(0L, TEK_VAL2);
         RollingProximityIdentifierKey rpik = CryptoModule.generateRPIK(tek);
         assertArrayEquals(TEK_VAL2_RPIK, rpik.getKey());
-        ENNumber enNumber = new ENNumber(2652091);
-        RollingProximityIdentifier rpi = CryptoModule.generateRPI(rpik, enNumber);
+        ENInterval enInterval = new ENInterval(2652091);
+        RollingProximityIdentifier rpi = CryptoModule.generateRPI(rpik, enInterval);
         assertArrayEquals(TEK_VAL2_RPI_1, rpi.getData());
 
         AssociatedEncryptedMetadataKey aemk = CryptoModule.generateAEMK(tek);
@@ -206,8 +206,8 @@ public class CryptoModuleTests {
         TemporaryExposureKey tek = new TemporaryExposureKey(0L, TEK_VAL3);
         RollingProximityIdentifierKey rpik = CryptoModule.generateRPIK(tek);
         assertArrayEquals(TEK_VAL3_RPIK, rpik.getKey());
-        ENNumber enNumber = new ENNumber(2649435);
-        RollingProximityIdentifier rpi = CryptoModule.generateRPI(rpik, enNumber);
+        ENInterval enInterval = new ENInterval(2649435);
+        RollingProximityIdentifier rpi = CryptoModule.generateRPI(rpik, enInterval);
         assertArrayEquals(TEK_VAL3_RPI_1, rpi.getData());
 
         AssociatedEncryptedMetadataKey aemk = CryptoModule.generateAEMK(tek);

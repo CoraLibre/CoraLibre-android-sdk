@@ -26,13 +26,13 @@ public class ExposeCheckerTests {
 
     private static TemporaryExposureKey tek(long whichRollingPeriod, String hex) {
         assertEquals(2*TEK_LENGTH, hex.length());
-        return new TemporaryExposureKey(new ENNumber(whichRollingPeriod * TEK_ROLLING_PERIOD),
+        return new TemporaryExposureKey(new ENInterval(whichRollingPeriod * TEK_ROLLING_PERIOD),
                 hex2byte(hex));
     }
 
     private static RollingProximityIdentifier rollingProximityIdentifier(long rawENNumber, String hex) {
         assertEquals(2* RPI_LENGTH, hex.length());
-        return new RollingProximityIdentifier(hex2byte(hex), new ENNumber(rawENNumber));
+        return new RollingProximityIdentifier(hex2byte(hex), new ENInterval(rawENNumber));
     }
 
     private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
@@ -82,10 +82,10 @@ public class ExposeCheckerTests {
                     tek(19, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
                     tek(19, "a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0")));
 
-    private static final ENNumber MIDDLE_OF_DAY_14 =
-            new ENNumber((long)(13.5 * TEK_ROLLING_PERIOD));
-    private static final ENNumber ONE_HOUR_INTO_DAY_15 =
-            new ENNumber((long)(14 * TEK_ROLLING_PERIOD + 6));
+    private static final ENInterval MIDDLE_OF_DAY_14 =
+            new ENInterval((long)(13.5 * TEK_ROLLING_PERIOD));
+    private static final ENInterval ONE_HOUR_INTO_DAY_15 =
+            new ENInterval((long)(14 * TEK_ROLLING_PERIOD + 6));
 
     private static final long SLOTSTART_MIDDLE_OF_DAY_14 = (long)(13.5 * TEK_ROLLING_PERIOD - 12);
     private static final long SLOTEND_MIDDLE_OF_DAY_14 = (long)(13.5 * TEK_ROLLING_PERIOD + 12);

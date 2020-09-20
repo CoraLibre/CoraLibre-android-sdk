@@ -10,6 +10,6 @@ import org.coralibre.android.sdk.fakegms.nearby.exposurenotification.ExposureNot
 public final class Nearby {
 
     public static ExposureNotificationClient getExposureNotificationClient(@NonNull Context context) {
-        return new ExposureNotificationClientImpl();
+        return new ExposureNotificationClientImpl(context);
     }
 }

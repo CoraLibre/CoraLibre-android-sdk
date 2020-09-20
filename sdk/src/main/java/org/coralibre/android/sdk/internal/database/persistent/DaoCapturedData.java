@@ -17,11 +17,11 @@ public interface DaoCapturedData {
     public void insertCapturedData(EntityCapturedData data);
 
 
-    @Query("DELETE FROM EntityCapturedData WHERE enNumber < :minKeepENIntervalNumber")
+    @Query("DELETE FROM EntityCapturedData WHERE enInterval < :minKeepENIntervalNumber")
     public void truncateOldData(long minKeepENIntervalNumber);
 
 
-    @Query("SELECT * FROM EntityCapturedData WHERE enNumber = :intervalNumber")
+    @Query("SELECT * FROM EntityCapturedData WHERE enInterval = :intervalNumber")
     public List<EntityCapturedData> getAllDataForSingleInterval(long intervalNumber);
 
 

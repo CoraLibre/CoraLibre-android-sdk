@@ -6,13 +6,15 @@ import androidx.annotation.NonNull;
 import androidx.room.Room;
 
 import org.coralibre.android.sdk.internal.crypto.CryptoModule;
-import org.coralibre.android.sdk.internal.crypto.ENNumber;
+import org.coralibre.android.sdk.internal.crypto.ENInterval;
 import org.coralibre.android.sdk.internal.crypto.TemporaryExposureKey;
 import org.coralibre.android.sdk.internal.database.model.CapturedData;
+import org.coralibre.android.sdk.internal.database.model.DiagnosisKey;
 import org.coralibre.android.sdk.internal.database.model.GeneratedTEK;
 import org.coralibre.android.sdk.internal.database.model.IntervalOfCapturedData;
 import org.coralibre.android.sdk.internal.database.model.IntervalOfCapturedDataImpl;
 import org.coralibre.android.sdk.internal.database.model.entity.EntityCapturedData;
+import org.coralibre.android.sdk.internal.database.model.entity.EntityDiagnosisKey;
 import org.coralibre.android.sdk.internal.database.model.entity.EntityGeneratedTEK;
 import org.coralibre.android.sdk.internal.database.persistent.RoomDatabaseDelegate;
 
@@ -70,14 +72,14 @@ public class PersistentDatabase implements Database {
 
 
     @Override
-    public boolean hasTEKForInterval(ENNumber interval) {
+    public boolean hasTEKForInterval(ENInterval interval) {
         List<EntityGeneratedTEK> teks = db.daoTEK().getTekByEnNumber(interval);
         return (teks.size() != 0);
     }
 
 
     @Override
-    public GeneratedTEK getGeneratedTEK(ENNumber interval) {
+    public GeneratedTEK getGeneratedTEK(ENInterval interval) {
         List<EntityGeneratedTEK> teks = db.daoTEK().getTekByEnNumber(interval);
         if (teks.size() != 1) {
             throw new StorageException("When attempting to query TEK for interval number " +
@@ -99,16 +101,15 @@ public class PersistentDatabase implements Database {
         return result;
     }
 
-
     @Override
     public Iterable<IntervalOfCapturedData> getAllCollectedPayload() {
         List<EntityCapturedData> allData = db.daoCapturedData().getAllData();
 
-        Map<ENNumber, IntervalOfCapturedData> collectedPackagesByInterval = new HashMap<>();
+        Map<ENInterval, IntervalOfCapturedData> collectedPackagesByInterval = new HashMap<>();
 
         for (EntityCapturedData e_payload : allData) {
             CapturedData payload = e_payload.toCapturedData();
-            ENNumber interval = payload.getEnNumber();
+            ENInterval interval = payload.getEnInterval();
 
             // find correct interval
             IntervalOfCapturedData payloadPerInterval
@@ -123,10 +124,19 @@ public class PersistentDatabase implements Database {
         return collectedPackagesByInterval.values();
     }
 
+    @Override
+    public Iterable<DiagnosisKey> getAllDiagnosisKeys() {
+        List<DiagnosisKey> result = new LinkedList<>();
+        for (EntityDiagnosisKey e : db.daoDiagnosisKey().getAllDiagnosisKeys()) {
+            result.add(e.toDiagnosisKey());
+        }
+        return result;
+    }
+
 
     @Override
     public void truncateLast14Days() {
-        ENNumber now = CryptoModule.getCurrentInterval();
+        ENInterval now = CryptoModule.getCurrentInterval();
         long lastIntervalToKeep = now.get() -
                 (CryptoModule.TEK_MAX_STORE_TIME
                         * TemporaryExposureKey.TEK_ROLLING_PERIOD);

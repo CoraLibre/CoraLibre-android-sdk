@@ -8,21 +8,21 @@ public class TemporaryExposureKey {
     public final long MAX_UINT_32 = 4294967295L;
     public static final int TEK_LENGTH = 16; //defined in byte
 
-    private ENNumber interval;
+    private ENInterval interval;
     private byte[] key = new byte[TEK_LENGTH];
 
 
-    public TemporaryExposureKey(ENNumber interval, byte[] value) {
+    public TemporaryExposureKey(ENInterval interval, byte[] value) {
         if(value.length < TEK_LENGTH) throw new InvalidParameterException("tek size not 16bytes");
         this.interval = getMidnight(interval);
         System.arraycopy(value, 0, key, 0, TEK_LENGTH);
     }
 
     public TemporaryExposureKey(long timestamp, byte[] rawKey) {
-        this(new ENNumber(timestamp), rawKey);
+        this(new ENInterval(timestamp), rawKey);
     }
 
-    public ENNumber getInterval() {
+    public ENInterval getInterval() {
         return interval;
     }
 
@@ -32,8 +32,8 @@ public class TemporaryExposureKey {
         return retVal;
     }
 
-    public static ENNumber getMidnight(ENNumber enNumber) {
-        return new ENNumber( ((long)(enNumber.get() / TEK_ROLLING_PERIOD)) * TEK_ROLLING_PERIOD);
+    public static ENInterval getMidnight(ENInterval enInterval) {
+        return new ENInterval( ((long)(enInterval.get() / TEK_ROLLING_PERIOD)) * TEK_ROLLING_PERIOD);
     }
 
     public static long getMidnight(long rawENNumber) {

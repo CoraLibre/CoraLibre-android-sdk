@@ -4,7 +4,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import org.coralibre.android.sdk.internal.crypto.CryptoModule;
-import org.coralibre.android.sdk.internal.crypto.ENNumber;
+import org.coralibre.android.sdk.internal.crypto.ENInterval;
 import org.coralibre.android.sdk.internal.database.model.CapturedData;
 import org.coralibre.android.sdk.internal.database.model.GeneratedTEK;
 import org.coralibre.android.sdk.internal.database.model.IntervalOfCapturedData;
@@ -49,7 +49,7 @@ public class DatabaseTests {
         Random random = new Random();
         byte[] dumTekBytes = new byte[8];
         random.nextBytes(dumTekBytes);
-        ENNumber dumIntervalNumber = new ENNumber(2000l);
+        ENInterval dumIntervalNumber = new ENInterval(2000l);
         GeneratedTEK dumTek = new GeneratedTEK(dumIntervalNumber, dumTekBytes);
         DatabaseAccess.getDefaultDatabaseInstance().addGeneratedTEK(dumTek);
 
@@ -118,9 +118,9 @@ public class DatabaseTests {
     public void testTruncate() {
         DatabaseAccess.getDefaultDatabaseInstance().clearAllData();
 
-        ENNumber now = CryptoModule.getCurrentInterval();
-        ENNumber intervalRemove = new ENNumber(now.get() - 24 * 6 * 14 - 1);
-        ENNumber intervalKeep = new ENNumber(now.get() - 24 * 6 * 14);
+        ENInterval now = CryptoModule.getCurrentInterval();
+        ENInterval intervalRemove = new ENInterval(now.get() - 24 * 6 * 14 - 1);
+        ENInterval intervalKeep = new ENInterval(now.get() - 24 * 6 * 14);
 
 
         // Insert:

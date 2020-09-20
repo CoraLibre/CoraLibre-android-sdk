@@ -1,16 +1,16 @@
 package org.coralibre.android.sdk.internal.database.model;
 
-import org.coralibre.android.sdk.internal.crypto.ENNumber;
+import org.coralibre.android.sdk.internal.crypto.ENInterval;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class IntervalOfCapturedDataImpl implements IntervalOfCapturedData {
 
-    ENNumber interval;
+    ENInterval interval;
     List<CapturedData> capturedData = new ArrayList<>();
 
-    public IntervalOfCapturedDataImpl(ENNumber interval) {
+    public IntervalOfCapturedDataImpl(ENInterval interval) {
         this.interval = interval;
     }
 
@@ -19,7 +19,7 @@ public class IntervalOfCapturedDataImpl implements IntervalOfCapturedData {
     }
 
     @Override
-    public ENNumber getInterval() {
+    public ENInterval getInterval() {
         return interval;
     }
 

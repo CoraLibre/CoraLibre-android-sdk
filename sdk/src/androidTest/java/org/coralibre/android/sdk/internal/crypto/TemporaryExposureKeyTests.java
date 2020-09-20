@@ -33,7 +33,7 @@ public class TemporaryExposureKeyTests {
 
     @Test
     public void testSetTEKWithENNumberInterval() {
-        ENNumber i = new ENNumber(RAW_INPUT_ENNUMBER_VAL1);
+        ENInterval i = new ENInterval(RAW_INPUT_ENNUMBER_VAL1);
         TemporaryExposureKey tek = new TemporaryExposureKey(i, TEK_VAL1);
         assertArrayEquals(TEK_VAL1, tek.getKey());
         assertEquals(RAW_OUTPUT_ENNUMBER_VAL1, tek.getInterval().get());

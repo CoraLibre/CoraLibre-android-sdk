@@ -10,7 +10,7 @@ public class BluetoothPayload {
     private RollingProximityIdentifier rpi;
     private AssociatedEncryptedMetadata aem;
 
-    public BluetoothPayload(byte[] rawPayload, ENNumber interval) {
+    public BluetoothPayload(byte[] rawPayload, ENInterval interval) {
         if(rawPayload.length != RPI_LENGTH + AEM_LENGTH)
             throw new InvalidParameterException("wrong payload size");
         byte[] rawRpi = new byte[RPI_LENGTH];
@@ -34,7 +34,7 @@ public class BluetoothPayload {
         return aem;
     }
 
-    public ENNumber getInterval() {
+    public ENInterval getInterval() {
         return rpi.getInterval();
     }
 
