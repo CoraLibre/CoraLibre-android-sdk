@@ -1,6 +1,7 @@
 package org.coralibre.android.sdk.fakegms.nearby;
 
 import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -140,9 +141,12 @@ final class ExposureNotificationClientImpl implements ExposureNotificationClient
                 }
             }
 
-            // TODO match provided keys with database
-            // TODO send intent to notify of exposure found / not found
+            // TODO (probably) match provided keys with database and cache result for later
 
+            boolean noMatchFound = database.findAllMeasuredExposures().isEmpty();
+            Intent intent = new Intent(noMatchFound ? ACTION_EXPOSURE_NOT_FOUND : ACTION_EXPOSURE_STATE_UPDATED);
+            intent.putExtra(EXTRA_TOKEN, token);
+            context.sendOrderedBroadcast(intent, null);
             return null;
         });
     }
