@@ -18,6 +18,9 @@ import org.coralibre.android.sdk.internal.database.Database;
 import org.coralibre.android.sdk.internal.database.PersistentDatabase;
 import org.coralibre.android.sdk.internal.database.model.CapturedData;
 import org.coralibre.android.sdk.internal.database.model.IntervalOfCapturedData;
+import org.coralibre.android.sdk.proto.TemporaryExposureKeyFile;
+import org.coralibre.android.sdk.proto.TemporaryExposureKeyFile.TemporaryExposureKeyExport;
+import org.coralibre.android.sdk.proto.TemporaryExposureKeyFile.TemporaryExposureKeyProto;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -124,8 +127,9 @@ final class ExposureNotificationClientImpl implements ExposureNotificationClient
 
                             String prefixString = new String(prefix).trim();
                             if (totalBytesRead == prefix.length && prefixString.equals("EK Export v1")) {
-                                // TODO decode the rest of `stream` using "proto"
-                                // TODO add key to database
+                                final TemporaryExposureKeyExport temporaryExposureKeyExport = TemporaryExposureKeyExport.parseFrom(stream);
+                                database.addDiagnosisKeys(temporaryExposureKeyExport.getKeysList());
+                                database.updateDiagnosisKeys(temporaryExposureKeyExport.getRevisedKeysList());
                             } else {
                                 Log.e(TAG, "Failed to parse diagnosis key file: export.bin has invalid prefix: " + prefixString);
                             }

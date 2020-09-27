@@ -17,7 +17,10 @@ import org.coralibre.android.sdk.internal.database.model.entity.EntityCapturedDa
 import org.coralibre.android.sdk.internal.database.model.entity.EntityDiagnosisKey;
 import org.coralibre.android.sdk.internal.database.model.entity.EntityGeneratedTEK;
 import org.coralibre.android.sdk.internal.database.persistent.RoomDatabaseDelegate;
+import org.coralibre.android.sdk.proto.TemporaryExposureKeyFile;
+import org.coralibre.android.sdk.proto.TemporaryExposureKeyFile.TemporaryExposureKeyProto;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -57,17 +60,43 @@ public class PersistentDatabase implements Database {
 
     @Override
     public void addGeneratedTEK(GeneratedTEK generatedTEK) {
-        db.daoTEK().insertTEK(
-                new EntityGeneratedTEK(generatedTEK)
-        );
+        db.daoTEK().insertTEK(new EntityGeneratedTEK(generatedTEK));
     }
-
 
     @Override
     public void addCapturedPayload(CapturedData collectedPayload) {
-        db.daoCapturedData().insertCapturedData(
-                new EntityCapturedData(collectedPayload)
-        );
+        db.daoCapturedData().insertCapturedData(new EntityCapturedData(collectedPayload));
+    }
+
+
+    private static List<EntityDiagnosisKey> toEntityDiagnosisKeys(List<TemporaryExposureKeyProto> tekProtos) {
+        List<EntityDiagnosisKey> entityDiagnosisKeys = new ArrayList<>();
+        for (TemporaryExposureKeyProto tekProto : tekProtos) {
+            if (!tekProto.hasKeyData()) {
+                throw new IllegalArgumentException("missing tekProto keyData");
+            } else if (!tekProto.hasRollingStartIntervalNumber()) {
+                throw new IllegalArgumentException("missing tekProto rollingStartIntervalNumber");
+            } else if (!tekProto.hasRollingPeriod()) {
+                throw new IllegalArgumentException("missing tekProto rollingPeriod");
+            }
+
+            entityDiagnosisKeys.add(new EntityDiagnosisKey(new DiagnosisKey(
+                tekProto.getKeyData().toByteArray(),
+                tekProto.getRollingStartIntervalNumber(),
+                tekProto.getRollingPeriod(),
+                tekProto.hasTransmissionRiskLevel() ? tekProto.getTransmissionRiskLevel() : 0)));
+        }
+        return entityDiagnosisKeys;
+    }
+
+    @Override
+    public void addDiagnosisKeys(List<TemporaryExposureKeyProto> diagnosisKeys) {
+        db.daoDiagnosisKey().insertDiagnosisKeys(toEntityDiagnosisKeys(diagnosisKeys));
+    }
+
+    @Override
+    public void updateDiagnosisKeys(List<TemporaryExposureKeyProto> diagnosisKeys) {
+        db.daoDiagnosisKey().updateDiagnosisKeys(toEntityDiagnosisKeys(diagnosisKeys));
     }
 
 
