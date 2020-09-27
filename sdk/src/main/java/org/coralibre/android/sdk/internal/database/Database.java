@@ -3,9 +3,9 @@ package org.coralibre.android.sdk.internal.database;
 
 import org.coralibre.android.sdk.internal.crypto.ENInterval;
 import org.coralibre.android.sdk.internal.database.model.CapturedData;
-import org.coralibre.android.sdk.internal.database.model.DiagnosisKey;
 import org.coralibre.android.sdk.internal.database.model.GeneratedTEK;
 import org.coralibre.android.sdk.internal.database.model.IntervalOfCapturedData;
+import org.coralibre.android.sdk.internal.database.model.MeasuredExposure;
 import org.coralibre.android.sdk.proto.TemporaryExposureKeyFile.TemporaryExposureKeyProto;
 
 import java.util.List;
@@ -28,7 +28,8 @@ public interface Database {
 
     Iterable<GeneratedTEK> getAllGeneratedTEKs();
     Iterable<IntervalOfCapturedData> getAllCollectedPayload();
-    Iterable<DiagnosisKey> getAllDiagnosisKeys();
+
+    List<MeasuredExposure> findAllMeasuredExposures();
 
     void truncateLast14Days();
 

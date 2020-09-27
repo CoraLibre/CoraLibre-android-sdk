@@ -13,6 +13,7 @@ import org.coralibre.android.sdk.internal.database.model.DiagnosisKey;
 import org.coralibre.android.sdk.internal.database.model.GeneratedTEK;
 import org.coralibre.android.sdk.internal.database.model.IntervalOfCapturedData;
 import org.coralibre.android.sdk.internal.database.model.IntervalOfCapturedDataImpl;
+import org.coralibre.android.sdk.internal.database.model.MeasuredExposure;
 import org.coralibre.android.sdk.internal.database.model.entity.EntityCapturedData;
 import org.coralibre.android.sdk.internal.database.model.entity.EntityDiagnosisKey;
 import org.coralibre.android.sdk.internal.database.model.entity.EntityGeneratedTEK;
@@ -21,6 +22,7 @@ import org.coralibre.android.sdk.proto.TemporaryExposureKeyFile;
 import org.coralibre.android.sdk.proto.TemporaryExposureKeyFile.TemporaryExposureKeyProto;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -153,13 +155,11 @@ public class PersistentDatabase implements Database {
         return collectedPackagesByInterval.values();
     }
 
+
     @Override
-    public Iterable<DiagnosisKey> getAllDiagnosisKeys() {
-        List<DiagnosisKey> result = new LinkedList<>();
-        for (EntityDiagnosisKey e : db.daoDiagnosisKey().getAllDiagnosisKeys()) {
-            result.add(e.toDiagnosisKey());
-        }
-        return result;
+    public List<MeasuredExposure> findAllMeasuredExposures() {
+        // TODO
+        return Collections.emptyList();
     }
 
 
