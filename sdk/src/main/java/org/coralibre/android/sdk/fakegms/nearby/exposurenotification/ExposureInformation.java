@@ -19,7 +19,7 @@ public final class ExposureInformation implements Parcelable {
     @NonNull
     private final int[] attenuationDurationsInMinutes;
 
-    public ExposureInformation(
+    private ExposureInformation(
         long dateMillisSinceEpoch,
         int durationMinutes,
         int attenuationValue,
@@ -93,7 +93,7 @@ public final class ExposureInformation implements Parcelable {
 
     @NonNull
     public int[] getAttenuationDurationsInMinutes() {
-        return attenuationDurationsInMinutes;
+        return Arrays.copyOf(attenuationDurationsInMinutes, attenuationDurationsInMinutes.length);
     }
 
     @Override
@@ -106,20 +106,19 @@ public final class ExposureInformation implements Parcelable {
             attenuationValue == that.attenuationValue &&
             transmissionRiskLevel == that.transmissionRiskLevel &&
             totalRiskScore == that.totalRiskScore &&
-            Arrays.equals(attenuationDurationsInMinutes, that.attenuationDurationsInMinutes);
+            attenuationDurationsInMinutes == that.attenuationDurationsInMinutes;
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(
+        return Objects.hash(
             dateMillisSinceEpoch,
             durationMinutes,
             attenuationValue,
             transmissionRiskLevel,
-            totalRiskScore
+            totalRiskScore,
+            attenuationDurationsInMinutes
         );
-        result = 31 * result + Arrays.hashCode(attenuationDurationsInMinutes);
-        return result;
     }
 
     public static final class ExposureInformationBuilder {
@@ -156,10 +155,12 @@ public final class ExposureInformation implements Parcelable {
             return this;
         }
 
-        public ExposureInformationBuilder setAttenuationDurationsInMinutes(
+        public ExposureInformationBuilder setAttenuationDurations(
             @NonNull int[] attenuationDurationsInMinutes
         ) {
-            this.attenuationDurationsInMinutes = attenuationDurationsInMinutes;
+            this.attenuationDurationsInMinutes = Arrays.copyOf(
+                attenuationDurationsInMinutes, attenuationDurationsInMinutes.length
+            );
             return this;
         }
 
