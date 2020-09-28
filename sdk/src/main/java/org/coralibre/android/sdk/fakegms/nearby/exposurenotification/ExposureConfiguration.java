@@ -1,5 +1,6 @@
 package org.coralibre.android.sdk.fakegms.nearby.exposurenotification;
 
+import android.os.Parcel;
 import android.os.Parcelable;
 
 import org.coralibre.android.sdk.internal.database.model.CapturedData;
@@ -13,7 +14,7 @@ import java.util.Arrays;
  * @see <a href="https://developer.apple.com/documentation/exposurenotification/enexposureconfiguration">risk calculation algorithm details on developer.apple.com</a>
  * @see <a href="https://developers.google.com/android/exposure-notifications/exposure-notifications-api#exposureconfiguration">documentation on developers.google.com</a>
  */
-public final class ExposureConfiguration {
+public final class ExposureConfiguration implements Parcelable {
 
     //
     // The gms ExposureConfiguration is used in particular by the following classes (and perhaps more):
@@ -126,6 +127,41 @@ public final class ExposureConfiguration {
         this.durationAtAttenuationThresholds = durationAtAttenuationThresholds;
     }
 
+    private ExposureConfiguration(Parcel in) {
+        minimumRiskScore = in.readInt();
+        attenuationScores = in.createIntArray();
+        daysSinceLastExposureScores = in.createIntArray();
+        durationScores = in.createIntArray();
+        transmissionRiskScores = in.createIntArray();
+        durationAtAttenuationThresholds = in.createIntArray();
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(minimumRiskScore);
+        dest.writeIntArray(attenuationScores);
+        dest.writeIntArray(daysSinceLastExposureScores);
+        dest.writeIntArray(durationScores);
+        dest.writeIntArray(transmissionRiskScores);
+        dest.writeIntArray(durationAtAttenuationThresholds);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    public static final Creator<ExposureConfiguration> CREATOR = new Creator<ExposureConfiguration>() {
+        @Override
+        public ExposureConfiguration createFromParcel(Parcel in) {
+            return new ExposureConfiguration(in);
+        }
+
+        @Override
+        public ExposureConfiguration[] newArray(int size) {
+            return new ExposureConfiguration[size];
+        }
+    };
 
     /**
      * @see #minimumRiskScore
@@ -147,7 +183,6 @@ public final class ExposureConfiguration {
     public int getDurationAtAttenuationHighThreshold() {
         return durationAtAttenuationThresholds[1];
     }
-
 
     /**
      * @param attenuationValue the bluetooth attenuation value from an exposure, in dB:
@@ -353,7 +388,6 @@ public final class ExposureConfiguration {
             durationAtAttenuationThresholds = Arrays.copyOf(thresholds, 2);
             return this;
         }
-
 
         /**
          * @return an {@link ExposureConfiguration} instance based on the values set in the builder
