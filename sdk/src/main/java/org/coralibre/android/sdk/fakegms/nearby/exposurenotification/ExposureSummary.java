@@ -107,14 +107,32 @@ public final class ExposureSummary implements Parcelable {
 
     /**
      * Contains the cumulative duration in minutes the user spent in the three ranges of risk
-     * defined by {@link ExposureConfiguration#durationAtAttenuationThresholds}. In particular:<br>
-     * attenuationDurations[0]  |  sum of durations of exposures with an attenuation less than the
-     * low threshold (i.e. {@link ExposureConfiguration#durationAtAttenuationThresholds}[0])<br>
-     * attenuationDurations[1]  |  sum of durations of exposures with an attenuation greater than
-     * equal to the low threshold (i.e. {@link ExposureConfiguration#durationAtAttenuationThresholds}[0])
-     * but less than the high threshold (i.e. {@link ExposureConfiguration#durationAtAttenuationThresholds}[1])<br>
-     * attenuationDurations[2]  |  sum of durations of exposures with an attenuation greater than
-     * or equal to the high threshold (i.e. {@link ExposureConfiguration#durationAtAttenuationThresholds}[1])<br>
+     * defined by {@link ExposureConfiguration#getDurationAtAttenuationLowThreshold()} and
+     * {@link ExposureConfiguration#getDurationAtAttenuationHighThreshold()}. In particular:<br>
+     * <table>
+     *     <tr>
+     *         <td>attenuationDurations[0]</td>
+     *         <td>
+     *             sum of durations of exposures with an attenuation less than the
+     *             {@link ExposureConfiguration#getDurationAtAttenuationLowThreshold() low threshold}
+     *        </td>
+     *     </tr>
+     *     <tr>
+     *         <td>attenuationDurations[1]</td>
+     *         <td>
+     *             sum of durations of exposures with an attenuation greater than
+     *             equal to the {@link ExposureConfiguration#getDurationAtAttenuationLowThreshold() low threshold}
+     *             but less than the {@link ExposureConfiguration#getDurationAtAttenuationHighThreshold() high threshold}
+     *         </td>
+     *     </tr>
+     *     <tr>
+     *         <td>attenuationDurations[2]</td>
+     *         <td>
+     *             sum of durations of exposures with an attenuation greater than or equal to
+     *             the {@link ExposureConfiguration#getDurationAtAttenuationHighThreshold() high threshold}
+     *         </td>
+     *     </tr>
+     * </table>
      *
      * @see <a href="https://developers.google.com/android/exposure-notifications/exposure-notifications-api#attenuationdurations">documentation on developers.google.com</a>
      */
