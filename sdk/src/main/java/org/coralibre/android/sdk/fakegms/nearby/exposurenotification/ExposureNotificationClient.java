@@ -8,7 +8,6 @@ import java.io.File;
 import java.util.List;
 
 public interface ExposureNotificationClient {
-
     //
     // The gms ExposureNotificationClient is used in particular by the following classes (and perhaps more):
     //

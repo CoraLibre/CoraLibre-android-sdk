@@ -1,14 +1,20 @@
 package org.coralibre.android.sdk.fakegms.nearby.exposurenotification;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import org.coralibre.android.sdk.internal.database.model.CapturedData;
+
+import java.util.Arrays;
 
 /**
  * Contains the parameters of the risk calculation algorithm. In particular:
  * {@code riskScore = attenuationScore * daysSinceLastExposureScore * durationScore * transmissionRiskScore}
+ *
  * @see <a href="https://developer.apple.com/documentation/exposurenotification/enexposureconfiguration">risk calculation algorithm details on developer.apple.com</a>
  * @see <a href="https://developers.google.com/android/exposure-notifications/exposure-notifications-api#exposureconfiguration">documentation on developers.google.com</a>
  */
-public class ExposureConfiguration {
+public final class ExposureConfiguration implements Parcelable {
 
     //
     // The gms ExposureConfiguration is used in particular by the following classes (and perhaps more):
@@ -23,6 +29,7 @@ public class ExposureConfiguration {
      * The only fields affected by this value are {@link ExposureSummary#maximumRiskScore},
      * {@link ExposureSummary#summationRiskScore} and {@link ExposureInformation#totalRiskScore},
      * which ignore exposure incidents with lower scores. Default is no minimum (i.e. {@code 0}).
+     *
      * @see <a href="https://developers.google.com/android/exposure-notifications/exposure-notifications-api#minimumriskscore">documentation on developers.google.com</a>
      */
     private final int minimumRiskScore;
@@ -39,6 +46,7 @@ public class ExposureConfiguration {
      * attenuationScores[5]  |  27dB >= A > 15dB <br>
      * attenuationScores[6]  |  15dB >= A > 10dB <br>
      * attenuationScores[7]  |  A <= 10dB
+     *
      * @see <a href="https://developer.apple.com/documentation/exposurenotification/enexposureconfiguration">risk calculation algorithm details on developer.apple.com</a>
      * @see <a href="https://developers.google.com/android/exposure-notifications/exposure-notifications-api#attenuationscores">documentation on developers.google.com</a>
      */
@@ -55,6 +63,7 @@ public class ExposureConfiguration {
      * daysSinceLastExposureScores[5]  |  4-5 days   <br>
      * daysSinceLastExposureScores[6]  |  2-3 days   <br>
      * daysSinceLastExposureScores[7]  |  0-1 days
+     *
      * @see <a href="https://developer.apple.com/documentation/exposurenotification/enexposureconfiguration">risk calculation algorithm details on developer.apple.com</a>
      * @see <a href="https://developers.google.com/android/exposure-notifications/exposure-notifications-api#dayssincelastexposurescores">documentation on developers.google.com</a>
      */
@@ -71,6 +80,7 @@ public class ExposureConfiguration {
      * durationScores[5]  |  20min < D <= 25min <br>
      * durationScores[6]  |  25min < D <= 30min <br>
      * durationScores[7]  |  D > 30min
+     *
      * @see <a href="https://developer.apple.com/documentation/exposurenotification/enexposureconfiguration">risk calculation algorithm details on developer.apple.com</a>
      * @see <a href="https://developers.google.com/android/exposure-notifications/exposure-notifications-api#durationscores">documentation on developers.google.com</a>
      */
@@ -81,6 +91,7 @@ public class ExposureConfiguration {
      * (i.e. the usage of these values) is app-defined, and for example a high risk could be
      * assigned to encounters with users who recently tested positive, and a lower score to
      * encounters with old positives
+     *
      * @see <a href="https://developer.apple.com/documentation/exposurenotification/enexposureconfiguration">risk calculation algorithm details on developer.apple.com</a>
      * @see <a href="https://developers.google.com/android/exposure-notifications/exposure-notifications-api#transmissionriskscores">documentation on developers.google.com</a>
      */
@@ -96,10 +107,10 @@ public class ExposureConfiguration {
      * 1. Attenuation <= durationAtAttenuationThresholds[0]                                      <br>
      * 2. durationAtAttenuationThresholds[0] < Attenuation <= durationAtAttenuationThresholds[1] <br>
      * 3. Y < durationAtAttenuationThresholds[1]
+     *
      * @see <a href="https://developer.apple.com/documentation/exposurenotification/enexposureconfiguration/3601128-attenuationdurationthresholds">documentation on developer.apple.com</a>
      */
     private final int[] durationAtAttenuationThresholds;
-
 
     private ExposureConfiguration(final int minimumRiskScore,
                                   final int[] attenuationScores,
@@ -116,6 +127,41 @@ public class ExposureConfiguration {
         this.durationAtAttenuationThresholds = durationAtAttenuationThresholds;
     }
 
+    private ExposureConfiguration(Parcel in) {
+        minimumRiskScore = in.readInt();
+        attenuationScores = in.createIntArray();
+        daysSinceLastExposureScores = in.createIntArray();
+        durationScores = in.createIntArray();
+        transmissionRiskScores = in.createIntArray();
+        durationAtAttenuationThresholds = in.createIntArray();
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(minimumRiskScore);
+        dest.writeIntArray(attenuationScores);
+        dest.writeIntArray(daysSinceLastExposureScores);
+        dest.writeIntArray(durationScores);
+        dest.writeIntArray(transmissionRiskScores);
+        dest.writeIntArray(durationAtAttenuationThresholds);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    public static final Creator<ExposureConfiguration> CREATOR = new Creator<ExposureConfiguration>() {
+        @Override
+        public ExposureConfiguration createFromParcel(Parcel in) {
+            return new ExposureConfiguration(in);
+        }
+
+        @Override
+        public ExposureConfiguration[] newArray(int size) {
+            return new ExposureConfiguration[size];
+        }
+    };
 
     /**
      * @see #minimumRiskScore
@@ -137,7 +183,6 @@ public class ExposureConfiguration {
     public int getDurationAtAttenuationHighThreshold() {
         return durationAtAttenuationThresholds[1];
     }
-
 
     /**
      * @param attenuationValue the bluetooth attenuation value from an exposure, in dB:
@@ -227,12 +272,12 @@ public class ExposureConfiguration {
 
 
     /**
-     * @param attenuationValue the bluetooth attenuation value from an exposure, in dB:
-     *                         {@code transmission power - } {@link CapturedData#getRssi()}
+     * @param attenuationValue           the bluetooth attenuation value from an exposure, in dB:
+     *                                   {@code transmission power - } {@link CapturedData#getRssi()}
      * @param daysSinceLastExposureValue the number of days since the last exposure
-     * @param durationValue the duration of an exposure, in minutes
-     * @param transmissionRiskValue the user defined risk value associated to an exposure,
-     *                              must be >= 0 and <= 7
+     * @param durationValue              the duration of an exposure, in minutes
+     * @param transmissionRiskValue      the user defined risk value associated to an exposure,
+     *                                   must be >= 0 and <= 7
      * @return the final risk score calculated by multiplying together the intermediary risk scores
      * associated with the provided values
      * @see <a href="https://developer.apple.com/documentation/exposurenotification/enexposureconfiguration">risk calculation algorithm details on developer.apple.com</a>
@@ -242,13 +287,12 @@ public class ExposureConfiguration {
                             final int durationValue,
                             final int transmissionRiskValue) {
         return getAttenuationScore(attenuationValue)
-                * getDaysSinceLastExposureScore(daysSinceLastExposureValue)
-                * getDurationScore(durationValue)
-                * getTransmissionRiskScore(transmissionRiskValue);
+            * getDaysSinceLastExposureScore(daysSinceLastExposureValue)
+            * getDurationScore(durationValue)
+            * getTransmissionRiskScore(transmissionRiskValue);
     }
 
-
-    public static class ExposureConfigurationBuilder {
+    public static final class ExposureConfigurationBuilder {
         // This one imported and used inside the
         //  InternalExposureNotificationClient
         //  https://github.com/corona-warn-app/cwa-app-android/blob/master/Corona-Warn-App/src/main/java/de/rki/coronawarnapp/nearby/InternalExposureNotificationClient.kt
@@ -256,21 +300,21 @@ public class ExposureConfiguration {
         //  ApplicationConfigurationService
         //  https://github.com/corona-warn-app/cwa-app-android/blob/master/Corona-Warn-App/src/main/java/de/rki/coronawarnapp/service/applicationconfiguration/ApplicationConfigurationService.kt
 
+        private int minimumRiskScore = 4;
+        private int[] attenuationScores = new int[]{4, 4, 4, 4, 4, 4, 4, 4};
+        private int[] daysSinceLastExposureScores = new int[]{4, 4, 4, 4, 4, 4, 4, 4};
+        private int[] durationScores = new int[]{4, 4, 4, 4, 4, 4, 4, 4};
+        private int[] transmissionRiskScores = new int[]{4, 4, 4, 4, 4, 4, 4, 4};
+        private int[] durationAtAttenuationThresholds = new int[]{50, 74};
 
-        private int minimumRiskScore = 0;
-        private int[] attenuationScores = null;
-        private int[] daysSinceLastExposureScores = null;
-        private int[] durationScores = null;
-        private int[] transmissionRiskScores = null;
-        private final int[] durationAtAttenuationThresholds = new int[] {50, 70};
-
-        public ExposureConfigurationBuilder() {}
-
+        public ExposureConfigurationBuilder() {
+        }
 
         /**
          * if not called defaults to 0
-         * @see ExposureConfiguration#minimumRiskScore
+         *
          * @return {@code this}
+         * @see ExposureConfiguration#minimumRiskScore
          */
         public ExposureConfigurationBuilder setMinimumRiskScore(int val) {
             minimumRiskScore = val;
@@ -278,97 +322,105 @@ public class ExposureConfiguration {
         }
 
         /**
+         * @return {@code this}
          * @see ExposureConfiguration#attenuationScores
-         * @return {@code this}
          */
-        public ExposureConfigurationBuilder setAttenuationScores(
-                int val0, int val1, int val2, int val3, int val4, int val5, int val6, int val7) {
-            attenuationScores = new int[8];
-            attenuationScores[0] = val0;
-            attenuationScores[1] = val1;
-            attenuationScores[2] = val2;
-            attenuationScores[3] = val3;
-            attenuationScores[4] = val4;
-            attenuationScores[5] = val5;
-            attenuationScores[6] = val6;
-            attenuationScores[7] = val7;
+        public ExposureConfigurationBuilder setAttenuationScores(int... values) {
+            if (values == null || values.length != 8) {
+                throw new IllegalArgumentException();
+            }
+
+            attenuationScores = Arrays.copyOf(values, 8);
             return this;
         }
 
         /**
+         * @return {@code this}
          * @see ExposureConfiguration#daysSinceLastExposureScores
-         * @return {@code this}
          */
-        public ExposureConfigurationBuilder setDaysSinceLastExposureScores(
-                int val0, int val1, int val2, int val3, int val4, int val5, int val6, int val7) {
-            daysSinceLastExposureScores = new int[8];
-            daysSinceLastExposureScores[0] = val0;
-            daysSinceLastExposureScores[1] = val1;
-            daysSinceLastExposureScores[2] = val2;
-            daysSinceLastExposureScores[3] = val3;
-            daysSinceLastExposureScores[4] = val4;
-            daysSinceLastExposureScores[5] = val5;
-            daysSinceLastExposureScores[6] = val6;
-            daysSinceLastExposureScores[7] = val7;
+        public ExposureConfigurationBuilder setDaysSinceLastExposureScores(int... values) {
+            if (values == null || values.length != 8) {
+                throw new IllegalArgumentException();
+            }
+
+            daysSinceLastExposureScores = Arrays.copyOf(values, 8);
             return this;
         }
 
         /**
+         * @return {@code this}
          * @see ExposureConfiguration#durationScores
-         * @return {@code this}
          */
-        public ExposureConfigurationBuilder setDurationScores(
-                int val0, int val1, int val2, int val3, int val4, int val5, int val6, int val7) {
-            durationScores = new int[8];
-            durationScores[0] = val0;
-            durationScores[1] = val1;
-            durationScores[2] = val2;
-            durationScores[3] = val3;
-            durationScores[4] = val4;
-            durationScores[5] = val5;
-            durationScores[6] = val6;
-            durationScores[7] = val7;
+        public ExposureConfigurationBuilder setDurationScores(int... values) {
+            if (values == null || values.length != 8) {
+                throw new IllegalArgumentException();
+            }
+
+            durationScores = Arrays.copyOf(values, 8);
             return this;
         }
 
         /**
-         * @see ExposureConfiguration#transmissionRiskScores
          * @return {@code this}
+         * @see ExposureConfiguration#transmissionRiskScores
          */
-        public ExposureConfigurationBuilder setTransmissionRiskScores(
-                int val0, int val1, int val2, int val3, int val4, int val5, int val6, int val7) {
-            transmissionRiskScores = new int[8];
-            transmissionRiskScores[0] = val0;
-            transmissionRiskScores[1] = val1;
-            transmissionRiskScores[2] = val2;
-            transmissionRiskScores[3] = val3;
-            transmissionRiskScores[4] = val4;
-            transmissionRiskScores[5] = val5;
-            transmissionRiskScores[6] = val6;
-            transmissionRiskScores[7] = val7;
+        public ExposureConfigurationBuilder setTransmissionRiskScores(int... values) {
+            if (values == null || values.length != 8) {
+                throw new IllegalArgumentException();
+            }
+
+            transmissionRiskScores = Arrays.copyOf(values, 8);
             return this;
         }
 
         /**
          * if not called defaults to {50, 70}
-         * @see ExposureConfiguration#durationAtAttenuationThresholds
+         *
+         * @param thresholds first the low, then the high threshold
          * @return {@code this}
+         * @see ExposureConfiguration#durationAtAttenuationThresholds
          */
-        public ExposureConfigurationBuilder setDurationAtAttenuationThresholds(
-                int lowThreshold, int highThreshold) {
-            durationAtAttenuationThresholds[0] = lowThreshold;
-            durationAtAttenuationThresholds[1] = highThreshold;
+        public ExposureConfigurationBuilder setDurationAtAttenuationThresholds(int... thresholds) {
+            if (thresholds == null || thresholds.length != 2) {
+                throw new IllegalArgumentException();
+            }
+
+            durationAtAttenuationThresholds = Arrays.copyOf(thresholds, 2);
             return this;
         }
 
+        public ExposureConfigurationBuilder setAttenuationWeight(int weight) {
+            // unused right now
+            return this;
+        }
+
+        public ExposureConfigurationBuilder setDaysSinceLastExposureWeight(int weight) {
+            // unused right now
+            return this;
+        }
+
+        public ExposureConfigurationBuilder setDurationWeight(int weight) {
+            // unused right now
+            return this;
+        }
+
+        public ExposureConfigurationBuilder setTransmissionRiskWeight(int weight) {
+            // unused right now
+            return this;
+        }
 
         /**
          * @return an {@link ExposureConfiguration} instance based on the values set in the builder
          */
         public ExposureConfiguration build() {
-            return new ExposureConfiguration(minimumRiskScore,attenuationScores,
-                    daysSinceLastExposureScores, durationScores, transmissionRiskScores,
-                    durationAtAttenuationThresholds);
+            return new ExposureConfiguration(
+                minimumRiskScore,
+                attenuationScores,
+                daysSinceLastExposureScores,
+                durationScores,
+                transmissionRiskScores,
+                durationAtAttenuationThresholds
+            );
         }
     }
 }

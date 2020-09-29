@@ -1,6 +1,11 @@
 package org.coralibre.android.sdk.fakegms.nearby.exposurenotification;
 
-public class TemporaryExposureKey {
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import java.util.Arrays;
+
+public final class TemporaryExposureKey implements Parcelable {
 
     //
     // The gms TemporaryExposureKey is used in particular by the following classes (and perhaps more):
@@ -13,61 +18,130 @@ public class TemporaryExposureKey {
     //
     //
 
-    public byte[] keyData;
-    public int rollingStartIntervalNumber;
-    public int rollingPeriod;
-    public int transmissionRiskLevel;
+    private final byte[] keyData;
+    private final int rollingStartIntervalNumber;
+    private final int transmissionRiskLevel;
+    private final int rollingPeriod;
+    private final int reportType;
 
+    public TemporaryExposureKey(
+        byte[] keyData,
+        int rollingStartIntervalNumber,
+        int rollingPeriod,
+        int transmissionRiskLevel,
+        int reportType
+    ) {
+        this.keyData = keyData;
+        this.rollingStartIntervalNumber = rollingStartIntervalNumber;
+        this.rollingPeriod = rollingPeriod;
+        this.transmissionRiskLevel = transmissionRiskLevel;
+        this.reportType = reportType;
+    }
 
-    // TODO: Match with internal.crypto.ppcp.TemporaryExposureKey / create a converter
+    private TemporaryExposureKey(Parcel in) {
+        keyData = in.createByteArray();
+        rollingStartIntervalNumber = in.readInt();
+        transmissionRiskLevel = in.readInt();
+        rollingPeriod = in.readInt();
+        reportType = in.readInt();
+    }
 
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeByteArray(keyData);
+        dest.writeInt(rollingStartIntervalNumber);
+        dest.writeInt(transmissionRiskLevel);
+        dest.writeInt(rollingPeriod);
+        dest.writeInt(reportType);
+    }
 
-    public static class TemporaryExposureKeyBuilder {
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    public static final Creator<TemporaryExposureKey> CREATOR = new Creator<TemporaryExposureKey>() {
+        @Override
+        public TemporaryExposureKey createFromParcel(Parcel in) {
+            return new TemporaryExposureKey(in);
+        }
+
+        @Override
+        public TemporaryExposureKey[] newArray(int size) {
+            return new TemporaryExposureKey[size];
+        }
+    };
+
+    public byte[] getKeyData() {
+        return keyData;
+    }
+
+    public int getRollingStartIntervalNumber() {
+        return rollingStartIntervalNumber;
+    }
+
+    public int getTransmissionRiskLevel() {
+        return transmissionRiskLevel;
+    }
+
+    public int getRollingPeriod() {
+        return rollingPeriod;
+    }
+
+    public int getReportType() {
+        return reportType;
+    }
+
+    // TODO: create a converter for internal.crypto.ppcp.TemporaryExposureKey
+
+    public static final class TemporaryExposureKeyBuilder {
         // This one imported and used inside the
         //  src/test/java/de/rki/coronawarnapp/transaction/SubmitDiagnosisKeysTransactionTest.kt
 
-        private TemporaryExposureKey builtObject = new TemporaryExposureKey();
-        public TemporaryExposureKeyBuilder() {}
+        private byte[] keyData;
+        private int rollingStartIntervalNumber;
+        private int transmissionRiskLevel;
+        private int rollingPeriod;
+        private int reportType;
 
+        public TemporaryExposureKeyBuilder() {
+        }
 
-
-        public TemporaryExposureKey.TemporaryExposureKeyBuilder setKeyData(
-                byte[] data
-        ) {
-            builtObject.keyData = data;
+        public TemporaryExposureKeyBuilder setKeyData(byte[] keyData) {
+            this.keyData = Arrays.copyOf(keyData, keyData.length);
             return this;
         }
 
-
-        public TemporaryExposureKey.TemporaryExposureKeyBuilder setRollingPeriod(
-                int val
-        ) {
-            builtObject.rollingPeriod = val;
+        public TemporaryExposureKeyBuilder setRollingPeriod(int rollingPeriod) {
+            this.rollingPeriod = rollingPeriod;
             return this;
         }
 
-
-        public TemporaryExposureKey.TemporaryExposureKeyBuilder setRollingStartIntervalNumber(
-                int val
+        public TemporaryExposureKeyBuilder setRollingStartIntervalNumber(
+            int rollingStartIntervalNumber
         ) {
-            builtObject.rollingStartIntervalNumber = val;
+            this.rollingStartIntervalNumber = rollingStartIntervalNumber;
             return this;
         }
 
-
-        public TemporaryExposureKey.TemporaryExposureKeyBuilder setTransmissionRiskLevel(
-                int val
-        ) {
-            builtObject.transmissionRiskLevel = val;
+        public TemporaryExposureKeyBuilder setTransmissionRiskLevel(int transmissionRiskLevel) {
+            this.transmissionRiskLevel = transmissionRiskLevel;
             return this;
         }
 
+        public TemporaryExposureKeyBuilder setReportType(int reportType) {
+            this.reportType = reportType;
+            return this;
+        }
 
         public TemporaryExposureKey build() {
-            return builtObject;
+            return new TemporaryExposureKey(
+                keyData,
+                rollingStartIntervalNumber,
+                rollingPeriod,
+                transmissionRiskLevel,
+                reportType
+            );
         }
-
     }
-
-
 }
