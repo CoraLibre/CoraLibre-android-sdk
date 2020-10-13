@@ -39,7 +39,7 @@ public class EntityCapturedData {
         aem = data.getAem();
     }
 
-    public CapturedData toCapturedData() throws Exception {
+    public CapturedData toCapturedData() {
         return new CapturedData(
                 captureTimestamp,
                 rssi,

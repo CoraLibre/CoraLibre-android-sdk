@@ -144,7 +144,7 @@ public class PersistentDatabase implements Database {
     }
 
     @Override
-    public Iterable<IntervalOfCapturedData> getAllCollectedPayload() throws Exception {
+    public Iterable<IntervalOfCapturedData> getAllCollectedPayload() {
         List<EntityCapturedData> allData = db.daoCapturedData().getAllData();
 
         Map<ENInterval, IntervalOfCapturedData> collectedPackagesByInterval = new HashMap<>();

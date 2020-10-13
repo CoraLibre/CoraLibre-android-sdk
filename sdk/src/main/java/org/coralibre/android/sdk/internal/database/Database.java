@@ -29,7 +29,7 @@ public interface Database {
     TemporaryExposureKey_internal getOwnTEK(ENInterval interval) throws StorageException;
 
     Iterable<TemporaryExposureKey_internal> getAllOwnTEKs();
-    Iterable<IntervalOfCapturedData> getAllCollectedPayload() throws Exception;
+    Iterable<IntervalOfCapturedData> getAllCollectedPayload();
 
     void truncateLast14Days();
 
