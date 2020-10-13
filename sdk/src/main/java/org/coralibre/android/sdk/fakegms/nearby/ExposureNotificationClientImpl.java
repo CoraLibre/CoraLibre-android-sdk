@@ -140,13 +140,10 @@ final class ExposureNotificationClientImpl implements ExposureNotificationClient
                 }
             }
 
-            // TODO (probably) match provided keys with database and cache result for later
 
-            IdentifyMatchesFromDb.identifyMatches();
+            // TODO Discard keys older than 14 days (https://developers.google.com/android/reference/com/google/android/gms/nearby/exposurenotification/ExposureNotificationClient#provideDiagnosisKeys(com.google.android.gms.nearby.exposurenotification.DiagnosisKeyFileProvider))
 
-            //boolean noMatchFound = database.findAllMeasuredExposures().isEmpty();
-            boolean noMatchFound = true;
-            // TODO WIP haitrec
+            boolean noMatchFound = !IdentifyMatchesFromDb.hasMatches();
 
             Intent intent = new Intent(noMatchFound ? ACTION_EXPOSURE_NOT_FOUND : ACTION_EXPOSURE_STATE_UPDATED);
             intent.putExtra(EXTRA_TOKEN, token);
@@ -158,20 +155,7 @@ final class ExposureNotificationClientImpl implements ExposureNotificationClient
     @Override
     public Task<ExposureSummary> getExposureSummary(String token) {
         return Tasks.call(() -> {
-            long minimumCaptureTimestamp = Long.MAX_VALUE;
-            int maximumRiskScore = 0;
-            int summationRiskScore = 0;
-            final Set<byte[]> distinctKeys = new HashSet<>();
-
-            // TODO loop through matched keys and collect the above data
-
-            return new ExposureSummary.ExposureSummaryBuilder()
-                .setDaysSinceLastExposure((int) minimumCaptureTimestamp) // TODO calculate days
-                .setMaximumRiskScore(maximumRiskScore)
-                .setSummationRiskScore(summationRiskScore)
-                .setMatchedKeyCount(distinctKeys.size())
-                .setAttenuationDurations(new int[3]) // TODO
-                .build();
+            return IdentifyMatchesFromDb.buildExposureSummaryFromMatches();
         });
     }
 
