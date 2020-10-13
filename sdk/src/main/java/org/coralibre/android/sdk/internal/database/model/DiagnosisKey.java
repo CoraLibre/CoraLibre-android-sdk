@@ -7,9 +7,7 @@ public class DiagnosisKey {
 
     byte[] keyData;
 
-    ENInterval rollingStartNumber;
-
-    ENInterval rollingPeriod;
+    private final ENInterval interval;
 
     /**
      * A number in range [0, 7]
@@ -18,12 +16,10 @@ public class DiagnosisKey {
     int transmissionRiskLevel;
 
     public DiagnosisKey(byte[] keyData,
-                        long rollingStartNumber,
-                        long rollingPeriod,
+                        long intervalNumber,
                         int transmissionRiskLevel) {
         this.keyData = keyData;
-        this.rollingStartNumber = new ENInterval(rollingStartNumber);
-        this.rollingPeriod = new ENInterval(rollingPeriod);
+        this.interval = new ENInterval(intervalNumber);
         this.transmissionRiskLevel = transmissionRiskLevel;
     }
 
@@ -31,12 +27,8 @@ public class DiagnosisKey {
         return keyData;
     }
 
-    public ENInterval getRollingStartNumber() {
-        return rollingStartNumber;
-    }
-
-    public ENInterval getRollingPeriod() {
-        return rollingPeriod;
+    public ENInterval getInterval() {
+        return interval;
     }
 
     public int getTransmissionRiskLevel() {

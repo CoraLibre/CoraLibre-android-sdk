@@ -15,8 +15,7 @@ public class EntityDiagnosisKey {
     public long dbPrimaryKey;
 
     public byte[] keyData;
-    public long rollingStartNumber;
-    public long rollingPeriod;
+    public long intervalNumber;
     public int transmissionRiskLevel;
 
 
@@ -24,12 +23,11 @@ public class EntityDiagnosisKey {
 
     public EntityDiagnosisKey(final DiagnosisKey diagnosisKey) {
         keyData = diagnosisKey.getKeyData();
-        rollingStartNumber = diagnosisKey.getRollingStartNumber().get();
-        rollingPeriod = diagnosisKey.getRollingPeriod().get();
+        intervalNumber = diagnosisKey.getInterval().get();
         transmissionRiskLevel = diagnosisKey.getTransmissionRiskLevel();
     }
 
     public DiagnosisKey toDiagnosisKey() {
-        return new DiagnosisKey(keyData, rollingStartNumber, rollingPeriod, transmissionRiskLevel);
+        return new DiagnosisKey(keyData, intervalNumber, transmissionRiskLevel);
     }
 }

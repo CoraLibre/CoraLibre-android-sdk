@@ -6,7 +6,6 @@ import com.google.crypto.tink.subtle.Hkdf;
 
 import org.coralibre.android.sdk.internal.database.Database;
 import org.coralibre.android.sdk.internal.database.DatabaseAccess;
-import org.coralibre.android.sdk.internal.database.model.GeneratedTEK;
 
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
@@ -68,12 +67,11 @@ public class CryptoModule {
         try {
             database = db;
 
-            ENInterval intervalNumberMidnight = TemporaryExposureKey.getMidnight(currentInterval);
+            ENInterval intervalNumberMidnight = TemporaryExposureKey_internal.getMidnight(currentInterval);
             if (! database.hasTEKForInterval(intervalNumberMidnight)) {
                 updateTEK();
             } else {
-                GeneratedTEK rawTek = database.getGeneratedTEK(intervalNumberMidnight);
-                TemporaryExposureKey tek = new TemporaryExposureKey(rawTek.getInterval(), rawTek.getKey());
+                TemporaryExposureKey_internal tek = database.getOwnTEK(intervalNumberMidnight);
                 currentTekDay = tek.getInterval();
                 currentRPIK = generateRPIK(tek);
                 currentAEMK = generateAEMK(tek);
@@ -87,22 +85,22 @@ public class CryptoModule {
         return new ENInterval(System.currentTimeMillis() / 1000L, true);
     }
 
-    private TemporaryExposureKey getNewRandomTEK() {
+    private TemporaryExposureKey_internal getNewRandomTEK() {
         try {
             KeyGenerator keyGenerator = KeyGenerator.getInstance("HmacSHA256");
             SecretKey secretKey = keyGenerator.generateKey();
             ENInterval now = testMode ? currentIntervalForTesting : getCurrentInterval();
-            return new TemporaryExposureKey(now, secretKey.getEncoded());
+            return new TemporaryExposureKey_internal(now, secretKey.getEncoded());
         } catch (Exception e) {
             throw new CryptoException(e);
         }
     }
 
-    private static byte[] generateHKDFBytes(TemporaryExposureKey tek, byte[] info, int length) {
+    private static byte[] generateHKDFBytes(byte[] tek, byte[] info, int length) {
         try {
             return Hkdf.computeHkdf(
                     "HMACSHA256",
-                    tek.getKey(),
+                    tek,
                     null,
                     info,
                     length
@@ -114,18 +112,22 @@ public class CryptoModule {
         }
     }
 
-    public static RollingProximityIdentifierKey generateRPIK(TemporaryExposureKey tek) {
+    public static RollingProximityIdentifierKey generateRPIK(TemporaryExposureKey_internal tek) {
+        return generateRPIK(tek.getKey());
+    }
+
+    public static RollingProximityIdentifierKey generateRPIK(byte[] tek) {
         byte[] rawRPIK = generateHKDFBytes(
-                tek,
-                RPIK_INFO.getBytes(StandardCharsets.UTF_8),
-                RollingProximityIdentifierKey.RPIK_LENGTH
+            tek,
+            RPIK_INFO.getBytes(StandardCharsets.UTF_8),
+            RollingProximityIdentifierKey.RPIK_LENGTH
         );
         return new RollingProximityIdentifierKey(rawRPIK);
     }
 
-    public static AssociatedEncryptedMetadataKey generateAEMK(TemporaryExposureKey tek) {
+    public static AssociatedEncryptedMetadataKey generateAEMK(TemporaryExposureKey_internal tek) {
         byte[] rawAEMK = generateHKDFBytes(
-                tek,
+                tek.getKey(),
                 AEMK_INFO.getBytes(StandardCharsets.UTF_8),
                 AssociatedEncryptedMetadataKey.AEMK_LENGTH
         );
@@ -199,21 +201,21 @@ public class CryptoModule {
 
     public static AssociatedMetadata decryptAEM(AssociatedEncryptedMetadata aem,
                                                 RollingProximityIdentifier rpi,
-                                                TemporaryExposureKey tek) {
+                                                TemporaryExposureKey_internal tek) {
         return decryptAEM(aem, rpi, generateAEMK(tek));
     }
 
     public void updateTEK() {
-        System.out.println(TemporaryExposureKey.getMidnight(testMode ? currentIntervalForTesting : getCurrentInterval()).get());
+        System.out.println(TemporaryExposureKey_internal.getMidnight(testMode ? currentIntervalForTesting : getCurrentInterval()).get());
         if (!currentTekDay.equals(
-                TemporaryExposureKey.getMidnight(testMode ? currentIntervalForTesting : getCurrentInterval()))) {
-            TemporaryExposureKey currentTek = getNewRandomTEK();
+                TemporaryExposureKey_internal.getMidnight(testMode ? currentIntervalForTesting : getCurrentInterval()))) {
+            TemporaryExposureKey_internal currentTek = getNewRandomTEK();
             currentTekDay = currentTek.getInterval();
             currentRPIK = generateRPIK(currentTek);
             currentAEMK = generateAEMK(currentTek);
 
             Database database = DatabaseAccess.getDefaultDatabaseInstance();
-            database.addGeneratedTEK(new GeneratedTEK(currentTekDay, currentTek.getKey()));
+            database.addGeneratedTEK(new TemporaryExposureKey_internal(currentTekDay, currentTek.getKey()));
         }
     }
 

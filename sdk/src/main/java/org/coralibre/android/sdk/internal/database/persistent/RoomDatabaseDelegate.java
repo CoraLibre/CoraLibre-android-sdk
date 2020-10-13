@@ -5,11 +5,11 @@ import androidx.room.TypeConverters;
 
 import org.coralibre.android.sdk.internal.database.model.entity.EntityCapturedData;
 import org.coralibre.android.sdk.internal.database.model.entity.EntityDiagnosisKey;
-import org.coralibre.android.sdk.internal.database.model.entity.EntityGeneratedTEK;
+import org.coralibre.android.sdk.internal.database.model.entity.EntityTemporaryExposureKey;
 
 
 @androidx.room.Database(
-        entities = {EntityGeneratedTEK.class, EntityCapturedData.class, EntityDiagnosisKey.class},
+        entities = {EntityTemporaryExposureKey.class, EntityCapturedData.class, EntityDiagnosisKey.class},
         version = 1
 )
 @TypeConverters(

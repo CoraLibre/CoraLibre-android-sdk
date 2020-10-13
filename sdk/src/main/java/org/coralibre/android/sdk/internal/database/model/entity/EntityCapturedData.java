@@ -24,7 +24,8 @@ public class EntityCapturedData {
     public long captureTimestamp;
     public ENInterval enInterval;
     public byte rssi;
-    public byte[] payload;
+    public byte[] rpi;
+    public byte[] aem;
 
 
     public EntityCapturedData(){}
@@ -34,14 +35,16 @@ public class EntityCapturedData {
         captureTimestamp = data.getCaptureTimestamp();
         enInterval = data.getEnInterval();
         rssi = data.getRssi();
-        payload = data.getPayload();
+        rpi = data.getRpi();
+        aem = data.getAem();
     }
 
-    public CapturedData toCapturedData() {
+    public CapturedData toCapturedData() throws Exception {
         return new CapturedData(
                 captureTimestamp,
                 rssi,
-                payload
+                rpi,
+                aem
         );
     }
 

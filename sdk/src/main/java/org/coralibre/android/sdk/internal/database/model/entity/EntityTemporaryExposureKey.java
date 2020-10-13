@@ -4,11 +4,11 @@ import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
 import org.coralibre.android.sdk.internal.crypto.ENInterval;
-import org.coralibre.android.sdk.internal.database.model.GeneratedTEK;
+import org.coralibre.android.sdk.internal.crypto.TemporaryExposureKey_internal;
 
 
 @Entity
-public class EntityGeneratedTEK {
+public class EntityTemporaryExposureKey {
 
     @PrimaryKey
     public ENInterval interval;
@@ -16,16 +16,15 @@ public class EntityGeneratedTEK {
     public byte[] key;
 
 
-    public EntityGeneratedTEK(){}
+    public EntityTemporaryExposureKey(){}
 
-
-    public EntityGeneratedTEK(GeneratedTEK tek) {
+    public EntityTemporaryExposureKey(TemporaryExposureKey_internal tek) {
         interval = tek.getInterval();
         key = tek.getKey();
     }
 
-    public GeneratedTEK toGeneratedTEK() {
-        return new GeneratedTEK(
+    public TemporaryExposureKey_internal toTemporaryExposureKey() {
+        return new TemporaryExposureKey_internal(
                 interval,
                 key
         );

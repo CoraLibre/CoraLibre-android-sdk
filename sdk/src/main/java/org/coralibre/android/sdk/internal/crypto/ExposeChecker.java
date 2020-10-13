@@ -8,26 +8,26 @@ import java.util.List;
 import static org.coralibre.android.sdk.internal.crypto.CryptoModule.FUZZY_COMPARE_TIME_DEVIATION;
 import static org.coralibre.android.sdk.internal.crypto.CryptoModule.generateRPI;
 import static org.coralibre.android.sdk.internal.crypto.CryptoModule.generateRPIK;
-import static org.coralibre.android.sdk.internal.crypto.TemporaryExposureKey.TEK_ROLLING_PERIOD;
-import static org.coralibre.android.sdk.internal.crypto.TemporaryExposureKey.getMidnight;
+import static org.coralibre.android.sdk.internal.crypto.TemporaryExposureKey_internal.TEK_ROLLING_PERIOD;
+import static org.coralibre.android.sdk.internal.crypto.TemporaryExposureKey_internal.getMidnight;
 
 public class ExposeChecker {
-    public static List<RollingProximityIdentifier> generateAllRPIForADay(TemporaryExposureKey tek) {
+    public static List<RollingProximityIdentifier> generateAllRPIForADay(TemporaryExposureKey_internal tek) {
         final long enInterval = tek.getInterval().get();
         List<RollingProximityIdentifier> rpiList =
-                new ArrayList<>(TemporaryExposureKey.TEK_ROLLING_PERIOD);
+                new ArrayList<>(TemporaryExposureKey_internal.TEK_ROLLING_PERIOD);
         RollingProximityIdentifierKey rpik = generateRPIK(tek);
-        for(long i = 0; i < TemporaryExposureKey.TEK_ROLLING_PERIOD; i++) {
+        for(long i = 0; i < TemporaryExposureKey_internal.TEK_ROLLING_PERIOD; i++) {
             rpiList.add(generateRPI(rpik, new ENInterval(enInterval + i)));
         }
         return rpiList;
     }
 
 
-    private static List<TemporaryExposureKey> getMatchingTEKs(List<TemporaryExposureKey> allTEKs,
-                                                              ENInterval interval) {
-        List<TemporaryExposureKey> relatedTEKs = new ArrayList<>();
-        for(TemporaryExposureKey key : allTEKs) {
+    private static List<TemporaryExposureKey_internal> getMatchingTEKs(List<TemporaryExposureKey_internal> allTEKs,
+                                                                       ENInterval interval) {
+        List<TemporaryExposureKey_internal> relatedTEKs = new ArrayList<>();
+        for(TemporaryExposureKey_internal key : allTEKs) {
             if(key.getInterval().equals(interval)) {
                 relatedTEKs.add(key);
             }
@@ -35,21 +35,21 @@ public class ExposeChecker {
         return relatedTEKs;
     }
 
-    public static List<TemporaryExposureKey> getAllRelatedTEKs(List<TemporaryExposureKey> allTEKs,
-                                                                ENInterval interval) {
+    public static List<TemporaryExposureKey_internal> getAllRelatedTEKs(List<TemporaryExposureKey_internal> allTEKs,
+                                                                        ENInterval interval) {
         ENInterval slotBeginning = getMidnight(
                 new ENInterval(interval.get() - FUZZY_COMPARE_TIME_DEVIATION));
         ENInterval slotEnding = getMidnight(
                 new ENInterval(interval.get() + FUZZY_COMPARE_TIME_DEVIATION));
-        List<TemporaryExposureKey> relatedTeKs = getMatchingTEKs(allTEKs, slotBeginning);
+        List<TemporaryExposureKey_internal> relatedTeKs = getMatchingTEKs(allTEKs, slotBeginning);
         if(!slotBeginning.equals(slotEnding)) {
             relatedTeKs.addAll(getMatchingTEKs(allTEKs, slotEnding));
         }
         return relatedTeKs;
     }
 
-    public static List<RollingProximityIdentifier> generateRPIsForSlot(TemporaryExposureKey tek,
-                                                                 ENInterval interval) {
+    public static List<RollingProximityIdentifier> generateRPIsForSlot(TemporaryExposureKey_internal tek,
+                                                                       ENInterval interval) {
         long slotBeginning = interval.get() - FUZZY_COMPARE_TIME_DEVIATION;
         if(slotBeginning < tek.getInterval().get()) {
             slotBeginning = tek.getInterval().get();
@@ -70,16 +70,16 @@ public class ExposeChecker {
 
 
 
-    public static List<Pair<TemporaryExposureKey, RollingProximityIdentifier>>
-        findMatches(List<TemporaryExposureKey> teks,
+    public static List<Pair<TemporaryExposureKey_internal, RollingProximityIdentifier>>
+        findMatches(List<TemporaryExposureKey_internal> teks,
                     List<RollingProximityIdentifier> collectedRPIs) {
         //TODO: Do dynamic programing foo and use a cache
-        List<Pair<TemporaryExposureKey, RollingProximityIdentifier>> matchingKeys = new
+        List<Pair<TemporaryExposureKey_internal, RollingProximityIdentifier>> matchingKeys = new
                 ArrayList<>();
         for(RollingProximityIdentifier crpi : collectedRPIs) {
-            List<TemporaryExposureKey> relatedTeks
+            List<TemporaryExposureKey_internal> relatedTeks
                     = getAllRelatedTEKs(teks, crpi.getInterval());
-            for(TemporaryExposureKey tek : relatedTeks) {
+            for(TemporaryExposureKey_internal tek : relatedTeks) {
                 List<RollingProximityIdentifier> generatedRPIs
                         = generateRPIsForSlot(tek, crpi.getInterval());
                 for(RollingProximityIdentifier grpi :  generatedRPIs) {

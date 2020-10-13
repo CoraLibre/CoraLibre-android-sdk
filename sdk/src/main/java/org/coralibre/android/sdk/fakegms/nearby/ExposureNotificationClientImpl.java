@@ -15,19 +15,17 @@ import org.coralibre.android.sdk.fakegms.nearby.exposurenotification.ExposureSum
 import org.coralibre.android.sdk.fakegms.nearby.exposurenotification.TemporaryExposureKey;
 import org.coralibre.android.sdk.fakegms.tasks.Task;
 import org.coralibre.android.sdk.fakegms.tasks.Tasks;
+import org.coralibre.android.sdk.internal.crypto.TemporaryExposureKey_internal;
 import org.coralibre.android.sdk.internal.database.Database;
-import org.coralibre.android.sdk.internal.database.PersistentDatabase;
-import org.coralibre.android.sdk.internal.database.model.CapturedData;
-import org.coralibre.android.sdk.internal.database.model.IntervalOfCapturedData;
-import org.coralibre.android.sdk.proto.TemporaryExposureKeyFile;
+import org.coralibre.android.sdk.internal.database.DatabaseAccess;
 import org.coralibre.android.sdk.proto.TemporaryExposureKeyFile.TemporaryExposureKeyExport;
-import org.coralibre.android.sdk.proto.TemporaryExposureKeyFile.TemporaryExposureKeyProto;
 
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.zip.ZipEntry;
@@ -52,7 +50,11 @@ final class ExposureNotificationClientImpl implements ExposureNotificationClient
         return Tasks.call(() -> {
             if (!enabled) {
                 PPCP.start(context);
-                database = new PersistentDatabase(context);
+
+                // TODO: Change after refactoring database creation / factory
+                //database = new PersistentDatabase(context);
+                database = DatabaseAccess.getDefaultDatabaseInstance();
+
                 enabled = true;
             }
             return null;
@@ -82,19 +84,16 @@ final class ExposureNotificationClientImpl implements ExposureNotificationClient
     @Override
     public Task<List<TemporaryExposureKey>> getTemporaryExposureKeyHistory() {
         return Tasks.call(() -> {
-            List<TemporaryExposureKey> result = new ArrayList<>();
-            for (IntervalOfCapturedData intervalOfCapturedData : database.getAllCollectedPayload()) {
-                CapturedData firstCapturedData = intervalOfCapturedData.getCapturedData().get(0);
-
-                result.add(new TemporaryExposureKey.TemporaryExposureKeyBuilder()
-                    .setKeyData(firstCapturedData.getPayload()) // TODO is this the correct key?
-                    .setRollingStartIntervalNumber((int) firstCapturedData.getEnInterval().get())
-                    .setRollingPeriod((int) intervalOfCapturedData.getInterval().get()) // number of 10-minutes intervals covered
-                    .build());
-
-                //.setTransmissionRiskLevel() not used because how could we know what
-                // transmission risk level would be assigned to this key by the library user?
-                // not even the microg's implementation does it
+            Iterable<TemporaryExposureKey_internal> dbTeks = database.getAllOwnTEKs();
+            List<TemporaryExposureKey> result = new LinkedList<TemporaryExposureKey>();
+            for (TemporaryExposureKey_internal dbTek : dbTeks) {
+                result.add(new TemporaryExposureKey(
+                    dbTek.getKey(),
+                    (int) dbTek.getInterval().get(),
+                    TemporaryExposureKey_internal.TEK_ROLLING_PERIOD,
+                    0, // TODO Means "Unused"; verify, that the CWA sets this value before uploading
+                    0 // TODO this means "UNKNOWN"; see https://developers.google.com/android/exposure-notifications/exposure-notifications-api
+                ));
             }
             return result;
         });
@@ -143,7 +142,12 @@ final class ExposureNotificationClientImpl implements ExposureNotificationClient
 
             // TODO (probably) match provided keys with database and cache result for later
 
-            boolean noMatchFound = database.findAllMeasuredExposures().isEmpty();
+            IdentifyMatchesFromDb.identifyMatches();
+
+            //boolean noMatchFound = database.findAllMeasuredExposures().isEmpty();
+            boolean noMatchFound = true;
+            // TODO WIP haitrec
+
             Intent intent = new Intent(noMatchFound ? ACTION_EXPOSURE_NOT_FOUND : ACTION_EXPOSURE_STATE_UPDATED);
             intent.putExtra(EXTRA_TOKEN, token);
             context.sendOrderedBroadcast(intent, null);

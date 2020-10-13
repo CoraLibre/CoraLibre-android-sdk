@@ -163,7 +163,6 @@ public class BleClient {
                         "]; size: " + rawPayload.length);
             }
 
-
             // no we are not checking for duplicates. We need duplicates for the
             // risk calculation later
             collectedData.add(new CollectedDatumInstance(payload, rssi, now));
@@ -194,9 +193,13 @@ public class BleClient {
         Database database = DatabaseAccess.getDefaultDatabaseInstance();
 
         for (CollectedDatumInstance data : collectedData) {
-            database.addCapturedPayload(new CapturedData(data.getTimestamp(),
+            database.addCapturedPayload(
+                new CapturedData(
+                    data.getTimestamp(),
                     data.getRssi(),
-                    data.getPayload().getRawPayload()));
+                    data.getPayload().getRpi().getData(),
+                    data.getPayload().getAem().getData()
+                ));
         }
     }
 

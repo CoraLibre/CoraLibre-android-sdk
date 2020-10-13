@@ -3,9 +3,9 @@ package org.coralibre.android.sdk.internal.crypto;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import org.coralibre.android.sdk.fakegms.nearby.exposurenotification.TemporaryExposureKey;
 import org.coralibre.android.sdk.internal.database.Database;
 import org.coralibre.android.sdk.internal.database.DatabaseAccess;
-import org.coralibre.android.sdk.internal.database.model.GeneratedTEK;
 
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -148,14 +148,14 @@ public class CryptoModuleTests {
 
     @Test
     public void testGenerateRPIK() throws Exception {
-        TemporaryExposureKey tek = new TemporaryExposureKey(0L, TEK_VAL1);
+        TemporaryExposureKey_internal tek = new TemporaryExposureKey_internal(0L, TEK_VAL1);
         RollingProximityIdentifierKey rpik = CryptoModule.generateRPIK(tek);
         assertArrayEquals(RPIK_VAL1, rpik.getKey());
     }
 
     @Test
     public void testGenerateAEMK() throws Exception {
-        TemporaryExposureKey tek = new TemporaryExposureKey(0L, TEK_VAL1);
+        TemporaryExposureKey_internal tek = new TemporaryExposureKey_internal(0L, TEK_VAL1);
         AssociatedEncryptedMetadataKey aemk = CryptoModule.generateAEMK(tek);
         assertArrayEquals(AEMK_VAL1, aemk.getKey());
     }
@@ -185,7 +185,7 @@ public class CryptoModuleTests {
     @Test
     // See: https://github.com/corona-warn-app/cwa-app-android/issues/75#issuecomment-640114705
     public void testRoundtripExample1() throws Exception {
-        TemporaryExposureKey tek = new TemporaryExposureKey(0L, TEK_VAL2);
+        TemporaryExposureKey_internal tek = new TemporaryExposureKey_internal(0L, TEK_VAL2);
         RollingProximityIdentifierKey rpik = CryptoModule.generateRPIK(tek);
         assertArrayEquals(TEK_VAL2_RPIK, rpik.getKey());
         ENInterval enInterval = new ENInterval(2652091);
@@ -203,7 +203,7 @@ public class CryptoModuleTests {
     @Test
     // See: https://github.com/corona-warn-app/cwa-app-android/issues/75#issuecomment-640114705
     public void testRoundtripExample2() throws Exception {
-        TemporaryExposureKey tek = new TemporaryExposureKey(0L, TEK_VAL3);
+        TemporaryExposureKey_internal tek = new TemporaryExposureKey_internal(0L, TEK_VAL3);
         RollingProximityIdentifierKey rpik = CryptoModule.generateRPIK(tek);
         assertArrayEquals(TEK_VAL3_RPIK, rpik.getKey());
         ENInterval enInterval = new ENInterval(2649435);
@@ -223,7 +223,7 @@ public class CryptoModuleTests {
         Database db = DatabaseAccess.getDefaultDatabaseInstance();
         CryptoModule crypto = getMockedTimeCryptoModule(db, 1000);
         int i = 0;
-        for(GeneratedTEK tek : db.getAllGeneratedTEKs())
+        for(TemporaryExposureKey_internal tek : db.getAllOwnTEKs())
             i++;
         assertEquals(1, i);
     }
@@ -235,7 +235,7 @@ public class CryptoModuleTests {
         setCurrentENNumber(crypto, 1100);
         crypto.updateTEK();
         int i = 0;
-        for(GeneratedTEK tek : db.getAllGeneratedTEKs())
+        for(TemporaryExposureKey_internal tek : db.getAllOwnTEKs())
             i++;
         assertEquals(1, i);
     }
@@ -247,7 +247,7 @@ public class CryptoModuleTests {
         setCurrentENNumber(crypto, 1100);
         crypto.updateTEK();
         int i = 0;
-        for(GeneratedTEK tek : db.getAllGeneratedTEKs())
+        for(TemporaryExposureKey_internal tek : db.getAllOwnTEKs())
             i++;
         assertEquals(2, i);
     }

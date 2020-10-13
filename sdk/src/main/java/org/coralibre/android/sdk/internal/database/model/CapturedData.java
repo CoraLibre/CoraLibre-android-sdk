@@ -20,13 +20,18 @@ public class CapturedData {
     private byte rssi;
 
     /** 16 bytes */
-    private byte[] payload;
+    private byte[] rpi;
 
-    public CapturedData(long captureTimestamp, byte rssi, byte[] payload) {
+    /** 4 bytes */
+    private byte[] aem;
+
+
+    public CapturedData(long captureTimestamp, byte rssi, byte[] rpi, byte[] aem) {
         this.captureTimestamp = captureTimestamp;
         this.enInterval = new ENInterval(captureTimestamp, true);
         this.rssi = rssi;
-        this.payload = payload;
+        this.rpi = rpi;
+        this.aem = aem;
     }
 
     public Long getCaptureTimestamp() {
@@ -41,7 +46,13 @@ public class CapturedData {
         return rssi;
     }
 
-    public byte[] getPayload() {
-        return payload;
+    public byte[] getRpi() {
+        // TODO Return copy, not the byte array itself
+        return rpi;
+    }
+
+    public byte[] getAem() {
+        // TODO Return copy, not the byte array itself
+        return aem;
     }
 }

@@ -92,7 +92,7 @@ public final class TemporaryExposureKey implements Parcelable {
         return reportType;
     }
 
-    // TODO: create a converter for internal.crypto.ppcp.TemporaryExposureKey
+    // TODO: create a converter for internal.crypto.ppcp.TemporaryExposureKey_internal
 
     public static final class TemporaryExposureKeyBuilder {
         // This one imported and used inside the
