@@ -9,10 +9,10 @@ public class RollingProximityIdentifier {
     private final byte[] data = new byte[RPI_LENGTH];
     private final ENInterval interval;
 
-    public RollingProximityIdentifier(byte[] rawPRI, ENInterval interval) {
-        if(rawPRI.length != RPI_LENGTH) throw new InvalidParameterException("wrong rawRPI size");
+    public RollingProximityIdentifier(byte[] rawRPI, ENInterval interval) {
+        if(rawRPI.length != RPI_LENGTH) throw new InvalidParameterException("wrong rawRPI size");
         this.interval = new ENInterval(interval);
-        System.arraycopy(rawPRI, 0, data, 0, RPI_LENGTH);
+        System.arraycopy(rawRPI, 0, data, 0, RPI_LENGTH);
     }
 
     public byte[] getData() {
