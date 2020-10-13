@@ -18,6 +18,7 @@ import org.coralibre.android.sdk.fakegms.tasks.Tasks;
 import org.coralibre.android.sdk.internal.crypto.TemporaryExposureKey_internal;
 import org.coralibre.android.sdk.internal.database.Database;
 import org.coralibre.android.sdk.internal.database.DatabaseAccess;
+import org.coralibre.android.sdk.internal.util.DiagnosisKeyUtils;
 import org.coralibre.android.sdk.proto.TemporaryExposureKeyFile.TemporaryExposureKeyExport;
 
 import java.io.BufferedInputStream;
@@ -128,8 +129,8 @@ final class ExposureNotificationClientImpl implements ExposureNotificationClient
                             String prefixString = new String(prefix).trim();
                             if (totalBytesRead == prefix.length && prefixString.equals("EK Export v1")) {
                                 final TemporaryExposureKeyExport temporaryExposureKeyExport = TemporaryExposureKeyExport.parseFrom(stream);
-                                database.addDiagnosisKeys(temporaryExposureKeyExport.getKeysList());
-                                database.updateDiagnosisKeys(temporaryExposureKeyExport.getRevisedKeysList());
+                                database.addDiagnosisKeys(token, DiagnosisKeyUtils.toDiagnosisKeys(temporaryExposureKeyExport.getKeysList()));
+                                database.updateDiagnosisKeys(token, DiagnosisKeyUtils.toDiagnosisKeys(temporaryExposureKeyExport.getRevisedKeysList()));
                             } else {
                                 Log.e(TAG, "Failed to parse diagnosis key file: export.bin has invalid prefix: " + prefixString);
                             }
@@ -143,7 +144,7 @@ final class ExposureNotificationClientImpl implements ExposureNotificationClient
 
             // TODO Discard keys older than 14 days (https://developers.google.com/android/reference/com/google/android/gms/nearby/exposurenotification/ExposureNotificationClient#provideDiagnosisKeys(com.google.android.gms.nearby.exposurenotification.DiagnosisKeyFileProvider))
 
-            boolean noMatchFound = !IdentifyMatchesFromDb.hasMatches();
+            boolean noMatchFound = !IdentifyMatchesFromDb.hasMatches(token);
 
             Intent intent = new Intent(noMatchFound ? ACTION_EXPOSURE_NOT_FOUND : ACTION_EXPOSURE_STATE_UPDATED);
             intent.putExtra(EXTRA_TOKEN, token);
@@ -155,7 +156,7 @@ final class ExposureNotificationClientImpl implements ExposureNotificationClient
     @Override
     public Task<ExposureSummary> getExposureSummary(String token) {
         return Tasks.call(() -> {
-            return IdentifyMatchesFromDb.buildExposureSummaryFromMatches();
+            return IdentifyMatchesFromDb.buildExposureSummaryFromMatches(token);
         });
     }
 

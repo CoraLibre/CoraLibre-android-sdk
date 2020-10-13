@@ -15,7 +15,9 @@ import org.coralibre.android.sdk.internal.database.model.IntervalOfCapturedDataI
 import org.coralibre.android.sdk.internal.database.model.entity.EntityCapturedData;
 import org.coralibre.android.sdk.internal.database.model.entity.EntityDiagnosisKey;
 import org.coralibre.android.sdk.internal.database.model.entity.EntityTemporaryExposureKey;
+import org.coralibre.android.sdk.internal.database.model.entity.EntityToken;
 import org.coralibre.android.sdk.internal.database.persistent.RoomDatabaseDelegate;
+import org.coralibre.android.sdk.internal.util.DiagnosisKeyUtils;
 import org.coralibre.android.sdk.proto.TemporaryExposureKeyFile.TemporaryExposureKeyProto;
 
 import java.util.ArrayList;
@@ -67,40 +69,28 @@ public class PersistentDatabase implements Database {
     }
 
 
-    private static List<EntityDiagnosisKey> toEntityDiagnosisKeys(List<TemporaryExposureKeyProto> tekProtos) {
-        List<EntityDiagnosisKey> entityDiagnosisKeys = new ArrayList<>();
-        for (TemporaryExposureKeyProto tekProto : tekProtos) {
-            if (!tekProto.hasKeyData()) {
-                throw new IllegalArgumentException("missing tekProto keyData");
-            } else if (!tekProto.hasRollingStartIntervalNumber()) {
-                throw new IllegalArgumentException("missing tekProto rollingStartIntervalNumber");
-            } else if (!tekProto.hasRollingPeriod()) {
-                throw new IllegalArgumentException("missing tekProto rollingPeriod");
-            }
 
-            entityDiagnosisKeys.add(new EntityDiagnosisKey(new DiagnosisKey(
-                tekProto.getKeyData().toByteArray(),
-                tekProto.getRollingStartIntervalNumber(),
-                tekProto.hasTransmissionRiskLevel() ? tekProto.getTransmissionRiskLevel() : 0)));
-        }
-        return entityDiagnosisKeys;
+    @Override
+    public void addDiagnosisKeys(String token, List<DiagnosisKey> diagnosisKeys) {
+        db.daoToken().insertToken(new EntityToken(token));
+        db.daoDiagnosisKey().insertDiagnosisKeys(
+            DiagnosisKeyUtils.toEntityDiagnosisKeys(token, diagnosisKeys)
+        );
     }
 
     @Override
-    public void addDiagnosisKeys(List<TemporaryExposureKeyProto> diagnosisKeys) {
-        db.daoDiagnosisKey().insertDiagnosisKeys(toEntityDiagnosisKeys(diagnosisKeys));
+    public void updateDiagnosisKeys(String token, List<DiagnosisKey> diagnosisKeys) {
+        db.daoToken().insertToken(new EntityToken(token));
+        db.daoDiagnosisKey().updateDiagnosisKeys(
+            DiagnosisKeyUtils.toEntityDiagnosisKeys(token, diagnosisKeys)
+        );
     }
 
     @Override
-    public void updateDiagnosisKeys(List<TemporaryExposureKeyProto> diagnosisKeys) {
-        db.daoDiagnosisKey().updateDiagnosisKeys(toEntityDiagnosisKeys(diagnosisKeys));
-    }
-
-    @Override
-    public List<DiagnosisKey> getAllDiagnosisKeys() {
+    public List<DiagnosisKey> getDiagnosisKeys(String token) {
         List<DiagnosisKey> result = new LinkedList<DiagnosisKey>();
 
-        List<EntityDiagnosisKey> entities = db.daoDiagnosisKey().getAllDiagnosisKeys();
+        List<EntityDiagnosisKey> entities = db.daoDiagnosisKey().getDiagnosisKeys(token);
         for (EntityDiagnosisKey entity : entities) {
             DiagnosisKey diagnosisKey = new DiagnosisKey(
                 entity.keyData,
@@ -176,12 +166,23 @@ public class PersistentDatabase implements Database {
 
         db.daoCapturedData().truncateOldData(lastIntervalToKeep);
         db.daoTEK().truncateOldData(lastIntervalToKeep);
+
+        // TODO truncate all data, not just teks and captured data
     }
 
+
+    @Override
+    public void deleteTokenWithDiagnosisKeys(String token) {
+        db.daoToken().removeToken(token);
+    }
 
     @Override
     public void clearAllData() {
         db.daoCapturedData().clearAllData();
         db.daoTEK().clearAllData();
+        db.daoDiagnosisKey().clearAllData();
+        db.daoToken().clearAllData();
+
+        // TODO test clear/delete
     }
 }

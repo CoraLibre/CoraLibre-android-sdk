@@ -13,9 +13,7 @@ import org.coralibre.android.sdk.internal.database.model.CapturedData;
 import org.coralibre.android.sdk.internal.database.model.DiagnosisKey;
 import org.coralibre.android.sdk.internal.database.model.IntervalOfCapturedData;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class IdentifyMatchesFromDb {
 
@@ -24,10 +22,10 @@ public class IdentifyMatchesFromDb {
     // There is much redundant code here!
 
 
-    public static boolean hasMatches() {
+    public static boolean hasMatches(String token) {
 
         Database db = DatabaseAccess.getDefaultDatabaseInstance();
-        List<DiagnosisKey> diagnosisKeys = db.getAllDiagnosisKeys();
+        List<DiagnosisKey> diagnosisKeys = db.getDiagnosisKeys(token);
         Iterable<IntervalOfCapturedData> payloadIntevals = db.getAllCollectedPayload();
 
         for (DiagnosisKey diagKey : diagnosisKeys) {
@@ -41,8 +39,7 @@ public class IdentifyMatchesFromDb {
 
                         return true;
 
-                        // TODO use the token passed to the ExposureNotificationClient to store the results and
-                        //  connect them to an ExposureSummary that is built with these results
+                        // TODO use the token to store the results
                     }
                 }
             }
@@ -52,10 +49,7 @@ public class IdentifyMatchesFromDb {
     }
 
 
-    public static ExposureSummary buildExposureSummaryFromMatches() {
-
-        // TODO use the token passed to the ExposureNotificationClient to identify a diagnosis key set
-        //  that should be used here
+    public static ExposureSummary buildExposureSummaryFromMatches(String token) {
 
         int maximumRiskScore = 0;
         int summationRiskScore = 0;
@@ -64,7 +58,7 @@ public class IdentifyMatchesFromDb {
         int[] attenuationDurations; // TODO
 
         Database db = DatabaseAccess.getDefaultDatabaseInstance();
-        List<DiagnosisKey> diagnosisKeys = db.getAllDiagnosisKeys();
+        List<DiagnosisKey> diagnosisKeys = db.getDiagnosisKeys(token);
         Iterable<IntervalOfCapturedData> payloadIntevals = db.getAllCollectedPayload();
 
         for (DiagnosisKey diagKey : diagnosisKeys) {

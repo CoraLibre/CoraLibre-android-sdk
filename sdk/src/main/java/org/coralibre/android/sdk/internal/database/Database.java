@@ -15,10 +15,10 @@ public interface Database {
     void addGeneratedTEK(TemporaryExposureKey_internal generatedTEK);
     void addCapturedPayload(CapturedData collectedPayload);
 
-    void addDiagnosisKeys(List<TemporaryExposureKeyProto> diagnosisKeys);
-    void updateDiagnosisKeys(List<TemporaryExposureKeyProto> diagnosisKeys);
+    void addDiagnosisKeys(String token, List<DiagnosisKey> diagnosisKeys);
+    void updateDiagnosisKeys(String token, List<DiagnosisKey> diagnosisKeys);
 
-    List<DiagnosisKey> getAllDiagnosisKeys();
+    List<DiagnosisKey> getDiagnosisKeys(String token);
 
     boolean hasTEKForInterval(ENInterval interval);
 
@@ -30,6 +30,8 @@ public interface Database {
 
     Iterable<TemporaryExposureKey_internal> getAllOwnTEKs();
     Iterable<IntervalOfCapturedData> getAllCollectedPayload();
+
+    void deleteTokenWithDiagnosisKeys(String token);
 
     void truncateLast14Days();
 

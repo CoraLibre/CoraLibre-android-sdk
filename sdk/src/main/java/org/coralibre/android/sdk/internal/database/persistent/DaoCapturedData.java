@@ -29,6 +29,9 @@ public interface DaoCapturedData {
     public List<EntityCapturedData> getAllData();
 
 
+    // TODO Provide method to remove old data (and also call it somewhere)
+
+
     @Query("DELETE FROM EntityCapturedData")
     public void clearAllData();
 

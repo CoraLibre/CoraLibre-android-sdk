@@ -8,12 +8,16 @@ import org.coralibre.android.sdk.internal.crypto.CryptoModule;
 import org.coralibre.android.sdk.internal.crypto.ENInterval;
 import org.coralibre.android.sdk.internal.crypto.TemporaryExposureKey_internal;
 import org.coralibre.android.sdk.internal.database.model.CapturedData;
+import org.coralibre.android.sdk.internal.database.model.DiagnosisKey;
 import org.coralibre.android.sdk.internal.database.model.IntervalOfCapturedData;
+import org.coralibre.android.sdk.internal.util.DiagnosisKeyUtils;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Random;
 
 import static org.junit.Assert.assertArrayEquals;
@@ -210,5 +214,86 @@ public class DatabaseTests {
     }
 
 
+    private DiagnosisKey createDummyDiagnosisKey() {
+        byte[] keyData = new byte[16];
+        Random random = new Random();
+        random.nextBytes(keyData);
+        long intervalNumber = CryptoModule.getCurrentInterval().get();
+        int transmissionRiskLevel = 0;
+        return new DiagnosisKey(keyData, intervalNumber, transmissionRiskLevel);
+    }
+
+    @Test
+    public void testAddDiagnosisKeys() {
+        Database db = DatabaseAccess.getDefaultDatabaseInstance();
+        db.clearAllData();
+
+        LinkedList<DiagnosisKey> diagKeys = new LinkedList<DiagnosisKey>();
+
+        diagKeys.add(createDummyDiagnosisKey());
+        String token0 = "token0";
+        db.addDiagnosisKeys(token0, diagKeys);
+
+        diagKeys.add(createDummyDiagnosisKey());
+        diagKeys.add(createDummyDiagnosisKey());
+        String token1 = "token1";
+        db.addDiagnosisKeys(token1, diagKeys);
+
+
+        // First verify that insertion with different tokens works:
+        {
+            List<DiagnosisKey> result0 = db.getDiagnosisKeys(token0);
+            assertEquals(1, result0.size());
+
+            List<DiagnosisKey> result1 = db.getDiagnosisKeys(token1);
+            assertEquals(3, result1.size());
+        }
+
+        // Now add additional keys for an existing token:
+        db.addDiagnosisKeys(token1, diagKeys);
+        {
+            List<DiagnosisKey> result0 = db.getDiagnosisKeys(token0);
+            assertEquals(1, result0.size());
+
+            List<DiagnosisKey> result1 = db.getDiagnosisKeys(token1);
+            assertEquals(6, result1.size());
+        }
+    }
+
+    @Test
+    public void testDeleteToken() {
+        Database db = DatabaseAccess.getDefaultDatabaseInstance();
+        db.clearAllData();
+
+        LinkedList<DiagnosisKey> diagKeys = new LinkedList<DiagnosisKey>();
+
+        diagKeys.add(createDummyDiagnosisKey());
+        String token0 = "token0";
+        db.addDiagnosisKeys(token0, diagKeys);
+
+        diagKeys.add(createDummyDiagnosisKey());
+        diagKeys.add(createDummyDiagnosisKey());
+        String token1 = "token1";
+        db.addDiagnosisKeys(token1, diagKeys);
+
+        // Verify insertion worked as expected:
+        {
+            List<DiagnosisKey> result0 = db.getDiagnosisKeys(token0);
+            assertEquals(1, result0.size());
+
+            List<DiagnosisKey> result1 = db.getDiagnosisKeys(token1);
+            assertEquals(3, result1.size());
+        }
+
+        // Now delete token1 and check again:
+        db.deleteTokenWithDiagnosisKeys(token1);
+        {
+            List<DiagnosisKey> result0 = db.getDiagnosisKeys(token0);
+            assertEquals(1, result0.size());
+
+            List<DiagnosisKey> result1 = db.getDiagnosisKeys(token1);
+            assertEquals(0, result1.size());
+        }
+    }
 
 }
