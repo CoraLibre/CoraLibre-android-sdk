@@ -3,14 +3,15 @@ package org.coralibre.android.sdk.internal.database;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
 
-import org.coralibre.android.sdk.fakegms.nearby.exposurenotification.TemporaryExposureKey;
-import org.coralibre.android.sdk.internal.crypto.CryptoModule;
-import org.coralibre.android.sdk.internal.crypto.ENInterval;
-import org.coralibre.android.sdk.internal.crypto.TemporaryExposureKey_internal;
-import org.coralibre.android.sdk.internal.database.model.CapturedData;
-import org.coralibre.android.sdk.internal.database.model.DiagnosisKey;
-import org.coralibre.android.sdk.internal.database.model.IntervalOfCapturedData;
-import org.coralibre.android.sdk.internal.util.DiagnosisKeyUtils;
+import org.coralibre.android.sdk.DatatypesTestUtil;
+import org.coralibre.android.sdk.internal.datatypes.AssociatedEncryptedMetadata;
+import org.coralibre.android.sdk.internal.datatypes.CapturedData;
+import org.coralibre.android.sdk.internal.datatypes.DiagnosisKey;
+import org.coralibre.android.sdk.internal.datatypes.ENInterval;
+import org.coralibre.android.sdk.internal.datatypes.IntervalOfCapturedData;
+import org.coralibre.android.sdk.internal.datatypes.RollingProximityIdentifier;
+import org.coralibre.android.sdk.internal.datatypes.TemporaryExposureKey_internal;
+import org.coralibre.android.sdk.internal.datatypes.util.ENIntervalUtil;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -54,9 +55,9 @@ public class DatabaseTests {
         Random random = new Random();
         byte[] dumTekBytes = new byte[16];
         random.nextBytes(dumTekBytes);
-        ENInterval dumIntervalNumber =
-            new ENInterval(TemporaryExposureKey_internal.getMidnight(2000l));
-        TemporaryExposureKey_internal dumTek = new TemporaryExposureKey_internal(dumIntervalNumber, dumTekBytes);
+        ENInterval dumInterval =
+            new ENInterval(ENIntervalUtil.getMidnight(2000l));
+        TemporaryExposureKey_internal dumTek = new TemporaryExposureKey_internal(dumInterval, dumTekBytes);
         DatabaseAccess.getDefaultDatabaseInstance().addGeneratedTEK(dumTek);
 
         // Query:
@@ -64,19 +65,19 @@ public class DatabaseTests {
                 DatabaseAccess.getDefaultDatabaseInstance().getAllOwnTEKs();
 
         TemporaryExposureKey_internal resultTekForInterval =
-                DatabaseAccess.getDefaultDatabaseInstance().getOwnTEK(dumIntervalNumber);
+                DatabaseAccess.getDefaultDatabaseInstance().getOwnTEK(dumInterval);
 
         // Compare:
         int numResultTeks = 0;
         for (TemporaryExposureKey_internal resultTek : resultTeks) {
             numResultTeks ++;
             assertArrayEquals(dumTekBytes, resultTek.getKey());
-            assertEquals(dumIntervalNumber, resultTek.getInterval());
+            assertEquals(dumInterval, resultTek.getInterval());
         }
         assertEquals(1, numResultTeks);
 
         assertArrayEquals(dumTekBytes, resultTekForInterval.getKey());
-        assertEquals(dumIntervalNumber, resultTekForInterval.getInterval());
+        assertEquals(dumInterval, resultTekForInterval.getInterval());
     }
 
 
@@ -95,7 +96,15 @@ public class DatabaseTests {
         random.nextBytes(dumRssiArray);
         byte dumRssi = dumRssiArray[0];
         Long dumCaptureTimestamp = 123545L;
-        CapturedData dumData = new CapturedData(dumCaptureTimestamp, dumRssi, dumRpi, dumAem);
+        CapturedData dumData = new CapturedData(
+            dumCaptureTimestamp,
+            dumRssi,
+            new RollingProximityIdentifier(
+                dumRpi,
+                ENIntervalUtil.createFromUnixTimestamp(dumCaptureTimestamp)
+            ),
+            new AssociatedEncryptedMetadata(dumAem)
+        );
         DatabaseAccess.getDefaultDatabaseInstance().addCapturedPayload(dumData);
 
         // Query:
@@ -111,8 +120,8 @@ public class DatabaseTests {
 
             for (CapturedData resultData : resultInterval.getCapturedData()) {
                 numResultData ++;
-                assertArrayEquals(dumRpi, resultData.getRpi());
-                assertArrayEquals(dumAem, resultData.getAem());
+                assertArrayEquals(dumRpi, resultData.getRpi().getData());
+                assertArrayEquals(dumAem, resultData.getAem().getData());
                 assertEquals(dumRssi, resultData.getRssi());
                 assertEquals(dumCaptureTimestamp, resultData.getCaptureTimestamp());
             }
@@ -127,11 +136,11 @@ public class DatabaseTests {
     public void testTruncate() throws Exception {
         DatabaseAccess.getDefaultDatabaseInstance().clearAllData();
 
-        ENInterval now = CryptoModule.getCurrentInterval();
-        ENInterval intervalRemove = TemporaryExposureKey_internal.getMidnight(
+        ENInterval now = ENIntervalUtil.getCurrentInterval();
+        ENInterval intervalRemove = ENIntervalUtil.getMidnight(
             new ENInterval(now.get() - 24 * 6 * 14)
         );
-        ENInterval intervalKeep = TemporaryExposureKey_internal.getMidnight(
+        ENInterval intervalKeep = ENIntervalUtil.getMidnight(
             new ENInterval(now.get() - 24 * 6 * 13)
         );
 
@@ -160,7 +169,12 @@ public class DatabaseTests {
             random.nextBytes(rssiRemoveArray);
             byte rssiRemove = rssiRemoveArray[0];
             long timestampRemove = intervalRemove.getUnixTime();
-            CapturedData dataRemove = new CapturedData(timestampRemove, rssiRemove, rpiRemove, aemRemove);
+            CapturedData dataRemove = new CapturedData(
+                timestampRemove,
+                rssiRemove,
+                new RollingProximityIdentifier(rpiRemove, ENIntervalUtil.createFromUnixTimestamp(timestampRemove)),
+                new AssociatedEncryptedMetadata(aemRemove)
+            );
             DatabaseAccess.getDefaultDatabaseInstance().addCapturedPayload(dataRemove);
         }
 
@@ -172,7 +186,12 @@ public class DatabaseTests {
         random.nextBytes(rssiKeepArray);
         byte rssiKeep = rssiKeepArray[0];
         Long timestampKeep = intervalKeep.getUnixTime();
-        CapturedData dataKeep = new CapturedData(timestampKeep, rssiKeep, rpiKeep, aemKeep);
+        CapturedData dataKeep = new CapturedData(
+            timestampKeep,
+            rssiKeep,
+            new RollingProximityIdentifier(rpiKeep, intervalKeep),
+            new AssociatedEncryptedMetadata(aemKeep)
+        );
         DatabaseAccess.getDefaultDatabaseInstance().addCapturedPayload(dataKeep);
 
 
@@ -202,8 +221,8 @@ public class DatabaseTests {
 
             for (CapturedData resultData : resultInterval.getCapturedData()) {
                 numResultData ++;
-                assertArrayEquals(rpiKeep, resultData.getRpi());
-                assertArrayEquals(aemKeep, resultData.getAem());
+                assertArrayEquals(rpiKeep, resultData.getRpi().getData());
+                assertArrayEquals(aemKeep, resultData.getAem().getData());
                 assertEquals(rssiKeep, resultData.getRssi());
                 assertEquals(timestampKeep, resultData.getCaptureTimestamp());
             }
@@ -214,14 +233,6 @@ public class DatabaseTests {
     }
 
 
-    private DiagnosisKey createDummyDiagnosisKey() {
-        byte[] keyData = new byte[16];
-        Random random = new Random();
-        random.nextBytes(keyData);
-        long intervalNumber = CryptoModule.getCurrentInterval().get();
-        int transmissionRiskLevel = 0;
-        return new DiagnosisKey(keyData, intervalNumber, transmissionRiskLevel);
-    }
 
     @Test
     public void testAddDiagnosisKeys() {
@@ -230,12 +241,12 @@ public class DatabaseTests {
 
         LinkedList<DiagnosisKey> diagKeys = new LinkedList<DiagnosisKey>();
 
-        diagKeys.add(createDummyDiagnosisKey());
+        diagKeys.add(DatatypesTestUtil.createDummyDiagnosisKey());
         String token0 = "token0";
         db.addDiagnosisKeys(token0, diagKeys);
 
-        diagKeys.add(createDummyDiagnosisKey());
-        diagKeys.add(createDummyDiagnosisKey());
+        diagKeys.add(DatatypesTestUtil.createDummyDiagnosisKey());
+        diagKeys.add(DatatypesTestUtil.createDummyDiagnosisKey());
         String token1 = "token1";
         db.addDiagnosisKeys(token1, diagKeys);
 
@@ -267,12 +278,12 @@ public class DatabaseTests {
 
         LinkedList<DiagnosisKey> diagKeys = new LinkedList<DiagnosisKey>();
 
-        diagKeys.add(createDummyDiagnosisKey());
+        diagKeys.add(DatatypesTestUtil.createDummyDiagnosisKey());
         String token0 = "token0";
         db.addDiagnosisKeys(token0, diagKeys);
 
-        diagKeys.add(createDummyDiagnosisKey());
-        diagKeys.add(createDummyDiagnosisKey());
+        diagKeys.add(DatatypesTestUtil.createDummyDiagnosisKey());
+        diagKeys.add(DatatypesTestUtil.createDummyDiagnosisKey());
         String token1 = "token1";
         db.addDiagnosisKeys(token1, diagKeys);
 

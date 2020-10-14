@@ -1,15 +1,17 @@
-package org.coralibre.android.sdk.internal.crypto;
+package org.coralibre.android.sdk.internal.datatypes;
 
 import java.security.InvalidParameterException;
 import java.util.Arrays;
 
+import static org.coralibre.android.sdk.internal.EnFrameworkConstants.RPI_LENGTH;
+
 public class RollingProximityIdentifier {
-    public static final int RPI_LENGTH = 16;
 
     private final byte[] data = new byte[RPI_LENGTH];
     private final ENInterval interval;
 
-    public RollingProximityIdentifier(byte[] rawRPI, ENInterval interval) {
+
+    public RollingProximityIdentifier(final byte[] rawRPI, final ENInterval interval) {
         if(rawRPI.length != RPI_LENGTH) throw new InvalidParameterException("wrong rawRPI size");
         this.interval = new ENInterval(interval);
         System.arraycopy(rawRPI, 0, data, 0, RPI_LENGTH);

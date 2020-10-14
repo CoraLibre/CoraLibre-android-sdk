@@ -1,11 +1,13 @@
-package org.coralibre.android.sdk.internal.database.model.entity;
+package org.coralibre.android.sdk.internal.database.persistent.entity;
 
 
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
-import org.coralibre.android.sdk.internal.crypto.ENInterval;
-import org.coralibre.android.sdk.internal.database.model.CapturedData;
+import org.coralibre.android.sdk.internal.datatypes.AssociatedEncryptedMetadata;
+import org.coralibre.android.sdk.internal.datatypes.CapturedData;
+import org.coralibre.android.sdk.internal.datatypes.ENInterval;
+import org.coralibre.android.sdk.internal.datatypes.RollingProximityIdentifier;
 
 
 @Entity
@@ -35,16 +37,16 @@ public class EntityCapturedData {
         captureTimestamp = data.getCaptureTimestamp();
         enInterval = data.getEnInterval();
         rssi = data.getRssi();
-        rpi = data.getRpi();
-        aem = data.getAem();
+        rpi = data.getRpi().getData();
+        aem = data.getAem().getData();
     }
 
     public CapturedData toCapturedData() {
         return new CapturedData(
                 captureTimestamp,
                 rssi,
-                rpi,
-                aem
+                new RollingProximityIdentifier(rpi, enInterval),
+                new AssociatedEncryptedMetadata(aem)
         );
     }
 

@@ -1,10 +1,10 @@
-package org.coralibre.android.sdk.internal.database.model.entity;
+package org.coralibre.android.sdk.internal.database.persistent.entity;
 
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
 import androidx.room.PrimaryKey;
 
-import org.coralibre.android.sdk.internal.database.model.DiagnosisKey;
+import org.coralibre.android.sdk.internal.datatypes.DiagnosisKey;
 
 import static androidx.room.ForeignKey.CASCADE;
 

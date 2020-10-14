@@ -6,7 +6,7 @@ import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
 
-import org.coralibre.android.sdk.internal.database.model.entity.EntityDiagnosisKey;
+import org.coralibre.android.sdk.internal.database.persistent.entity.EntityDiagnosisKey;
 
 import java.util.List;
 

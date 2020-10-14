@@ -2,7 +2,7 @@ package org.coralibre.android.sdk.internal.database.persistent;
 
 import androidx.room.TypeConverter;
 
-import org.coralibre.android.sdk.internal.crypto.ENInterval;
+import org.coralibre.android.sdk.internal.datatypes.ENInterval;
 
 public class ENIntervalConverter {
 

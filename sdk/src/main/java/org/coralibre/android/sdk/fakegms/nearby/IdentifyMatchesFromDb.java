@@ -1,25 +1,24 @@
 package org.coralibre.android.sdk.fakegms.nearby;
 
 import org.coralibre.android.sdk.fakegms.nearby.exposurenotification.ExposureSummary;
-import org.coralibre.android.sdk.internal.crypto.AssociatedEncryptedMetadata;
-import org.coralibre.android.sdk.internal.crypto.AssociatedEncryptedMetadataKey;
-import org.coralibre.android.sdk.internal.crypto.AssociatedMetadata;
 import org.coralibre.android.sdk.internal.crypto.CryptoModule;
-import org.coralibre.android.sdk.internal.crypto.RollingProximityIdentifier;
-import org.coralibre.android.sdk.internal.crypto.RollingProximityIdentifierKey;
 import org.coralibre.android.sdk.internal.database.Database;
 import org.coralibre.android.sdk.internal.database.DatabaseAccess;
-import org.coralibre.android.sdk.internal.database.model.CapturedData;
-import org.coralibre.android.sdk.internal.database.model.DiagnosisKey;
-import org.coralibre.android.sdk.internal.database.model.IntervalOfCapturedData;
+import org.coralibre.android.sdk.internal.datatypes.AssociatedEncryptedMetadataKey;
+import org.coralibre.android.sdk.internal.datatypes.AssociatedMetadata;
+import org.coralibre.android.sdk.internal.datatypes.CapturedData;
+import org.coralibre.android.sdk.internal.datatypes.DiagnosisKey;
+import org.coralibre.android.sdk.internal.datatypes.IntervalOfCapturedData;
+import org.coralibre.android.sdk.internal.datatypes.RollingProximityIdentifier;
+import org.coralibre.android.sdk.internal.datatypes.RollingProximityIdentifierKey;
 
 import java.util.List;
 
 public class IdentifyMatchesFromDb {
 
-    // This is just a temporary glue class, which needs some refactoring after
-    // the tracing and matching works / after we have a working mvp.
-    // There is much redundant code here!
+    // TODO This is just a temporary glue class, which needs some refactoring after
+    //  the tracing and matching works / after we have a working mvp.
+    //  Much redundant code here!
 
 
     public static boolean hasMatches(String token) {
@@ -74,7 +73,7 @@ public class IdentifyMatchesFromDb {
                         hasMatchForThisKey = true;
 
                         AssociatedMetadata metadata = CryptoModule.decryptAEM(
-                            new AssociatedEncryptedMetadata(capturedData.getAem()),
+                            capturedData.getAem(),
                             rpi,
                             new AssociatedEncryptedMetadataKey(diagKey.getKeyData())
                         );

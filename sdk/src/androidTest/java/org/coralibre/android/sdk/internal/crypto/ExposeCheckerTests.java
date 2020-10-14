@@ -4,6 +4,10 @@ import android.util.Pair;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
+import org.coralibre.android.sdk.internal.EnFrameworkConstants;
+import org.coralibre.android.sdk.internal.datatypes.ENInterval;
+import org.coralibre.android.sdk.internal.datatypes.RollingProximityIdentifier;
+import org.coralibre.android.sdk.internal.datatypes.TemporaryExposureKey_internal;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -12,9 +16,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.coralibre.android.sdk.internal.crypto.RollingProximityIdentifier.RPI_LENGTH;
-import static org.coralibre.android.sdk.internal.crypto.TemporaryExposureKey_internal.TEK_LENGTH;
-import static org.coralibre.android.sdk.internal.crypto.TemporaryExposureKey_internal.TEK_ROLLING_PERIOD;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
@@ -25,13 +26,13 @@ public class ExposeCheckerTests {
     }
 
     private static TemporaryExposureKey_internal tek(long whichRollingPeriod, String hex) {
-        assertEquals(2*TEK_LENGTH, hex.length());
-        return new TemporaryExposureKey_internal(new ENInterval(whichRollingPeriod * TEK_ROLLING_PERIOD),
+        assertEquals(2 * EnFrameworkConstants.TEK_LENGTH, hex.length());
+        return new TemporaryExposureKey_internal(new ENInterval(whichRollingPeriod * EnFrameworkConstants.TEK_ROLLING_PERIOD),
                 hex2byte(hex));
     }
 
     private static RollingProximityIdentifier rollingProximityIdentifier(long rawENNumber, String hex) {
-        assertEquals(2* RPI_LENGTH, hex.length());
+        assertEquals(2 * EnFrameworkConstants.RPI_LENGTH, hex.length());
         return new RollingProximityIdentifier(hex2byte(hex), new ENInterval(rawENNumber));
     }
 
@@ -83,16 +84,16 @@ public class ExposeCheckerTests {
                     tek(19, "a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0")));
 
     private static final ENInterval MIDDLE_OF_DAY_14 =
-            new ENInterval((long)(13.5 * TEK_ROLLING_PERIOD));
+            new ENInterval((long)(13.5 * EnFrameworkConstants.TEK_ROLLING_PERIOD));
     private static final ENInterval ONE_HOUR_INTO_DAY_15 =
-            new ENInterval((long)(14 * TEK_ROLLING_PERIOD + 6));
+            new ENInterval((long)(14 * EnFrameworkConstants.TEK_ROLLING_PERIOD + 6));
 
-    private static final long SLOTSTART_MIDDLE_OF_DAY_14 = (long)(13.5 * TEK_ROLLING_PERIOD - 12);
-    private static final long SLOTEND_MIDDLE_OF_DAY_14 = (long)(13.5 * TEK_ROLLING_PERIOD + 12);
+    private static final long SLOTSTART_MIDDLE_OF_DAY_14 = (long)(13.5 * EnFrameworkConstants.TEK_ROLLING_PERIOD - 12);
+    private static final long SLOTEND_MIDDLE_OF_DAY_14 = (long)(13.5 * EnFrameworkConstants.TEK_ROLLING_PERIOD + 12);
 
-    private static final long SLOTSTART_ONE_HOUR_INTO_DAY_15 = 14 * TEK_ROLLING_PERIOD;
-    private static final long SLOTEND_ONE_HOUR_INTO_DAY_15 = 14 * TEK_ROLLING_PERIOD + 6 + 12;
-    private static final long SLOTSTART_END_DAY_14 = 14 * TEK_ROLLING_PERIOD + 6 - 12;
+    private static final long SLOTSTART_ONE_HOUR_INTO_DAY_15 = 14 * EnFrameworkConstants.TEK_ROLLING_PERIOD;
+    private static final long SLOTEND_ONE_HOUR_INTO_DAY_15 = 14 * EnFrameworkConstants.TEK_ROLLING_PERIOD + 6 + 12;
+    private static final long SLOTSTART_END_DAY_14 = 14 * EnFrameworkConstants.TEK_ROLLING_PERIOD + 6 - 12;
     private static final long SLOTEND_END_DAY_14 = SLOTSTART_ONE_HOUR_INTO_DAY_15;
 
     @Test

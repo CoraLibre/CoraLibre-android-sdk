@@ -1,7 +1,8 @@
-package org.coralibre.android.sdk.internal.crypto;
+package org.coralibre.android.sdk.internal.datatypes;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
+import org.coralibre.android.sdk.internal.datatypes.util.ENIntervalUtil;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -50,5 +51,11 @@ public class ENIntervalTests {
         ENInterval i = new ENInterval(0x12345678);
         byte[] data = i.getBytes();
         assertArrayEquals(new byte[] {0x78, 0x56, 0x34, 0x12}, data);
+    }
+
+
+    @Test
+    public void testGetCurrentInterval() {
+        assertEquals(ENIntervalUtil.getCurrentInterval(), new ENInterval(System.currentTimeMillis() / 1000L, true));
     }
 }

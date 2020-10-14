@@ -3,10 +3,17 @@ package org.coralibre.android.sdk.internal.crypto;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
 
-import org.coralibre.android.sdk.fakegms.nearby.exposurenotification.TemporaryExposureKey;
+import org.coralibre.android.sdk.internal.EnFrameworkConstants;
 import org.coralibre.android.sdk.internal.database.Database;
 import org.coralibre.android.sdk.internal.database.DatabaseAccess;
-
+import org.coralibre.android.sdk.internal.datatypes.AssociatedEncryptedMetadata;
+import org.coralibre.android.sdk.internal.datatypes.AssociatedEncryptedMetadataKey;
+import org.coralibre.android.sdk.internal.datatypes.AssociatedMetadata;
+import org.coralibre.android.sdk.internal.datatypes.BluetoothPayload;
+import org.coralibre.android.sdk.internal.datatypes.ENInterval;
+import org.coralibre.android.sdk.internal.datatypes.RollingProximityIdentifier;
+import org.coralibre.android.sdk.internal.datatypes.RollingProximityIdentifierKey;
+import org.coralibre.android.sdk.internal.datatypes.TemporaryExposureKey_internal;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -17,8 +24,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 
-import static org.coralibre.android.sdk.internal.crypto.AssociatedMetadata.AEM_LENGTH;
-import static org.coralibre.android.sdk.internal.crypto.RollingProximityIdentifier.RPI_LENGTH;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -142,11 +147,6 @@ public class CryptoModuleTests {
     }
 
     @Test
-    public void testGetCurrentInterval() {
-        assertEquals(CryptoModule.getCurrentInterval(), new ENInterval(System.currentTimeMillis() / 1000L, true));
-    }
-
-    @Test
     public void testGenerateRPIK() throws Exception {
         TemporaryExposureKey_internal tek = new TemporaryExposureKey_internal(0L, TEK_VAL1);
         RollingProximityIdentifierKey rpik = CryptoModule.generateRPIK(tek);
@@ -259,9 +259,9 @@ public class CryptoModuleTests {
         crypto.setMetadata(mockAem);
         crypto.renewPayload();
         BluetoothPayload payload = crypto.getCurrentPayload();
-        assertEquals(AEM_LENGTH, payload.getAem().getData().length);
+        assertEquals(EnFrameworkConstants.AEM_LENGTH, payload.getAem().getData().length);
         assertEquals(1000, payload.getInterval().get());
-        assertEquals(RPI_LENGTH, payload.getRpi().getData().length);
+        assertEquals(EnFrameworkConstants.RPI_LENGTH, payload.getRpi().getData().length);
     }
 
     @Test

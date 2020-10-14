@@ -15,20 +15,19 @@ import org.coralibre.android.sdk.fakegms.nearby.exposurenotification.ExposureSum
 import org.coralibre.android.sdk.fakegms.nearby.exposurenotification.TemporaryExposureKey;
 import org.coralibre.android.sdk.fakegms.tasks.Task;
 import org.coralibre.android.sdk.fakegms.tasks.Tasks;
-import org.coralibre.android.sdk.internal.crypto.TemporaryExposureKey_internal;
+import org.coralibre.android.sdk.internal.EnFrameworkConstants;
 import org.coralibre.android.sdk.internal.database.Database;
 import org.coralibre.android.sdk.internal.database.DatabaseAccess;
-import org.coralibre.android.sdk.internal.util.DiagnosisKeyUtils;
+import org.coralibre.android.sdk.internal.datatypes.TemporaryExposureKey_internal;
+import org.coralibre.android.sdk.internal.datatypes.util.DiagnosisKeyUtil;
 import org.coralibre.android.sdk.proto.TemporaryExposureKeyFile.TemporaryExposureKeyExport;
 
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -91,7 +90,7 @@ final class ExposureNotificationClientImpl implements ExposureNotificationClient
                 result.add(new TemporaryExposureKey(
                     dbTek.getKey(),
                     (int) dbTek.getInterval().get(),
-                    TemporaryExposureKey_internal.TEK_ROLLING_PERIOD,
+                    EnFrameworkConstants.TEK_ROLLING_PERIOD,
                     0, // TODO Means "Unused"; verify, that the CWA sets this value before uploading
                     0 // TODO this means "UNKNOWN"; see https://developers.google.com/android/exposure-notifications/exposure-notifications-api
                 ));
@@ -129,8 +128,8 @@ final class ExposureNotificationClientImpl implements ExposureNotificationClient
                             String prefixString = new String(prefix).trim();
                             if (totalBytesRead == prefix.length && prefixString.equals("EK Export v1")) {
                                 final TemporaryExposureKeyExport temporaryExposureKeyExport = TemporaryExposureKeyExport.parseFrom(stream);
-                                database.addDiagnosisKeys(token, DiagnosisKeyUtils.toDiagnosisKeys(temporaryExposureKeyExport.getKeysList()));
-                                database.updateDiagnosisKeys(token, DiagnosisKeyUtils.toDiagnosisKeys(temporaryExposureKeyExport.getRevisedKeysList()));
+                                database.addDiagnosisKeys(token, DiagnosisKeyUtil.toDiagnosisKeys(temporaryExposureKeyExport.getKeysList()));
+                                database.updateDiagnosisKeys(token, DiagnosisKeyUtil.toDiagnosisKeys(temporaryExposureKeyExport.getRevisedKeysList()));
                             } else {
                                 Log.e(TAG, "Failed to parse diagnosis key file: export.bin has invalid prefix: " + prefixString);
                             }

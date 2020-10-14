@@ -4,8 +4,18 @@ import android.annotation.SuppressLint;
 
 import com.google.crypto.tink.subtle.Hkdf;
 
+import org.coralibre.android.sdk.internal.EnFrameworkConstants;
 import org.coralibre.android.sdk.internal.database.Database;
 import org.coralibre.android.sdk.internal.database.DatabaseAccess;
+import org.coralibre.android.sdk.internal.datatypes.AssociatedEncryptedMetadata;
+import org.coralibre.android.sdk.internal.datatypes.AssociatedEncryptedMetadataKey;
+import org.coralibre.android.sdk.internal.datatypes.AssociatedMetadata;
+import org.coralibre.android.sdk.internal.datatypes.BluetoothPayload;
+import org.coralibre.android.sdk.internal.datatypes.ENInterval;
+import org.coralibre.android.sdk.internal.datatypes.RollingProximityIdentifier;
+import org.coralibre.android.sdk.internal.datatypes.RollingProximityIdentifierKey;
+import org.coralibre.android.sdk.internal.datatypes.TemporaryExposureKey_internal;
+import org.coralibre.android.sdk.internal.datatypes.util.ENIntervalUtil;
 
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
@@ -20,7 +30,6 @@ import javax.crypto.spec.SecretKeySpec;
 public class CryptoModule {
     private static final String TAG = CryptoModule.class.getName();
 
-    public static final int TEK_MAX_STORE_TIME = 14; //defined as days
     public static final int FUZZY_COMPARE_TIME_DEVIATION = 12; //defined int 10min units
     public static final String RPIK_INFO = "EN-RPIK";
     public static final String AEMK_INFO = "EN-AEMK";
@@ -48,7 +57,7 @@ public class CryptoModule {
     public CryptoModule(Database db) {
         testMode = false; // remove this line and everything goes BOOM!!!
         //TODO: Use proper dependency injection
-        init(db, getCurrentInterval());
+        init(db, ENIntervalUtil.getCurrentInterval());
     }
 
     /**
@@ -67,7 +76,7 @@ public class CryptoModule {
         try {
             database = db;
 
-            ENInterval intervalNumberMidnight = TemporaryExposureKey_internal.getMidnight(currentInterval);
+            ENInterval intervalNumberMidnight = ENIntervalUtil.getMidnight(currentInterval);
             if (! database.hasTEKForInterval(intervalNumberMidnight)) {
                 updateTEK();
             } else {
@@ -81,15 +90,12 @@ public class CryptoModule {
         }
     }
 
-    public static ENInterval getCurrentInterval() {
-        return new ENInterval(System.currentTimeMillis() / 1000L, true);
-    }
 
     private TemporaryExposureKey_internal getNewRandomTEK() {
         try {
             KeyGenerator keyGenerator = KeyGenerator.getInstance("HmacSHA256");
             SecretKey secretKey = keyGenerator.generateKey();
-            ENInterval now = testMode ? currentIntervalForTesting : getCurrentInterval();
+            ENInterval now = testMode ? currentIntervalForTesting : ENIntervalUtil.getCurrentInterval();
             return new TemporaryExposureKey_internal(now, secretKey.getEncoded());
         } catch (Exception e) {
             throw new CryptoException(e);
@@ -120,22 +126,22 @@ public class CryptoModule {
         byte[] rawRPIK = generateHKDFBytes(
             tek,
             RPIK_INFO.getBytes(StandardCharsets.UTF_8),
-            RollingProximityIdentifierKey.RPIK_LENGTH
+            EnFrameworkConstants.RPIK_LENGTH
         );
         return new RollingProximityIdentifierKey(rawRPIK);
     }
 
     public static AssociatedEncryptedMetadataKey generateAEMK(TemporaryExposureKey_internal tek) {
         byte[] rawAEMK = generateHKDFBytes(
-                tek.getKey(),
-                AEMK_INFO.getBytes(StandardCharsets.UTF_8),
-                AssociatedEncryptedMetadataKey.AEMK_LENGTH
+            tek.getKey(),
+            AEMK_INFO.getBytes(StandardCharsets.UTF_8),
+            EnFrameworkConstants.AEMK_LENGTH
         );
         return new AssociatedEncryptedMetadataKey(rawAEMK);
     }
 
     public RollingProximityIdentifier generateRPI(RollingProximityIdentifierKey rpik) {
-        return generateRPI(rpik, testMode ? currentIntervalForTesting : getCurrentInterval());
+        return generateRPI(rpik, testMode ? currentIntervalForTesting : ENIntervalUtil.getCurrentInterval());
     }
 
     public static RollingProximityIdentifier generateRPI(RollingProximityIdentifierKey rpik,
@@ -206,9 +212,9 @@ public class CryptoModule {
     }
 
     public void updateTEK() {
-        System.out.println(TemporaryExposureKey_internal.getMidnight(testMode ? currentIntervalForTesting : getCurrentInterval()).get());
+        System.out.println(ENIntervalUtil.getMidnight(testMode ? currentIntervalForTesting : ENIntervalUtil.getCurrentInterval()).get());
         if (!currentTekDay.equals(
-                TemporaryExposureKey_internal.getMidnight(testMode ? currentIntervalForTesting : getCurrentInterval()))) {
+            ENIntervalUtil.getMidnight(testMode ? currentIntervalForTesting : ENIntervalUtil.getCurrentInterval()))) {
             TemporaryExposureKey_internal currentTek = getNewRandomTEK();
             currentTekDay = currentTek.getInterval();
             currentRPIK = generateRPIK(currentTek);
@@ -224,9 +230,9 @@ public class CryptoModule {
             throw new CryptoException("Associated metadata has not yet been set.");
 
         if (currentPayload == null
-                || !currentPayload.getInterval().equals(testMode ? currentIntervalForTesting : getCurrentInterval())){
+                || !currentPayload.getInterval().equals(testMode ? currentIntervalForTesting : ENIntervalUtil.getCurrentInterval())){
             updateTEK();
-            RollingProximityIdentifier currentRPI = generateRPI(currentRPIK, testMode ? currentIntervalForTesting : getCurrentInterval());
+            RollingProximityIdentifier currentRPI = generateRPI(currentRPIK, testMode ? currentIntervalForTesting : ENIntervalUtil.getCurrentInterval());
             AssociatedEncryptedMetadata currentAEM = encryptAM(metadata, currentRPI, currentAEMK);
             currentPayload = new BluetoothPayload(currentRPI, currentAEM);
         }

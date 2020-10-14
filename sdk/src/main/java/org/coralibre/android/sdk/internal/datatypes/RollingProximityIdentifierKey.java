@@ -1,13 +1,14 @@
-package org.coralibre.android.sdk.internal.crypto;
+package org.coralibre.android.sdk.internal.datatypes;
 
 import java.security.InvalidParameterException;
 
+import static org.coralibre.android.sdk.internal.EnFrameworkConstants.RPIK_LENGTH;
+
 public class RollingProximityIdentifierKey {
-    public static final int RPIK_LENGTH = 16; // unit is bytes
 
     private final byte[] key = new byte[RPIK_LENGTH];
 
-    public RollingProximityIdentifierKey(byte[] value) {
+    public RollingProximityIdentifierKey(final byte[] value) {
         if(value.length != RPIK_LENGTH) throw new InvalidParameterException("size not 16bytes");
         System.arraycopy(value, 0, key, 0, RPIK_LENGTH);
     }

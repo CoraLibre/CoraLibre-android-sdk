@@ -1,4 +1,4 @@
-package org.coralibre.android.sdk.internal.crypto;
+package org.coralibre.android.sdk.internal.datatypes;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 

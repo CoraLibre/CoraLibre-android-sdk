@@ -1,10 +1,10 @@
-package org.coralibre.android.sdk.internal.database.model.entity;
+package org.coralibre.android.sdk.internal.database.persistent.entity;
 
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
-import org.coralibre.android.sdk.internal.crypto.ENInterval;
-import org.coralibre.android.sdk.internal.crypto.TemporaryExposureKey_internal;
+import org.coralibre.android.sdk.internal.datatypes.ENInterval;
+import org.coralibre.android.sdk.internal.datatypes.TemporaryExposureKey_internal;
 
 
 @Entity

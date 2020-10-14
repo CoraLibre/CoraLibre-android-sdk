@@ -1,5 +1,7 @@
 package org.coralibre.android.sdk.internal.crypto;
 
+import org.coralibre.android.sdk.internal.datatypes.ENInterval;
+
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidParameterException;
 

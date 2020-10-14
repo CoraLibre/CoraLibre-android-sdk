@@ -3,7 +3,7 @@ package org.coralibre.android.sdk.fakegms.nearby.exposurenotification;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import org.coralibre.android.sdk.internal.database.model.CapturedData;
+import org.coralibre.android.sdk.internal.datatypes.CapturedData;
 
 import java.util.Arrays;
 

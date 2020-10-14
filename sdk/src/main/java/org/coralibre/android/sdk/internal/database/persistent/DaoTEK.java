@@ -6,8 +6,8 @@ import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 
-import org.coralibre.android.sdk.internal.crypto.ENInterval;
-import org.coralibre.android.sdk.internal.database.model.entity.EntityTemporaryExposureKey;
+import org.coralibre.android.sdk.internal.database.persistent.entity.EntityTemporaryExposureKey;
+import org.coralibre.android.sdk.internal.datatypes.ENInterval;
 
 import java.util.List;
 

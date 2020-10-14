@@ -6,7 +6,7 @@ import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 
-import org.coralibre.android.sdk.internal.database.model.entity.EntityCapturedData;
+import org.coralibre.android.sdk.internal.database.persistent.entity.EntityCapturedData;
 
 import java.util.List;
 

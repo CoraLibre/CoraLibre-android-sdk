@@ -6,11 +6,7 @@ import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 
-import org.coralibre.android.sdk.internal.crypto.ENInterval;
-import org.coralibre.android.sdk.internal.database.model.entity.EntityTemporaryExposureKey;
-import org.coralibre.android.sdk.internal.database.model.entity.EntityToken;
-
-import java.util.List;
+import org.coralibre.android.sdk.internal.database.persistent.entity.EntityToken;
 
 @Dao
 public interface DaoToken {

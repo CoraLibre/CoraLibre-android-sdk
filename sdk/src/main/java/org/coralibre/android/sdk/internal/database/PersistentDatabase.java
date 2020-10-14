@@ -5,22 +5,21 @@ import android.content.Context;
 import androidx.annotation.NonNull;
 import androidx.room.Room;
 
-import org.coralibre.android.sdk.internal.crypto.CryptoModule;
-import org.coralibre.android.sdk.internal.crypto.ENInterval;
-import org.coralibre.android.sdk.internal.crypto.TemporaryExposureKey_internal;
-import org.coralibre.android.sdk.internal.database.model.CapturedData;
-import org.coralibre.android.sdk.internal.database.model.DiagnosisKey;
-import org.coralibre.android.sdk.internal.database.model.IntervalOfCapturedData;
-import org.coralibre.android.sdk.internal.database.model.IntervalOfCapturedDataImpl;
-import org.coralibre.android.sdk.internal.database.model.entity.EntityCapturedData;
-import org.coralibre.android.sdk.internal.database.model.entity.EntityDiagnosisKey;
-import org.coralibre.android.sdk.internal.database.model.entity.EntityTemporaryExposureKey;
-import org.coralibre.android.sdk.internal.database.model.entity.EntityToken;
+import org.coralibre.android.sdk.internal.EnFrameworkConstants;
 import org.coralibre.android.sdk.internal.database.persistent.RoomDatabaseDelegate;
-import org.coralibre.android.sdk.internal.util.DiagnosisKeyUtils;
-import org.coralibre.android.sdk.proto.TemporaryExposureKeyFile.TemporaryExposureKeyProto;
+import org.coralibre.android.sdk.internal.database.persistent.entity.EntityCapturedData;
+import org.coralibre.android.sdk.internal.database.persistent.entity.EntityDiagnosisKey;
+import org.coralibre.android.sdk.internal.database.persistent.entity.EntityTemporaryExposureKey;
+import org.coralibre.android.sdk.internal.database.persistent.entity.EntityToken;
+import org.coralibre.android.sdk.internal.datatypes.CapturedData;
+import org.coralibre.android.sdk.internal.datatypes.DiagnosisKey;
+import org.coralibre.android.sdk.internal.datatypes.ENInterval;
+import org.coralibre.android.sdk.internal.datatypes.IntervalOfCapturedData;
+import org.coralibre.android.sdk.internal.datatypes.IntervalOfCapturedDataImpl;
+import org.coralibre.android.sdk.internal.datatypes.TemporaryExposureKey_internal;
+import org.coralibre.android.sdk.internal.datatypes.util.DiagnosisKeyUtil;
+import org.coralibre.android.sdk.internal.datatypes.util.ENIntervalUtil;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -74,7 +73,7 @@ public class PersistentDatabase implements Database {
     public void addDiagnosisKeys(String token, List<DiagnosisKey> diagnosisKeys) {
         db.daoToken().insertToken(new EntityToken(token));
         db.daoDiagnosisKey().insertDiagnosisKeys(
-            DiagnosisKeyUtils.toEntityDiagnosisKeys(token, diagnosisKeys)
+            DiagnosisKeyUtil.toEntityDiagnosisKeys(token, diagnosisKeys)
         );
     }
 
@@ -82,7 +81,7 @@ public class PersistentDatabase implements Database {
     public void updateDiagnosisKeys(String token, List<DiagnosisKey> diagnosisKeys) {
         db.daoToken().insertToken(new EntityToken(token));
         db.daoDiagnosisKey().updateDiagnosisKeys(
-            DiagnosisKeyUtils.toEntityDiagnosisKeys(token, diagnosisKeys)
+            DiagnosisKeyUtil.toEntityDiagnosisKeys(token, diagnosisKeys)
         );
     }
 
@@ -93,8 +92,9 @@ public class PersistentDatabase implements Database {
         List<EntityDiagnosisKey> entities = db.daoDiagnosisKey().getDiagnosisKeys(token);
         for (EntityDiagnosisKey entity : entities) {
             DiagnosisKey diagnosisKey = new DiagnosisKey(
-                entity.keyData,
-                entity.intervalNumber,
+                new TemporaryExposureKey_internal(
+                    new ENInterval(entity.intervalNumber),
+                    entity.keyData),
                 entity.transmissionRiskLevel
             );
             result.add(diagnosisKey);
@@ -159,10 +159,9 @@ public class PersistentDatabase implements Database {
 
     @Override
     public void truncateLast14Days() {
-        ENInterval now = CryptoModule.getCurrentInterval();
-        long lastIntervalToKeep = now.get() -
-                (CryptoModule.TEK_MAX_STORE_TIME
-                        * TemporaryExposureKey_internal.TEK_ROLLING_PERIOD);
+        ENInterval now = ENIntervalUtil.getCurrentInterval();
+        long lastIntervalToKeep =
+            now.get() - (EnFrameworkConstants.TEK_MAX_STORE_TIME_INTERVALS);
 
         db.daoCapturedData().truncateOldData(lastIntervalToKeep);
         db.daoTEK().truncateOldData(lastIntervalToKeep);

@@ -24,12 +24,12 @@ import android.util.Log;
 import org.coralibre.android.sdk.BuildConfig;
 import org.coralibre.android.sdk.internal.AppConfigManager;
 import org.coralibre.android.sdk.internal.BroadcastHelper;
-import org.coralibre.android.sdk.internal.crypto.BluetoothPayload;
-import org.coralibre.android.sdk.internal.crypto.CryptoModule;
-import org.coralibre.android.sdk.internal.crypto.ENInterval;
 import org.coralibre.android.sdk.internal.database.Database;
 import org.coralibre.android.sdk.internal.database.DatabaseAccess;
-import org.coralibre.android.sdk.internal.database.model.CapturedData;
+import org.coralibre.android.sdk.internal.datatypes.BluetoothPayload;
+import org.coralibre.android.sdk.internal.datatypes.CapturedData;
+import org.coralibre.android.sdk.internal.datatypes.ENInterval;
+import org.coralibre.android.sdk.internal.datatypes.util.ENIntervalUtil;
 import org.coralibre.android.sdk.internal.util.ByteToHex;
 
 import java.util.ArrayList;
@@ -149,7 +149,7 @@ public class BleClient {
     private void onDeviceFound(ScanResult scanResult) {
         try {
             long now = System.currentTimeMillis();
-            ENInterval currentInterval = CryptoModule.getCurrentInterval();
+            ENInterval currentInterval = ENIntervalUtil.getCurrentInterval();
             BluetoothDevice bluetoothDevice = scanResult.getDevice();
             final String deviceAddr = bluetoothDevice.getAddress();
 
@@ -197,8 +197,8 @@ public class BleClient {
                 new CapturedData(
                     data.getTimestamp(),
                     data.getRssi(),
-                    data.getPayload().getRpi().getData(),
-                    data.getPayload().getAem().getData()
+                    data.getPayload().getRpi(),
+                    data.getPayload().getAem()
                 ));
         }
     }

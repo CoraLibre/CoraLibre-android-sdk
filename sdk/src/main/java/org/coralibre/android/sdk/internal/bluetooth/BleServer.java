@@ -19,10 +19,11 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.ParcelUuid;
 import android.util.Log;
+
 import org.coralibre.android.sdk.BuildConfig;
 import org.coralibre.android.sdk.internal.AppConfigManager;
-import org.coralibre.android.sdk.internal.crypto.AssociatedMetadata;
 import org.coralibre.android.sdk.internal.crypto.CryptoModule;
+import org.coralibre.android.sdk.internal.datatypes.AssociatedMetadata;
 import org.coralibre.android.sdk.internal.device_info.DeviceInfo;
 import org.coralibre.android.sdk.internal.device_info.DeviceList;
 

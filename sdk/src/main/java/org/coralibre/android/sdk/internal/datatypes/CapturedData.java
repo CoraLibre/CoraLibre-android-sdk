@@ -1,7 +1,5 @@
-package org.coralibre.android.sdk.internal.database.model;
+package org.coralibre.android.sdk.internal.datatypes;
 
-
-import org.coralibre.android.sdk.internal.crypto.ENInterval;
 
 public class CapturedData {
 
@@ -9,6 +7,7 @@ public class CapturedData {
     /**
      *  Milliseconds since Epoch.
      */
+    @Deprecated
     private final long captureTimestamp;
 
     /**
@@ -17,16 +16,21 @@ public class CapturedData {
     private final ENInterval enInterval;
 
     /** in dB */
-    private byte rssi;
+    private final byte rssi;
 
     /** 16 bytes */
-    private byte[] rpi;
+    private final RollingProximityIdentifier rpi;
 
     /** 4 bytes */
-    private byte[] aem;
+    private final AssociatedEncryptedMetadata aem;
 
 
-    public CapturedData(long captureTimestamp, byte rssi, byte[] rpi, byte[] aem) {
+    public CapturedData(
+        final long captureTimestamp,
+        final byte rssi,
+        final RollingProximityIdentifier rpi,
+        final AssociatedEncryptedMetadata aem
+    ) {
         this.captureTimestamp = captureTimestamp;
         this.enInterval = new ENInterval(captureTimestamp, true);
         this.rssi = rssi;
@@ -46,13 +50,11 @@ public class CapturedData {
         return rssi;
     }
 
-    public byte[] getRpi() {
-        // TODO Return copy, not the byte array itself
+    public RollingProximityIdentifier getRpi() {
         return rpi;
     }
 
-    public byte[] getAem() {
-        // TODO Return copy, not the byte array itself
+    public AssociatedEncryptedMetadata getAem() {
         return aem;
     }
 }
