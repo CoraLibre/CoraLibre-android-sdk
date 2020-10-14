@@ -32,7 +32,7 @@ public class PersistentDatabase implements Database {
     //  using SQLCipher
 
 
-    private final String dbName = "db";
+    private final String dbName = "coralibre-en-database";
     private final RoomDatabaseDelegate db;
 
 
