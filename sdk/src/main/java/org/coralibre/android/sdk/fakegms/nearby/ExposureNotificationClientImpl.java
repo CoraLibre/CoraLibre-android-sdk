@@ -20,7 +20,7 @@ import org.coralibre.android.sdk.internal.database.Database;
 import org.coralibre.android.sdk.internal.database.DatabaseAccess;
 import org.coralibre.android.sdk.internal.datatypes.TemporaryExposureKey_internal;
 import org.coralibre.android.sdk.internal.datatypes.util.DiagnosisKeyUtil;
-import org.coralibre.android.sdk.internal.matching.IdentifyMatchesFromDb;
+import org.coralibre.android.sdk.internal.matching.MatchingHelper;
 import org.coralibre.android.sdk.proto.TemporaryExposureKeyFile.TemporaryExposureKeyExport;
 
 import java.io.BufferedInputStream;
@@ -144,7 +144,7 @@ final class ExposureNotificationClientImpl implements ExposureNotificationClient
 
             // TODO Discard keys older than 14 days (https://developers.google.com/android/reference/com/google/android/gms/nearby/exposurenotification/ExposureNotificationClient#provideDiagnosisKeys(com.google.android.gms.nearby.exposurenotification.DiagnosisKeyFileProvider))
 
-            boolean noMatchFound = !IdentifyMatchesFromDb.hasMatches(token);
+            boolean noMatchFound = !MatchingHelper.hasMatches(token);
 
             Intent intent = new Intent(noMatchFound ? ACTION_EXPOSURE_NOT_FOUND : ACTION_EXPOSURE_STATE_UPDATED);
             intent.putExtra(EXTRA_TOKEN, token);
@@ -162,7 +162,7 @@ final class ExposureNotificationClientImpl implements ExposureNotificationClient
             //  the exposure configuration parameter from the following call and implement the
             //  selection inside the buildExposureSummaryFromMatches(...) method, using the database
             //  in a similar manner as already done for the diagnosis key sets.
-            return IdentifyMatchesFromDb.buildExposureSummary(token, exposureConfiguration);
+            return MatchingHelper.buildExposureSummary(token, exposureConfiguration);
         });
     }
 
