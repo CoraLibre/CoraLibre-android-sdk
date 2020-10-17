@@ -20,6 +20,7 @@ import org.coralibre.android.sdk.internal.database.Database;
 import org.coralibre.android.sdk.internal.database.DatabaseAccess;
 import org.coralibre.android.sdk.internal.datatypes.TemporaryExposureKey_internal;
 import org.coralibre.android.sdk.internal.datatypes.util.DiagnosisKeyUtil;
+import org.coralibre.android.sdk.internal.matching.IdentifyMatchesFromDb;
 import org.coralibre.android.sdk.proto.TemporaryExposureKeyFile.TemporaryExposureKeyExport;
 
 import java.io.BufferedInputStream;

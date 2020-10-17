@@ -1,4 +1,4 @@
-package org.coralibre.android.sdk.fakegms.nearby;
+package org.coralibre.android.sdk.internal.matching;
 
 import android.util.Log;
 
