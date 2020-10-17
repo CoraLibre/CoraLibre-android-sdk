@@ -39,7 +39,17 @@ public class EnFrameworkConstants {
      * payloads are treated as belonging to different 'Exposures'. Otherwise, both belong to the
      * same 'Exposure'.
      */
-    public static final long MAX_EXPOSURE_INTERPOLATION_DURATION_SECONDS = 2 * TracingService.SCAN_INTERVAL;
+    public static final long MAX_EXPOSURE_INTERPOLATION_DURATION_SECONDS = 2 * TracingService.SCAN_INTERVAL_MILLIS;
 
+    // See lines 60ff. in:
+    // https://github.com/google/exposure-notifications-internals/blob/8f751a666697c3cae0a56ae3464c2c6cbe31b69e/exposurenotification/src/main/java/com/google/samples/exposurenotification/matching/TracingParams.java#L66
+    // There it reads that this boolean defaults to false.
+    // TODO Check, where this value comes from and set accordingly:
+    public static final boolean INTERPOLATION_ENABLED = false;
+
+    // See lines 31ff. in:
+    // https://github.com/google/exposure-notifications-internals/blob/8f751a666697c3cae0a56ae3464c2c6cbe31b69e/exposurenotification/src/main/java/com/google/samples/exposurenotification/matching/TracingParams.java#L37
+    // TODO Set to the correct value! The following value is just a guess:
+    public static final long MIN_BUCKETIZED_DURATION_SECONDS = 15 * 60;
 
 }

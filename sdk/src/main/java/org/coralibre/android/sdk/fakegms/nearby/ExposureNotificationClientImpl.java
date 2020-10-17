@@ -8,7 +8,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import org.coralibre.android.sdk.PPCP;
-import org.coralibre.android.sdk.fakegms.common.api.ApiException;
 import org.coralibre.android.sdk.fakegms.nearby.exposurenotification.ExposureConfiguration;
 import org.coralibre.android.sdk.fakegms.nearby.exposurenotification.ExposureInformation;
 import org.coralibre.android.sdk.fakegms.nearby.exposurenotification.ExposureNotificationClient;
@@ -162,13 +161,9 @@ final class ExposureNotificationClientImpl implements ExposureNotificationClient
     @Override
     public Task<ExposureSummary> getExposureSummary(String token) {
         return Tasks.call(() -> {
-            // TODO Here it is unclear, when the exposureConfiguration can be null. Also it is,
-            //  unclear, if different exposureConfigurations can be around, and if so, which to use.
-            //  Should the exposureConfiguration also be selected using the token? If so, remove
-            //  the exposure configuration parameter from the following call and implement the
-            //  selection inside the buildExposureSummaryFromMatches(...) method, using the database
-            //  in a similar manner as already done for the diagnosis key sets.
-            return MatchingHelper.buildExposureSummary(token, exposureConfiguration);
+            // TODO
+
+            return null;
         });
     }
 

@@ -57,7 +57,8 @@ public class TracingService extends Service {
     // The source of these Values is this a description on Googles API description:
     // https://developers.google.com/android/exposure-notifications/ble-attenuation-overview
     public static final long SCAN_DURATION = 4 * 1000; // unit in milliseconds
-    public static final long SCAN_INTERVAL = 5 * 60 * 1000; // unit in milliseconds
+    public static final long SCAN_INTERVAL_SECONDS = 5 * 60; // unit in milliseconds
+    public static final long SCAN_INTERVAL_MILLIS = 1000 * SCAN_INTERVAL_SECONDS; // unit in milliseconds
     public static final long MAC_ROTATION_PERIOD = 11 * 60 * 1000; // unit in milliseconds
 
     private Handler handler;
@@ -250,7 +251,7 @@ public class TracingService extends Service {
 
         handler.postDelayed(() -> {
             stopScanning();
-            scheduleNextClientRestart(this, SCAN_INTERVAL);
+            scheduleNextClientRestart(this, SCAN_INTERVAL_MILLIS);
         }, SCAN_DURATION);
     }
 

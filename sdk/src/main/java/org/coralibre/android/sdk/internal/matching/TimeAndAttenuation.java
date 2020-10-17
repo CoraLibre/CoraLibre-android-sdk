@@ -18,11 +18,22 @@
 package org.coralibre.android.sdk.internal.matching;
 
 public class TimeAndAttenuation {
+
+    public final int timeSeconds;
+    public final int attenuation;
+
     public TimeAndAttenuation(int timeSeconds, int attenuation) {
         this.timeSeconds = timeSeconds;
         this.attenuation = attenuation;
     }
 
-    public final int timeSeconds;
-    public final int attenuation;
+
+    public static TimeAndAttenuation fromMatch(Match match) {
+        return new TimeAndAttenuation(
+            (int)match.captureTimestampMillis * 1000,
+            0 // TODO implement!!!
+        );
+    }
+
+
 }
