@@ -34,7 +34,7 @@ public class EntityCapturedData {
 
 
     public EntityCapturedData(CapturedData data) {
-        captureTimestamp = data.getCaptureTimestamp();
+        captureTimestamp = data.getCaptureTimestampMillis();
         enInterval = data.getEnInterval();
         rssi = data.getRssi();
         rpi = data.getRpi().getData();

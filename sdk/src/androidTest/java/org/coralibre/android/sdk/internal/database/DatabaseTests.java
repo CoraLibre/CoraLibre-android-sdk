@@ -123,7 +123,7 @@ public class DatabaseTests {
                 assertArrayEquals(dumRpi, resultData.getRpi().getData());
                 assertArrayEquals(dumAem, resultData.getAem().getData());
                 assertEquals(dumRssi, resultData.getRssi());
-                assertEquals(dumCaptureTimestamp, resultData.getCaptureTimestamp());
+                assertEquals(dumCaptureTimestamp, resultData.getCaptureTimestampMillis());
             }
         }
         assertEquals(1, numResultIntervals);
@@ -224,7 +224,7 @@ public class DatabaseTests {
                 assertArrayEquals(rpiKeep, resultData.getRpi().getData());
                 assertArrayEquals(aemKeep, resultData.getAem().getData());
                 assertEquals(rssiKeep, resultData.getRssi());
-                assertEquals(timestampKeep, resultData.getCaptureTimestamp());
+                assertEquals(timestampKeep, resultData.getCaptureTimestampMillis());
             }
         }
         assertEquals(1, numResultIntervals);

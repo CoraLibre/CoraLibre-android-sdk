@@ -155,7 +155,13 @@ final class ExposureNotificationClientImpl implements ExposureNotificationClient
     @Override
     public Task<ExposureSummary> getExposureSummary(String token) {
         return Tasks.call(() -> {
-            return IdentifyMatchesFromDb.buildExposureSummaryFromMatches(token);
+            // TODO Here it is unclear, when the exposureConfiguration can be null. Also it is,
+            //  unclear, if different exposureConfigurations can be around, and if so, which to use.
+            //  Should the exposureConfiguration also be selected using the token? If so, remove
+            //  the exposure configuration parameter from the following call and implement the
+            //  selection inside the buildExposureSummaryFromMatches(...) method, using the database
+            //  in a similar manner as already done for the diagnosis key sets.
+            return IdentifyMatchesFromDb.buildExposureSummary(token, exposureConfiguration);
         });
     }
 

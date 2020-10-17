@@ -26,5 +26,20 @@ public class EnFrameworkConstants {
     public static final int AEM_LENGTH = 4; //unit in bytes
     public static final int BLE_PAYLOAD_LENGTH = RPI_LENGTH + AEM_LENGTH;
 
+    // TODO The following constant is just a guess! There might be documentation regarding this
+    //  constant, but I did not look it up yet. For information regarding this constant see:
+    //  https://github.com/google/exposure-notifications-internals/blob/8f751a666697c3cae0a56ae3464c2c6cbe31b69e/exposurenotification/src/main/java/com/google/samples/exposurenotification/matching/TracingParams.java#L52
+    //  and line 200 in:
+    //  https://github.com/google/exposure-notifications-internals/blob/8f751a666697c3cae0a56ae3464c2c6cbe31b69e/exposurenotification/src/main/java/com/google/samples/exposurenotification/matching/KeyExposureEvaluator.java#L420
+    //  Perhaps it should be 5 minutes? See line 203 in:
+    //  https://github.com/google/exposure-notifications-internals/blob/8f751a666697c3cae0a56ae3464c2c6cbe31b69e/exposurenotification/src/main/java/com/google/samples/exposurenotification/matching/KeyExposureEvaluator.java#L420
+    /**
+     * If two consecutive bluetooth payloads have been received for the same rpik, but the time
+     * difference between receiving the two payloads is greater than the value defined here, the
+     * payloads are treated as belonging to different 'Exposures'. Otherwise, both belong to the
+     * same 'Exposure'.
+     */
+    public static final long MAX_EXPOSURE_INTERPOLATION_DURATION_SECONDS = 2 * TracingService.SCAN_INTERVAL;
+
 
 }

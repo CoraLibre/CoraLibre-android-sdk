@@ -7,8 +7,7 @@ public class CapturedData {
     /**
      *  Milliseconds since Epoch.
      */
-    @Deprecated
-    private final long captureTimestamp;
+    private final long captureTimestampMillis;
 
     /**
      * the 10-minute interval
@@ -31,15 +30,15 @@ public class CapturedData {
         final RollingProximityIdentifier rpi,
         final AssociatedEncryptedMetadata aem
     ) {
-        this.captureTimestamp = captureTimestamp;
+        this.captureTimestampMillis = captureTimestamp;
         this.enInterval = new ENInterval(captureTimestamp, true);
         this.rssi = rssi;
         this.rpi = rpi;
         this.aem = aem;
     }
 
-    public Long getCaptureTimestamp() {
-        return captureTimestamp;
+    public Long getCaptureTimestampMillis() {
+        return captureTimestampMillis;
     }
 
     public ENInterval getEnInterval() {
