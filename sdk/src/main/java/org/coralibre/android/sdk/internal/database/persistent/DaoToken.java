@@ -5,27 +5,33 @@ import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
+import androidx.room.Update;
 
+import org.coralibre.android.sdk.internal.database.persistent.entity.EntityExposureSummary;
 import org.coralibre.android.sdk.internal.database.persistent.entity.EntityToken;
 
 @Dao
 public interface DaoToken {
 
-    //TODO test inserting, adding after first insertion and deleting.
-    // Also ensure/test that a token is dropped, once no diagnosis key set references it anymore
+    // TODO test inserting, adding after first insertion and deleting.
+    // TODO mplement removal of tokens after they are not required anymore. Regard the special case,
+    //  that an app might always use the same single token string
 
 
-    // Conflicts are ignored, since multiple insertions for the same token are possible
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    @Insert(onConflict = OnConflictStrategy.ABORT)
     public void insertToken(EntityToken token);
+
+    @Update(onConflict = OnConflictStrategy.ABORT)
+    public void updateToken(EntityToken token);
+
+    @Query("SELECT * FROM EntityToken WHERE tokenString = :tokenString")
+    public EntityToken getToken(String tokenString);
 
     @Query("DELETE FROM EntityToken WHERE tokenString = :tokenString")
     public void removeToken(String tokenString);
 
+
     @Query("DELETE FROM EntityToken")
     public void clearAllData();
-
-
-    // TODO Clean tokens that are not in use, i.e. that are not referenced by stored diagnosis keys
 
 }

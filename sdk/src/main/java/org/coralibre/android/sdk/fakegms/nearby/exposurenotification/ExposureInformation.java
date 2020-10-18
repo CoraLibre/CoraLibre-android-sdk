@@ -19,7 +19,7 @@ public final class ExposureInformation implements Parcelable {
     @NonNull
     private final int[] attenuationDurationsInMinutes;
 
-    private ExposureInformation(
+    public ExposureInformation(
         long dateMillisSinceEpoch,
         int durationMinutes,
         int attenuationValue,

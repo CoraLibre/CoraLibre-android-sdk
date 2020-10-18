@@ -35,14 +35,4 @@ public class DiagnosisKeyUtil {
         return entityDiagnosisKeys;
     }
 
-
-    public static List<EntityDiagnosisKey> toEntityDiagnosisKeys(String token, List<DiagnosisKey> diagKeys) {
-        LinkedList<EntityDiagnosisKey> result = new LinkedList<EntityDiagnosisKey>();
-        for (DiagnosisKey dk : diagKeys) {
-            result.add(new EntityDiagnosisKey(token, dk));
-        }
-        return result;
-    }
-
-
 }

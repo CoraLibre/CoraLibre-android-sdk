@@ -297,7 +297,7 @@ public class DatabaseTests {
         }
 
         // Now delete token1 and check again:
-        db.deleteTokenWithDiagnosisKeys(token1);
+        db.deleteTokenWithData(token1);
         {
             List<DiagnosisKey> result0 = db.getDiagnosisKeys(token0);
             assertEquals(1, result0.size());

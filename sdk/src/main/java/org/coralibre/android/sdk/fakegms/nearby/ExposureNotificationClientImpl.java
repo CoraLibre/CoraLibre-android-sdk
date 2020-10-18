@@ -32,6 +32,10 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+
+// TODO What happens with queries for tokens, for that no keys have been provided?
+// TODO When are tokens with data deleted?
+
 final class ExposureNotificationClientImpl implements ExposureNotificationClient {
     public static final String TAG = ExposureNotificationClientImpl.class.getSimpleName();
     private static Nearby instance = null;
@@ -136,6 +140,7 @@ final class ExposureNotificationClientImpl implements ExposureNotificationClient
                                 final TemporaryExposureKeyExport temporaryExposureKeyExport = TemporaryExposureKeyExport.parseFrom(stream);
                                 database.addDiagnosisKeys(token, DiagnosisKeyUtil.toDiagnosisKeys(temporaryExposureKeyExport.getKeysList()));
                                 database.updateDiagnosisKeys(token, DiagnosisKeyUtil.toDiagnosisKeys(temporaryExposureKeyExport.getRevisedKeysList()));
+                                // TODO verify that first add and then update is correct here
                             } else {
                                 Log.e(TAG, "Failed to parse diagnosis key file: export.bin has invalid prefix: " + prefixString);
                             }
@@ -161,6 +166,7 @@ final class ExposureNotificationClientImpl implements ExposureNotificationClient
     @Override
     public Task<ExposureSummary> getExposureSummary(String token) {
         return Tasks.call(() -> {
+
             // TODO
 
             return null;

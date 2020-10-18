@@ -1,14 +1,19 @@
 package org.coralibre.android.sdk.internal.database;
 
 import android.content.Context;
+import android.content.Entity;
 
 import androidx.annotation.NonNull;
 import androidx.room.Room;
 
+import org.coralibre.android.sdk.fakegms.nearby.exposurenotification.ExposureInformation;
+import org.coralibre.android.sdk.fakegms.nearby.exposurenotification.ExposureSummary;
 import org.coralibre.android.sdk.internal.EnFrameworkConstants;
 import org.coralibre.android.sdk.internal.database.persistent.RoomDatabaseDelegate;
 import org.coralibre.android.sdk.internal.database.persistent.entity.EntityCapturedData;
 import org.coralibre.android.sdk.internal.database.persistent.entity.EntityDiagnosisKey;
+import org.coralibre.android.sdk.internal.database.persistent.entity.EntityExposureInformation;
+import org.coralibre.android.sdk.internal.database.persistent.entity.EntityExposureSummary;
 import org.coralibre.android.sdk.internal.database.persistent.entity.EntityTemporaryExposureKey;
 import org.coralibre.android.sdk.internal.database.persistent.entity.EntityToken;
 import org.coralibre.android.sdk.internal.datatypes.CapturedData;
@@ -17,7 +22,6 @@ import org.coralibre.android.sdk.internal.datatypes.ENInterval;
 import org.coralibre.android.sdk.internal.datatypes.IntervalOfCapturedData;
 import org.coralibre.android.sdk.internal.datatypes.IntervalOfCapturedDataImpl;
 import org.coralibre.android.sdk.internal.datatypes.TemporaryExposureKey_internal;
-import org.coralibre.android.sdk.internal.datatypes.util.DiagnosisKeyUtil;
 import org.coralibre.android.sdk.internal.datatypes.util.ENIntervalUtil;
 
 import java.util.HashMap;
@@ -71,17 +75,29 @@ public class PersistentDatabase implements Database {
 
     @Override
     public void addDiagnosisKeys(String token, List<DiagnosisKey> diagnosisKeys) {
-        db.daoToken().insertToken(new EntityToken(token));
+        EntityToken entityToken = db.daoToken().getToken(token);
+        if (entityToken == null) {
+            db.daoToken().insertToken(new EntityToken(token, false));
+        } else {
+            entityToken.exposureDataUpToDate = false;
+            db.daoToken().updateToken(entityToken);
+        }
         db.daoDiagnosisKey().insertDiagnosisKeys(
-            DiagnosisKeyUtil.toEntityDiagnosisKeys(token, diagnosisKeys)
+            EntityDiagnosisKey.toEntityDiagnosisKeys(token, diagnosisKeys)
         );
     }
 
     @Override
     public void updateDiagnosisKeys(String token, List<DiagnosisKey> diagnosisKeys) {
-        db.daoToken().insertToken(new EntityToken(token));
+        EntityToken entityToken = db.daoToken().getToken(token);
+        if (entityToken == null) {
+            db.daoToken().insertToken(new EntityToken(token, false));
+        } else {
+            entityToken.exposureDataUpToDate = false;
+            db.daoToken().updateToken(entityToken);
+        }
         db.daoDiagnosisKey().updateDiagnosisKeys(
-            DiagnosisKeyUtil.toEntityDiagnosisKeys(token, diagnosisKeys)
+            EntityDiagnosisKey.toEntityDiagnosisKeys(token, diagnosisKeys)
         );
     }
 
@@ -98,6 +114,44 @@ public class PersistentDatabase implements Database {
                 entity.transmissionRiskLevel
             );
             result.add(diagnosisKey);
+        }
+        return result;
+    }
+
+    @Override
+    public void putExposureMatchingResults(
+        String token,
+        List<ExposureInformation> exposureInformations,
+        ExposureSummary exposureSummary
+    ) {
+        db.daoToken().insertToken(new EntityToken(token, true));
+        db.daoExposureInformation().clearDataForToken(token);
+        db.daoExposureInformation().insertExposureInformations(
+            EntityExposureInformation.toEntityExposureInformations(token, exposureInformations)
+        );
+        db.daoExposureSummary().clearDataForToken(token);
+        db.daoExposureSummary().insertExposureSummary(new EntityExposureSummary(token, exposureSummary));
+        // TODO implement test
+    }
+
+    @Override
+    public ExposureSummary getExposureSummary(String token) throws StorageException {
+        EntityToken entityToken = db.daoToken().getToken(token);
+        if (entityToken == null || !entityToken.exposureDataUpToDate) {
+            throw new StorageException("db - getExposureSummary(...): No up-to-date exposure data in db");
+        }
+        return db.daoExposureSummary().getExposureSummary(token).toExposureSummary();
+    }
+
+    @Override
+    public List<ExposureInformation> getExposureInformation(String token) throws StorageException {
+        EntityToken entityToken = db.daoToken().getToken(token);
+        if (entityToken == null || !entityToken.exposureDataUpToDate) {
+            throw new StorageException("db - getExposureInformation(...): No up-to-date exposure data in db");
+        }
+        List<ExposureInformation> result = new LinkedList<>();
+        for (EntityExposureInformation e : db.daoExposureInformation().getExposureInformations(token)) {
+            result.add(e.toExposureInformation());
         }
         return result;
     }
@@ -171,7 +225,7 @@ public class PersistentDatabase implements Database {
 
 
     @Override
-    public void deleteTokenWithDiagnosisKeys(String token) {
+    public void deleteTokenWithData(String token) {
         db.daoToken().removeToken(token);
     }
 
@@ -179,7 +233,9 @@ public class PersistentDatabase implements Database {
     public void clearAllData() {
         db.daoCapturedData().clearAllData();
         db.daoTEK().clearAllData();
-        db.daoDiagnosisKey().clearAllData();
+
+        // The following call also clears the diagnosis key, exposure infomation and exposure
+        // summary tables, since the items stored there contain token strings as foreign keys:
         db.daoToken().clearAllData();
 
         // TODO test clear/delete

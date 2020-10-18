@@ -64,6 +64,7 @@ public class MatchingHelper {
     public static AllExposureInfo assembleAllExposureInfo(
         final String token, final ExposureConfiguration exposureConfiguration
     ) {
+        // TODO call this method and store the results in db
         // TODO refactor: split this method
 
         final Database db = DatabaseAccess.getDefaultDatabaseInstance();

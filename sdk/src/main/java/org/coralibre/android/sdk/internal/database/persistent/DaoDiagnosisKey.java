@@ -13,6 +13,8 @@ import java.util.List;
 @Dao
 public interface DaoDiagnosisKey {
 
+    // TODO what happens on update?
+
     @Insert(onConflict = OnConflictStrategy.ABORT)
     public void insertDiagnosisKeys(List<EntityDiagnosisKey> entityDiagnosisKeys);
 
@@ -22,10 +24,4 @@ public interface DaoDiagnosisKey {
     @Query("SELECT * FROM EntityDiagnosisKey WHERE tokenString = :token")
     public List<EntityDiagnosisKey> getDiagnosisKeys(String token);
 
-
-    // TODO Provide method to remove old keys (and also call it somewhere)
-
-
-    @Query("DELETE FROM EntityDiagnosisKey")
-    public void clearAllData();
 }
