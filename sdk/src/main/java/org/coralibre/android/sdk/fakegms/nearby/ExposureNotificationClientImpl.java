@@ -8,6 +8,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import org.coralibre.android.sdk.PPCP;
+import org.coralibre.android.sdk.fakegms.common.api.ApiException;
 import org.coralibre.android.sdk.fakegms.nearby.exposurenotification.ExposureConfiguration;
 import org.coralibre.android.sdk.fakegms.nearby.exposurenotification.ExposureInformation;
 import org.coralibre.android.sdk.fakegms.nearby.exposurenotification.ExposureNotificationClient;
@@ -105,6 +106,11 @@ final class ExposureNotificationClientImpl implements ExposureNotificationClient
                                            @Nullable final ExposureConfiguration exposureConfiguration,
                                            final String token) {
         return Tasks.call(() -> {
+
+            if (exposureConfiguration == null || token == null || token.isEmpty()) {
+                throw new IllegalArgumentException("EN framework: Invalid parameter for 'provideDiagnosisKeys(...)'.");
+            }
+
             // TODO save exposure configuration to database, to restore it after e.g. phone restart, like microg?
             this.exposureConfiguration = exposureConfiguration;
 
