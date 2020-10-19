@@ -389,7 +389,7 @@ public final class ExposureConfiguration implements Parcelable {
             return this;
         }
 
-        public ExposureConfigurationBuilder setAttenuationWeight(int weight) {
+/*        public ExposureConfigurationBuilder setAttenuationWeight(int weight) {
             // unused right now
             return this;
         }
@@ -407,7 +407,7 @@ public final class ExposureConfiguration implements Parcelable {
         public ExposureConfigurationBuilder setTransmissionRiskWeight(int weight) {
             // unused right now
             return this;
-        }
+        }*/
 
         /**
          * @return an {@link ExposureConfiguration} instance based on the values set in the builder
