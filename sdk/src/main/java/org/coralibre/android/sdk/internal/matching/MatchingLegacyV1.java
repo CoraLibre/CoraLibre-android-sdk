@@ -21,6 +21,12 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * Provides static methods to check if matches exist and to compute ExposureSummary/ExposureInformation
+ * objects.
+ * This class and all calculations it performs should not access the database, but receive all
+ * data required for the computations as (method) parameters.
+ */
 public class MatchingLegacyV1 {
 
     // TODO add more logs for debugging
@@ -57,7 +63,15 @@ public class MatchingLegacyV1 {
         return false;
     }
 
-
+    /**
+     * Computes an ExposureSummary and multiple ExposureInformation objects, which are wrapped into
+     * an AllExposureInfo object and returned.
+     * @param diagnosisKeys the set of all infected diagnosis keys used for the calculation
+     * @param payloadIntevals the collected bluetooth payloads used for the calculation
+     * @param exposureConfiguration used for the risk value computation of single matches/exposures
+     * @param ownDeviceInfo device info to compute the bluetooth attenuation value
+     * @return
+     */
     public static AllExposureInfo assembleAllExposureInfo(
         final List<DiagnosisKey> diagnosisKeys,
         final Iterable<IntervalOfCapturedData> payloadIntevals,

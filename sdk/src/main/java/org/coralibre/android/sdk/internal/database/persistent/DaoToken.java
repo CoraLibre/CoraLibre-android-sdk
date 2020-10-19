@@ -7,7 +7,6 @@ import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
 
-import org.coralibre.android.sdk.internal.database.persistent.entity.EntityExposureSummary;
 import org.coralibre.android.sdk.internal.database.persistent.entity.EntityToken;
 
 @Dao

@@ -64,7 +64,6 @@ public interface Database {
         List<ExposureInformation> exposureInformations,
         ExposureSummary exposureSummary
     );
-    // TODO Implement test
 
     /**
      * Get an exposure summary object that has previously been stored using
@@ -75,7 +74,6 @@ public interface Database {
      * @throws StorageException if there is no ExposureSummary for that token, which is up-to-date
      */
     ExposureSummary getExposureSummary(String token) throws StorageException;
-    // TODO Implement test
 
     /**
      * Get exposure information objects that have previously been stored using
@@ -86,7 +84,6 @@ public interface Database {
      * @throws StorageException if there is no matchin result data for that token, which is up-to-date
      */
     List<ExposureInformation> getExposureInformation(String token) throws StorageException;
-    // TODO Implement test
 
     /**
      * @param token A token with that an addDiagnosisKeys(...) call has been performed previously

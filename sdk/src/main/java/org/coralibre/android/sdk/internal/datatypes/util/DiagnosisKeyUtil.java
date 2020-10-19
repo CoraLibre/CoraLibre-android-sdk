@@ -1,13 +1,11 @@
 package org.coralibre.android.sdk.internal.datatypes.util;
 
-import org.coralibre.android.sdk.internal.database.persistent.entity.EntityDiagnosisKey;
 import org.coralibre.android.sdk.internal.datatypes.DiagnosisKey;
 import org.coralibre.android.sdk.internal.datatypes.ENInterval;
 import org.coralibre.android.sdk.internal.datatypes.TemporaryExposureKey_internal;
 import org.coralibre.android.sdk.proto.TemporaryExposureKeyFile;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 public class DiagnosisKeyUtil {

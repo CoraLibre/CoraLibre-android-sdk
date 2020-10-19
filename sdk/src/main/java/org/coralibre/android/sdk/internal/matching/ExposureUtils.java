@@ -87,7 +87,8 @@ public class ExposureUtils {
 
     // Based on the google sample code:
     private static List<Period> computePeriods(
-        LinkedList<TimeAndAttenuation> timeAndAttenuations, long scanInterval) {
+        LinkedList<TimeAndAttenuation> timeAndAttenuations, long scanInterval
+    ) {
         // Add fake start and end boundary scans with the same attenuation as first and last ones.
         int timeMargin = (int) (TracingService.SCAN_INTERVAL_MILLIS / 2);
         timeAndAttenuations.addFirst(
@@ -133,7 +134,8 @@ public class ExposureUtils {
 
 
     private static List<Integer> getTimeBelowBetweenAndAbove(
-        List<Period> periods, int thresholdLow, int thresholdHigh, boolean interpolate) {
+        List<Period> periods, int thresholdLow, int thresholdHigh, boolean interpolate
+    ) {
         Pair<Integer, Integer> timeBelowAndAboveOfLow =
             getTimeBelowAndAbove(periods, thresholdLow, interpolate);
         Pair<Integer, Integer> timeBelowAndAboveOfHigh =
@@ -156,7 +158,8 @@ public class ExposureUtils {
      * values.
      */
     private static Pair<Integer, Integer> getTimeBelowAndAbove(
-        List<Period> periods, int threshold, boolean interpolate) {
+        List<Period> periods, int threshold, boolean interpolate
+    ) {
         int timeAboveThreshold = 0;
         int timeBelowThreshold = 0;
         for (Period period : periods) {
@@ -218,7 +221,7 @@ public class ExposureUtils {
         final ExposureConfiguration exposureConfiguration,
         final DiagnosisKey diagnosisKey,
         final DeviceInfo ownDeviceInfo
-        ) {
+    ) {
 
         final LinkedList<TimeAndAttenuation> timeAndAttenuations = new LinkedList<>();
         for (Match match : matches) {

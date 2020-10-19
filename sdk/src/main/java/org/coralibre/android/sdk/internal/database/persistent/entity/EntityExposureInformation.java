@@ -1,17 +1,11 @@
 package org.coralibre.android.sdk.internal.database.persistent.entity;
 
 
-import androidx.annotation.NonNull;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
 import androidx.room.PrimaryKey;
 
 import org.coralibre.android.sdk.fakegms.nearby.exposurenotification.ExposureInformation;
-import org.coralibre.android.sdk.internal.datatypes.AssociatedEncryptedMetadata;
-import org.coralibre.android.sdk.internal.datatypes.CapturedData;
-import org.coralibre.android.sdk.internal.datatypes.DiagnosisKey;
-import org.coralibre.android.sdk.internal.datatypes.ENInterval;
-import org.coralibre.android.sdk.internal.datatypes.RollingProximityIdentifier;
 
 import java.util.LinkedList;
 import java.util.List;

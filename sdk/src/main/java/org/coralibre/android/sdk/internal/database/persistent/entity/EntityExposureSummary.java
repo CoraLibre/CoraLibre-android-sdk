@@ -7,10 +7,6 @@ import androidx.room.ForeignKey;
 import androidx.room.PrimaryKey;
 
 import org.coralibre.android.sdk.fakegms.nearby.exposurenotification.ExposureSummary;
-import org.coralibre.android.sdk.internal.datatypes.AssociatedEncryptedMetadata;
-import org.coralibre.android.sdk.internal.datatypes.CapturedData;
-import org.coralibre.android.sdk.internal.datatypes.ENInterval;
-import org.coralibre.android.sdk.internal.datatypes.RollingProximityIdentifier;
 
 import static androidx.room.ForeignKey.CASCADE;
 

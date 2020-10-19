@@ -22,8 +22,6 @@ import org.coralibre.android.sdk.internal.datatypes.DiagnosisKey;
 import org.coralibre.android.sdk.internal.datatypes.IntervalOfCapturedData;
 import org.coralibre.android.sdk.internal.datatypes.TemporaryExposureKey_internal;
 import org.coralibre.android.sdk.internal.datatypes.util.DiagnosisKeyUtil;
-import org.coralibre.android.sdk.internal.device_info.DeviceInfo;
-import org.coralibre.android.sdk.internal.matching.AllExposureInfo;
 import org.coralibre.android.sdk.internal.matching.MatchingLegacyV1;
 import org.coralibre.android.sdk.proto.TemporaryExposureKeyFile.TemporaryExposureKeyExport;
 
@@ -48,7 +46,6 @@ final class ExposureNotificationClientImpl implements ExposureNotificationClient
     private boolean enabled = false;
     private Database database;
 
-    private ExposureConfiguration exposureConfiguration;
 
     ExposureNotificationClientImpl(@NonNull final Context context) {
         this.context = context;
@@ -100,8 +97,8 @@ final class ExposureNotificationClientImpl implements ExposureNotificationClient
                     dbTek.getKey(),
                     (int) dbTek.getInterval().get(),
                     EnFrameworkConstants.TEK_ROLLING_PERIOD,
-                    0, // TODO Means "Unused"; verify, that the CWA sets this value before uploading
-                    0 // TODO this means "UNKNOWN"; see https://developers.google.com/android/exposure-notifications/exposure-notifications-api
+                    0, // TODO Means "Unused"; is this correct here? verify, that the CWA sets this value before uploading
+                    0 // TODO this means "UNKNOWN"; is this correct here? see https://developers.google.com/android/exposure-notifications/exposure-notifications-api
                 ));
             }
             return result;
@@ -119,7 +116,6 @@ final class ExposureNotificationClientImpl implements ExposureNotificationClient
             }
 
             // TODO save exposure configuration to database, to restore it after e.g. phone restart, like microg?
-            this.exposureConfiguration = exposureConfiguration;
 
             for (File file : keyFiles) {
                 try (ZipInputStream stream = new ZipInputStream(
@@ -156,7 +152,14 @@ final class ExposureNotificationClientImpl implements ExposureNotificationClient
             }
 
 
-            // TODO Discard keys older than 14 days (https://developers.google.com/android/reference/com/google/android/gms/nearby/exposurenotification/ExposureNotificationClient#provideDiagnosisKeys(com.google.android.gms.nearby.exposurenotification.DiagnosisKeyFileProvider))
+            // TODO Discard keys older than 14 days
+            //  See description of method "provideDiagnosisKeys()" in:
+            //  https://developers.google.com/android/exposure-notifications/exposure-notifications-api
+            //  "Keys provided with the same token accumulate into the same set, and are aged out
+            //  of those sets as they pass out of the 14-day window."
+
+            // TODO Are measurements from today used for the matching? If not, remove them before
+            //  testing for matches (same for the ExposureSummary/ExposureInformation computation)
 
             List<DiagnosisKey> diagnosisKeys = database.getDiagnosisKeys(token);
             Iterable<IntervalOfCapturedData> capturedData = database.getAllCollectedPayload();
@@ -173,7 +176,7 @@ final class ExposureNotificationClientImpl implements ExposureNotificationClient
     public Task<ExposureSummary> getExposureSummary(String token) {
         return Tasks.call(() -> {
 
-            // TODO implement
+            // TODO use MatchingLegacyV1 to get ExposureSummary item
 
             return null;
         });
@@ -185,7 +188,7 @@ final class ExposureNotificationClientImpl implements ExposureNotificationClient
             // See src/deviceForTesters/java/de.rki.coronawarnapp/TestRiskLevelCalculation.kt
             List<ExposureInformation> result = new ArrayList<>();
 
-            // TODO loop through matched keys and build exposure information items
+            // TODO use MatchingLegacyV1 to get ExposureInformation items
 
             return result;
         });

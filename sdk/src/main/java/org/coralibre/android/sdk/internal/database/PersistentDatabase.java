@@ -1,7 +1,6 @@
 package org.coralibre.android.sdk.internal.database;
 
 import android.content.Context;
-import android.content.Entity;
 
 import androidx.annotation.NonNull;
 import androidx.room.Room;
@@ -131,8 +130,8 @@ public class PersistentDatabase implements Database {
         );
         db.daoExposureSummary().clearDataForToken(token);
         db.daoExposureSummary().insertExposureSummary(new EntityExposureSummary(token, exposureSummary));
-        // TODO implement test
     }
+    // TODO Implement test
 
     @Override
     public ExposureSummary getExposureSummary(String token) throws StorageException {
@@ -142,6 +141,7 @@ public class PersistentDatabase implements Database {
         }
         return db.daoExposureSummary().getExposureSummary(token).toExposureSummary();
     }
+    // TODO Implement test
 
     @Override
     public List<ExposureInformation> getExposureInformation(String token) throws StorageException {
@@ -155,6 +155,7 @@ public class PersistentDatabase implements Database {
         }
         return result;
     }
+    // TODO Implement test
 
 
     @Override
