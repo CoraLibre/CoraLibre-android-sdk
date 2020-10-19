@@ -6,8 +6,6 @@ import org.coralibre.android.sdk.fakegms.nearby.exposurenotification.ExposureCon
 import org.coralibre.android.sdk.fakegms.nearby.exposurenotification.ExposureInformation;
 import org.coralibre.android.sdk.fakegms.nearby.exposurenotification.ExposureSummary;
 import org.coralibre.android.sdk.internal.crypto.CryptoModule;
-import org.coralibre.android.sdk.internal.database.Database;
-import org.coralibre.android.sdk.internal.database.DatabaseAccess;
 import org.coralibre.android.sdk.internal.datatypes.AssociatedEncryptedMetadataKey;
 import org.coralibre.android.sdk.internal.datatypes.AssociatedMetadata;
 import org.coralibre.android.sdk.internal.datatypes.CapturedData;
@@ -30,17 +28,16 @@ public class MatchingLegacyV1 {
     public final static String TAG = MatchingLegacyV1.class.getSimpleName();
 
 
+
     /**
-     * For all intervals for that captured data is present, an rpi is computed per diagnosis key,
-     * then rpi matches are searched in the recorded data for that interval.
-     * @param token identifies the set of diagnosis keys, for which matches are searched
+     * Computes the rpik for each diagnosis key and search all payloads in the given intervals
+     * for matches
      * @return true, iff at least one payload with a matching rpi has been found
      */
-    public static boolean hasMatches(String token) {
-
-        Database db = DatabaseAccess.getDefaultDatabaseInstance();
-        List<DiagnosisKey> diagnosisKeys = db.getDiagnosisKeys(token);
-        Iterable<IntervalOfCapturedData> payloadIntevals = db.getAllCollectedPayload();
+    public static boolean hasMatches(
+        List<DiagnosisKey> diagnosisKeys,
+        Iterable<IntervalOfCapturedData> payloadIntevals
+    ) {
 
         for (DiagnosisKey diagKey : diagnosisKeys) {
             RollingProximityIdentifierKey rpik = CryptoModule.generateRPIK(diagKey.getKeyData());
@@ -62,22 +59,19 @@ public class MatchingLegacyV1 {
 
 
     public static AllExposureInfo assembleAllExposureInfo(
-        final String token,
+        final List<DiagnosisKey> diagnosisKeys,
+        final Iterable<IntervalOfCapturedData> payloadIntevals,
         final ExposureConfiguration exposureConfiguration,
         final DeviceInfo ownDeviceInfo
     ) {
         // TODO call this method and store the results in db
         // TODO refactor: split this method
 
-        final Database db = DatabaseAccess.getDefaultDatabaseInstance();
-        final List<DiagnosisKey> diagnosisKeys = db.getDiagnosisKeys(token);
-
         // First, collect all matches per rpik and put them into a list. The lists are stored in a
         // map and accessible by the respective rpik:
         final HashMap<RollingProximityIdentifierKey, LinkedList<Match>> matchesByRpik = new HashMap<>();
         final HashMap<RollingProximityIdentifierKey, DiagnosisKey> diagKeysByRpik = new HashMap<>();
 
-        final Iterable<IntervalOfCapturedData> payloadIntevals = db.getAllCollectedPayload();
         for (DiagnosisKey diagKey : diagnosisKeys) {
             RollingProximityIdentifierKey rpik = CryptoModule.generateRPIK(diagKey.getKeyData());
             diagKeysByRpik.put(rpik, diagKey);

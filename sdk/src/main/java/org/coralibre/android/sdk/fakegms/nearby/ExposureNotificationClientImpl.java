@@ -18,8 +18,12 @@ import org.coralibre.android.sdk.fakegms.tasks.Tasks;
 import org.coralibre.android.sdk.internal.EnFrameworkConstants;
 import org.coralibre.android.sdk.internal.database.Database;
 import org.coralibre.android.sdk.internal.database.DatabaseAccess;
+import org.coralibre.android.sdk.internal.datatypes.DiagnosisKey;
+import org.coralibre.android.sdk.internal.datatypes.IntervalOfCapturedData;
 import org.coralibre.android.sdk.internal.datatypes.TemporaryExposureKey_internal;
 import org.coralibre.android.sdk.internal.datatypes.util.DiagnosisKeyUtil;
+import org.coralibre.android.sdk.internal.device_info.DeviceInfo;
+import org.coralibre.android.sdk.internal.matching.AllExposureInfo;
 import org.coralibre.android.sdk.internal.matching.MatchingLegacyV1;
 import org.coralibre.android.sdk.proto.TemporaryExposureKeyFile.TemporaryExposureKeyExport;
 
@@ -154,7 +158,9 @@ final class ExposureNotificationClientImpl implements ExposureNotificationClient
 
             // TODO Discard keys older than 14 days (https://developers.google.com/android/reference/com/google/android/gms/nearby/exposurenotification/ExposureNotificationClient#provideDiagnosisKeys(com.google.android.gms.nearby.exposurenotification.DiagnosisKeyFileProvider))
 
-            boolean noMatchFound = !MatchingLegacyV1.hasMatches(token);
+            List<DiagnosisKey> diagnosisKeys = database.getDiagnosisKeys(token);
+            Iterable<IntervalOfCapturedData> capturedData = database.getAllCollectedPayload();
+            boolean noMatchFound = !MatchingLegacyV1.hasMatches(diagnosisKeys, capturedData);
 
             Intent intent = new Intent(noMatchFound ? ACTION_EXPOSURE_NOT_FOUND : ACTION_EXPOSURE_STATE_UPDATED);
             intent.putExtra(EXTRA_TOKEN, token);
@@ -167,7 +173,7 @@ final class ExposureNotificationClientImpl implements ExposureNotificationClient
     public Task<ExposureSummary> getExposureSummary(String token) {
         return Tasks.call(() -> {
 
-            // TODO
+            // TODO implement
 
             return null;
         });
