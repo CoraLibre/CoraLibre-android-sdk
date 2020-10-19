@@ -1,4 +1,4 @@
-package org.coralibre.android.sdk.internal.matching;
+package org.coralibre.android.sdk.internal.matching.intermediateDatatypes;
 
 public class ExposureRecord {
 

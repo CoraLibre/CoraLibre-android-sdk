@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.coralibre.android.sdk.internal.matching;
+package org.coralibre.android.sdk.internal.matching.intermediateDatatypes;
 
 public class TimeAndAttenuation {
 
@@ -28,7 +28,7 @@ public class TimeAndAttenuation {
     }
 
 
-    public static TimeAndAttenuation fromMatch(Match match) {
+    public static TimeAndAttenuation fromMatch(final Match match) {
         return new TimeAndAttenuation(
             (int)match.captureTimestampMillis * 1000,
             0 // TODO implement!!!

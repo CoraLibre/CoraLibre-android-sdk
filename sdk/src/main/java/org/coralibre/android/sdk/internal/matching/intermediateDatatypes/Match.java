@@ -1,4 +1,4 @@
-package org.coralibre.android.sdk.internal.matching;
+package org.coralibre.android.sdk.internal.matching.intermediateDatatypes;
 
 import org.coralibre.android.sdk.internal.datatypes.AssociatedMetadata;
 import org.coralibre.android.sdk.internal.datatypes.RollingProximityIdentifierKey;
@@ -18,9 +18,9 @@ public class Match {
     public final long captureTimestampMillis;
 
     public Match(
-        RollingProximityIdentifierKey rpik,
-        AssociatedMetadata metadata,
-        long captureTimestamp
+        final RollingProximityIdentifierKey rpik,
+        final AssociatedMetadata metadata,
+        final long captureTimestamp
     ) {
         this.rpik = rpik;
         this.metadata = metadata;

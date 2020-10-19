@@ -1,22 +1,3 @@
-//
-// The following source code is partially based on:
-// https://github.com/google/exposure-notifications-internals/blob/8f751a666697c3cae0a56ae3464c2c6cbe31b69e/exposurenotification/src/main/java/com/google/samples/exposurenotification/matching/KeyExposureEvaluator.java#L420
-// which is licensed under Apache License, Version 2.0:
-//
-//  Licensed under the Apache License, Version 2.0 (the "License");
-//  you may not use this file except in compliance with the License.
-//  You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-//  Unless required by applicable law or agreed to in writing, software
-//  distributed under the License is distributed on an "AS IS" BASIS,
-//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//  See the License for the specific language governing permissions and
-//  limitations under the License.
-//
-
-
 package org.coralibre.android.sdk.internal.matching;
 
 import android.util.Pair;
@@ -25,6 +6,11 @@ import org.coralibre.android.sdk.fakegms.nearby.exposurenotification.ExposureCon
 import org.coralibre.android.sdk.internal.EnFrameworkConstants;
 import org.coralibre.android.sdk.internal.TracingService;
 import org.coralibre.android.sdk.internal.datatypes.DiagnosisKey;
+import org.coralibre.android.sdk.internal.matching.intermediateDatatypes.Exposure;
+import org.coralibre.android.sdk.internal.matching.intermediateDatatypes.ExposureRecord;
+import org.coralibre.android.sdk.internal.matching.intermediateDatatypes.Match;
+import org.coralibre.android.sdk.internal.matching.intermediateDatatypes.Period;
+import org.coralibre.android.sdk.internal.matching.intermediateDatatypes.TimeAndAttenuation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,32 +22,7 @@ import java.util.List;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
-
-/**
- * 1 or more consecutive matches for the same rpik build an exposure
- */
-public class Exposure {
-    /*
-     * "Exposures are defined as consecutive sightings where the time between each sighting is not
-     * longer than {@link TracingParams#maxInterpolationDuration()} and the exposure duration is not
-     * shorter than {@link TracingParams#minExposureBucketizedDuration()}."
-     * See lines 151ff. at:
-     * https://github.com/google/exposure-notifications-internals/blob/main/exposurenotification/src/main/java/com/google/samples/exposurenotification/matching/KeyExposureEvaluator.java
-     */
-
-    // We store some information required to build ExposureInformation objects:
-    // (The comments attached to the fields are taken from https://developers.google.com/android/exposure-notifications/exposure-notifications-api )
-    public final long millisSinceEpoch; // The day that the interaction occurred.
-    public final long durationSeconds;
-    public final int daysSinceExposure;
-    public final int attenuationValue; // The time-weighted average of the attenuation.
-    public final int transmissionRiskLevel; // A transmission risk value.
-    public final int riskScore;
-        // The total risk calculated for the exposure, represented as an integer between 0 and 4096, inclusive.
-        // Note that if the totalRiskScore is less than the ExposureConfiguration's minimumRiskScore, then totalRiskScore is zero.
-    public final int secondsBelowLowThreshold;
-    public final int secondsBetweenThresholds;
-    public final int secondsAboveHighThreshold;
+public class ExposureUtils {
 
 
     /**
@@ -70,7 +31,7 @@ public class Exposure {
      * @param matches an (unordered) list of matches for the same rpik
      * @return a list of Exposure objects for that rpik
      */
-    public static List<Exposure> exposuresFromMatches(
+    protected static List<Exposure> exposuresFromMatches(
         final LinkedList<Match> matches, final ExposureConfiguration exposureConfiguration, DiagnosisKey diagnosisKey
     ) {
         // First sort the matches by time to ease assembling of the exposures. The sorted
@@ -251,7 +212,7 @@ public class Exposure {
         final LinkedList<Match> matches,
         final ExposureConfiguration exposureConfiguration,
         final DiagnosisKey diagnosisKey
-        ) {
+    ) {
 
         final LinkedList<TimeAndAttenuation> timeAndAttenuations = new LinkedList<>();
         for (Match match : matches) {
@@ -321,27 +282,5 @@ public class Exposure {
         }
     }
 
-
-    private Exposure(
-        final long millisSinceEpoch, // The day that the interaction occurred.
-        final long durationSeconds,
-        final int daysSinceExposure,
-        final int attenuationValue, // The time-weighted average of the attenuation.
-        final int transmissionRiskLevel, // A transmission risk value.
-        final int riskScore,
-        final int secondsBelowLowThreshold,
-        final int secondsBetweenThresholds,
-        final int secondsAboveHighThreshold
-    ) {
-        this.millisSinceEpoch = millisSinceEpoch;
-        this.durationSeconds = durationSeconds;
-        this.daysSinceExposure = daysSinceExposure;
-        this.attenuationValue = attenuationValue;
-        this.transmissionRiskLevel = transmissionRiskLevel;
-        this.riskScore = riskScore;
-        this.secondsBelowLowThreshold = secondsBelowLowThreshold;
-        this.secondsBetweenThresholds = secondsBetweenThresholds;
-        this.secondsAboveHighThreshold = secondsAboveHighThreshold;
-    }
 
 }

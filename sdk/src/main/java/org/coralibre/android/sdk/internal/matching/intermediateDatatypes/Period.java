@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.coralibre.android.sdk.internal.matching;
+package org.coralibre.android.sdk.internal.matching.intermediateDatatypes;
 
 public class Period {
 

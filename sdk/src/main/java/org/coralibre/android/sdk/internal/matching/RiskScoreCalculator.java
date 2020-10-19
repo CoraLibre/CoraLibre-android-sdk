@@ -19,10 +19,8 @@ package org.coralibre.android.sdk.internal.matching;
 
 
 import org.coralibre.android.sdk.fakegms.nearby.exposurenotification.ExposureConfiguration;
+import org.coralibre.android.sdk.internal.matching.intermediateDatatypes.ExposureRecord;
 
-import java.util.Date;
-
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 /**
@@ -35,11 +33,12 @@ public class RiskScoreCalculator {
      * Returns a V1 risk score. Returns 0 if calculated risk score is below {@link
      * ExposureConfiguration#getMinimumRiskScore()}. Throws IllegalArgumentException on invalid input.
      */
-    public static int calculateRiskScore(
-        ExposureRecord exposureRecord,
-        ExposureConfiguration configuration) {
+    protected static int calculateRiskScore(
+        final ExposureRecord exposureRecord,
+        final ExposureConfiguration configuration
+    ) {
 
-        int riskScore = configuration.getRiskScore(
+        final int riskScore = configuration.getRiskScore(
             exposureRecord.attenuationValue,
             exposureRecord.daysSinceExposure,
             (int)SECONDS.toMinutes(exposureRecord.durationSeconds),

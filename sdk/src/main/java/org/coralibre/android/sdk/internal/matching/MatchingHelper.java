@@ -15,6 +15,8 @@ import org.coralibre.android.sdk.internal.datatypes.DiagnosisKey;
 import org.coralibre.android.sdk.internal.datatypes.IntervalOfCapturedData;
 import org.coralibre.android.sdk.internal.datatypes.RollingProximityIdentifier;
 import org.coralibre.android.sdk.internal.datatypes.RollingProximityIdentifierKey;
+import org.coralibre.android.sdk.internal.matching.intermediateDatatypes.Exposure;
+import org.coralibre.android.sdk.internal.matching.intermediateDatatypes.Match;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -107,7 +109,7 @@ public class MatchingHelper {
         // Exposure object might be created:
         List<Exposure> allExposures = new LinkedList<>();
         for (RollingProximityIdentifierKey rpik : matchesByRpik.keySet()) {
-            final List<Exposure> exposures = Exposure.exposuresFromMatches(
+            final List<Exposure> exposures = ExposureUtils.exposuresFromMatches(
                 matchesByRpik.get(rpik),
                 exposureConfiguration,
                 diagKeysByRpik.get(rpik)
@@ -136,6 +138,8 @@ public class MatchingHelper {
         List<ExposureInformation> allExposureInformations = new LinkedList<>();
         for (Exposure exposure : allExposures) {
 
+            // First the ExposureInformation for this specific exposure:
+
             int[] attenuationDurationsMinutes = {
                 exposure.secondsBelowLowThreshold / 60,
                 exposure.secondsBetweenThresholds / 60,
@@ -152,6 +156,9 @@ public class MatchingHelper {
                     .build()
             );
 
+            // Then this exposure is used to update the variables from that the overall
+            // ExposureSummary will be built:
+
             // Note: In the google sample code, low scores are ignored when calculating sum and
             // maximum score, BUT that code already implements the new ExposureWindow mode:
             //
@@ -163,7 +170,7 @@ public class MatchingHelper {
             //
             // See line 100ff. in:
             // https://github.com/google/exposure-notifications-internals/blob/main/exposurenotification/src/main/java/com/google/samples/exposurenotification/matching/DailySummaryUtils.java
-            // TODO verify this note has been used! Move it to the correct place
+            // TODO verify this note has been regarded! Move it to the correct place
 
             if (daysSinceLastExposure == -1) {
                 daysSinceLastExposure = exposure.daysSinceExposure;

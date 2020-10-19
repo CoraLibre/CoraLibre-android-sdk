@@ -11,6 +11,9 @@ public class PaddedData {
     public static final int TIMESTAMP_POS = 12;
     private byte[] data = new byte[PADDED_DATA_SIZE];
 
+    //TODO In the following source file from the google code, padded data length is only 12?:
+    // https://github.com/google/exposure-notifications-internals/blob/main/exposurenotification/src/main/cpp/constants.h
+
     public PaddedData(ENInterval timestamp) {
         System.arraycopy(RPI_INFO.getBytes(StandardCharsets.UTF_8), 0, data, 0, RPI_INFO.length());
         System.arraycopy(timestamp.getBytes(), 0, data, TIMESTAMP_POS, ENInterval.INT_BYTES);
