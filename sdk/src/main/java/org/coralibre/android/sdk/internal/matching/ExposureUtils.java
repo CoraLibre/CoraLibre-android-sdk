@@ -6,6 +6,7 @@ import org.coralibre.android.sdk.fakegms.nearby.exposurenotification.ExposureCon
 import org.coralibre.android.sdk.internal.EnFrameworkConstants;
 import org.coralibre.android.sdk.internal.TracingService;
 import org.coralibre.android.sdk.internal.datatypes.DiagnosisKey;
+import org.coralibre.android.sdk.internal.device_info.DeviceInfo;
 import org.coralibre.android.sdk.internal.matching.intermediateDatatypes.Exposure;
 import org.coralibre.android.sdk.internal.matching.intermediateDatatypes.ExposureRecord;
 import org.coralibre.android.sdk.internal.matching.intermediateDatatypes.Match;
@@ -32,7 +33,10 @@ public class ExposureUtils {
      * @return a list of Exposure objects for that rpik
      */
     protected static List<Exposure> exposuresFromMatches(
-        final LinkedList<Match> matches, final ExposureConfiguration exposureConfiguration, DiagnosisKey diagnosisKey
+        final LinkedList<Match> matches,
+        final ExposureConfiguration exposureConfiguration,
+        final DiagnosisKey diagnosisKey,
+        final DeviceInfo ownDeviceInfo
     ) {
         // First sort the matches by time to ease assembling of the exposures. The sorted
         // list will be in chronological order, i.e. the most recent match will be the last
@@ -70,7 +74,8 @@ public class ExposureUtils {
         // are returned:
         final LinkedList<Exposure> exposures = new LinkedList<>();
         for (LinkedList<Match> exposureMatchesOrdered : matchesPerExposure) {
-            Exposure exposure = fromOrderedMatchList(exposureMatchesOrdered, exposureConfiguration, diagnosisKey);
+            Exposure exposure = fromOrderedMatchList(
+                exposureMatchesOrdered, exposureConfiguration, diagnosisKey, ownDeviceInfo);
             if (exposure != null) {
                 exposures.addLast(exposure);
             }
@@ -211,12 +216,13 @@ public class ExposureUtils {
     private static Exposure fromOrderedMatchList(
         final LinkedList<Match> matches,
         final ExposureConfiguration exposureConfiguration,
-        final DiagnosisKey diagnosisKey
-    ) {
+        final DiagnosisKey diagnosisKey,
+        final DeviceInfo ownDeviceInfo
+        ) {
 
         final LinkedList<TimeAndAttenuation> timeAndAttenuations = new LinkedList<>();
         for (Match match : matches) {
-            timeAndAttenuations.addLast(TimeAndAttenuation.fromMatch(match));
+            timeAndAttenuations.addLast(TimeAndAttenuation.fromMatch(match, ownDeviceInfo));
         }
 
 

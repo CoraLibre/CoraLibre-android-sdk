@@ -16,15 +16,18 @@ public class Match {
     public final RollingProximityIdentifierKey rpik;
     public final AssociatedMetadata metadata;
     public final long captureTimestampMillis;
+    public final byte rssi;
 
     public Match(
         final RollingProximityIdentifierKey rpik,
         final AssociatedMetadata metadata,
-        final long captureTimestamp
+        final long captureTimestamp,
+        final byte rssi
     ) {
         this.rpik = rpik;
         this.metadata = metadata;
         this.captureTimestampMillis = captureTimestamp;
+        this.rssi = rssi;
     }
 
 }

@@ -15,6 +15,7 @@ import org.coralibre.android.sdk.internal.datatypes.DiagnosisKey;
 import org.coralibre.android.sdk.internal.datatypes.IntervalOfCapturedData;
 import org.coralibre.android.sdk.internal.datatypes.RollingProximityIdentifier;
 import org.coralibre.android.sdk.internal.datatypes.RollingProximityIdentifierKey;
+import org.coralibre.android.sdk.internal.device_info.DeviceInfo;
 import org.coralibre.android.sdk.internal.matching.intermediateDatatypes.Exposure;
 import org.coralibre.android.sdk.internal.matching.intermediateDatatypes.Match;
 
@@ -64,7 +65,9 @@ public class MatchingHelper {
 
 
     public static AllExposureInfo assembleAllExposureInfo(
-        final String token, final ExposureConfiguration exposureConfiguration
+        final String token,
+        final ExposureConfiguration exposureConfiguration,
+        final DeviceInfo ownDeviceInfo
     ) {
         // TODO call this method and store the results in db
         // TODO refactor: split this method
@@ -94,7 +97,8 @@ public class MatchingHelper {
                         );
 
                         // Build a Match object; Match objects are collected in a list per rpik
-                        Match match = new Match(rpik, metadata, capturedData.getCaptureTimestampMillis());
+                        Match match = new Match(
+                            rpik, metadata, capturedData.getCaptureTimestampMillis(), capturedData.getRssi());
                         if (!matchesByRpik.containsKey(rpik)) {
                             matchesByRpik.put(rpik, new LinkedList<>());
                         }
@@ -112,7 +116,8 @@ public class MatchingHelper {
             final List<Exposure> exposures = ExposureUtils.exposuresFromMatches(
                 matchesByRpik.get(rpik),
                 exposureConfiguration,
-                diagKeysByRpik.get(rpik)
+                diagKeysByRpik.get(rpik),
+                ownDeviceInfo
             );
             allExposures.addAll(exposures);
         }

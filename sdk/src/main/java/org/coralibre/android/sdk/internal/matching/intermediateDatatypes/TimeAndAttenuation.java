@@ -17,6 +17,8 @@
 
 package org.coralibre.android.sdk.internal.matching.intermediateDatatypes;
 
+import org.coralibre.android.sdk.internal.device_info.DeviceInfo;
+
 public class TimeAndAttenuation {
 
     public final int timeSeconds;
@@ -28,10 +30,16 @@ public class TimeAndAttenuation {
     }
 
 
-    public static TimeAndAttenuation fromMatch(final Match match) {
+    public static TimeAndAttenuation fromMatch(final Match match, DeviceInfo ownDeviceInfo) {
+        int rssiMeasured = new Byte(match.rssi).intValue();
+        int txPower = match.metadata.getTransmitPowerLevel();
+        int rssiCorrection = ownDeviceInfo.getRssiCorrection();
+
+        int attenuation = txPower - (rssiMeasured - rssiCorrection);
+        int timeSeconds = (int)match.captureTimestampMillis * 1000;
         return new TimeAndAttenuation(
-            (int)match.captureTimestampMillis * 1000,
-            0 // TODO implement!!!
+            timeSeconds,
+            attenuation
         );
     }
 
