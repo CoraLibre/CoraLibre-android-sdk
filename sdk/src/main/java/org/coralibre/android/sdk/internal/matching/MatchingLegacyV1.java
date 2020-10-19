@@ -23,11 +23,11 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
-public class MatchingHelper {
+public class MatchingLegacyV1 {
 
     // TODO add more logs for debugging
 
-    public final static String TAG = MatchingHelper.class.getSimpleName();
+    public final static String TAG = MatchingLegacyV1.class.getSimpleName();
 
 
     /**
@@ -59,9 +59,6 @@ public class MatchingHelper {
 
         return false;
     }
-
-
-
 
 
     public static AllExposureInfo assembleAllExposureInfo(
@@ -201,7 +198,7 @@ public class MatchingHelper {
 
 
         if (daysSinceLastExposure < 0) {
-            Log.e(MatchingHelper.TAG, "Invalid value for daysSinceLastExposures: " + daysSinceLastExposure);
+            Log.e(MatchingLegacyV1.TAG, "Invalid value for daysSinceLastExposures: " + daysSinceLastExposure);
         }
 
 
