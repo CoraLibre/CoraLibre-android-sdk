@@ -153,7 +153,7 @@ public class BleClient {
             BluetoothDevice bluetoothDevice = scanResult.getDevice();
             final String deviceAddr = bluetoothDevice.getAddress();
 
-            byte rssi = (byte) scanResult.getRssi();
+            byte rssi = new Integer(scanResult.getRssi()).byteValue();
             byte[] rawPayload = scanResult.getScanRecord().getServiceData(new ParcelUuid(SERVICE_UUID));
             BluetoothPayload payload = new BluetoothPayload(rawPayload, currentInterval);
             if (BuildConfig.DEBUG) {

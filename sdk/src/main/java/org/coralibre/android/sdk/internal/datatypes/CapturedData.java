@@ -37,6 +37,20 @@ public class CapturedData {
         this.aem = aem;
     }
 
+
+    public CapturedData(
+        final long captureTimestamp,
+        final int rssi,
+        final RollingProximityIdentifier rpi,
+        final AssociatedEncryptedMetadata aem
+    ) {
+        this.captureTimestampMillis = captureTimestamp;
+        this.enInterval = new ENInterval(captureTimestamp, true);
+        this.rssi = new Integer(rssi).byteValue();
+        this.rpi = rpi;
+        this.aem = aem;
+    }
+
     public Long getCaptureTimestampMillis() {
         return captureTimestampMillis;
     }
@@ -47,6 +61,10 @@ public class CapturedData {
 
     public byte getRssi() {
         return rssi;
+    }
+
+    public int getRssiInt() {
+        return new Byte(rssi).intValue();
     }
 
     public RollingProximityIdentifier getRpi() {
