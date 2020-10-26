@@ -3,13 +3,13 @@ package org.coralibre.android.sdk.internal.datatypes;
 import java.util.ArrayList;
 import java.util.List;
 
-public class IntervalOfCapturedDataImpl {
+public class IntervalOfCapturedData {
 
     private final ENInterval interval;
     private final List<CapturedData> capturedData = new ArrayList<>();
 
 
-    public IntervalOfCapturedDataImpl(ENInterval interval) {
+    public IntervalOfCapturedData(ENInterval interval) {
         this.interval = interval;
     }
 
