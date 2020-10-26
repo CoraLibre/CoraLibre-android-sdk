@@ -63,8 +63,8 @@ public class ExposureUtils {
         final long lastMatchTimestampMillis = -1;
         for (Match match : matchesSorted) {
             if (lastMatchTimestampMillis == -1
-                || (match.captureTimestampMillis - lastMatchTimestampMillis) * 1000
-                > EnFrameworkConstants.MAX_EXPOSURE_INTERPOLATION_DURATION_SECONDS) {
+                || (match.captureTimestampMillis - lastMatchTimestampMillis)
+                > EnFrameworkConstants.MAX_EXPOSURE_INTERPOLATION_DURATION_SECONDS * 1000) {
                 matchesPerExposure.addLast(new LinkedList<Match>());
             }
             matchesPerExposure.getLast().addLast(match);
