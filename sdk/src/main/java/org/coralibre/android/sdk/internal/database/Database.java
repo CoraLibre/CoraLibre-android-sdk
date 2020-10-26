@@ -6,7 +6,7 @@ import org.coralibre.android.sdk.fakegms.nearby.exposurenotification.ExposureSum
 import org.coralibre.android.sdk.internal.datatypes.CapturedData;
 import org.coralibre.android.sdk.internal.datatypes.DiagnosisKey;
 import org.coralibre.android.sdk.internal.datatypes.ENInterval;
-import org.coralibre.android.sdk.internal.datatypes.IntervalOfCapturedData;
+import org.coralibre.android.sdk.internal.datatypes.IntervalOfCapturedDataImpl;
 import org.coralibre.android.sdk.internal.datatypes.TemporaryExposureKey_internal;
 
 import java.util.List;
@@ -33,7 +33,7 @@ public interface Database {
 
     void addCapturedPayload(CapturedData collectedPayload);
 
-    Iterable<IntervalOfCapturedData> getAllCollectedPayload();
+    Iterable<IntervalOfCapturedDataImpl> getAllCollectedPayload();
 
 
     /**

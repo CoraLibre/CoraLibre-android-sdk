@@ -19,7 +19,7 @@ import org.coralibre.android.sdk.internal.EnFrameworkConstants;
 import org.coralibre.android.sdk.internal.database.Database;
 import org.coralibre.android.sdk.internal.database.DatabaseAccess;
 import org.coralibre.android.sdk.internal.datatypes.DiagnosisKey;
-import org.coralibre.android.sdk.internal.datatypes.IntervalOfCapturedData;
+import org.coralibre.android.sdk.internal.datatypes.IntervalOfCapturedDataImpl;
 import org.coralibre.android.sdk.internal.datatypes.TemporaryExposureKey_internal;
 import org.coralibre.android.sdk.internal.datatypes.util.DiagnosisKeyUtil;
 import org.coralibre.android.sdk.internal.matching.MatchingLegacyV1;
@@ -162,7 +162,7 @@ final class ExposureNotificationClientImpl implements ExposureNotificationClient
             //  testing for matches (same for the ExposureSummary/ExposureInformation computation)
 
             List<DiagnosisKey> diagnosisKeys = database.getDiagnosisKeys(token);
-            Iterable<IntervalOfCapturedData> capturedData = database.getAllCollectedPayload();
+            Iterable<IntervalOfCapturedDataImpl> capturedData = database.getAllCollectedPayload();
             boolean noMatchFound = !MatchingLegacyV1.hasMatches(diagnosisKeys, capturedData);
 
             Intent intent = new Intent(noMatchFound ? ACTION_EXPOSURE_NOT_FOUND : ACTION_EXPOSURE_STATE_UPDATED);

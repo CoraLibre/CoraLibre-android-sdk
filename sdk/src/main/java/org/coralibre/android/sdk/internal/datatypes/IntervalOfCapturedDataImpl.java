@@ -3,7 +3,7 @@ package org.coralibre.android.sdk.internal.datatypes;
 import java.util.ArrayList;
 import java.util.List;
 
-public class IntervalOfCapturedDataImpl implements IntervalOfCapturedData {
+public class IntervalOfCapturedDataImpl {
 
     private final ENInterval interval;
     private final List<CapturedData> capturedData = new ArrayList<>();
@@ -18,7 +18,6 @@ public class IntervalOfCapturedDataImpl implements IntervalOfCapturedData {
     }
 
 
-    @Override
     public ENInterval getInterval() {
         return interval;
     }

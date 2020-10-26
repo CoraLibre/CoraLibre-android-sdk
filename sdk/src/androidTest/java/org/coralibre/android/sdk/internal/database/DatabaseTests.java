@@ -8,7 +8,7 @@ import org.coralibre.android.sdk.internal.datatypes.AssociatedEncryptedMetadata;
 import org.coralibre.android.sdk.internal.datatypes.CapturedData;
 import org.coralibre.android.sdk.internal.datatypes.DiagnosisKey;
 import org.coralibre.android.sdk.internal.datatypes.ENInterval;
-import org.coralibre.android.sdk.internal.datatypes.IntervalOfCapturedData;
+import org.coralibre.android.sdk.internal.datatypes.IntervalOfCapturedDataImpl;
 import org.coralibre.android.sdk.internal.datatypes.RollingProximityIdentifier;
 import org.coralibre.android.sdk.internal.datatypes.TemporaryExposureKey_internal;
 import org.coralibre.android.sdk.internal.datatypes.util.ENIntervalUtil;
@@ -108,13 +108,13 @@ public class DatabaseTests {
         DatabaseAccess.getDefaultDatabaseInstance().addCapturedPayload(dumData);
 
         // Query:
-        Iterable<IntervalOfCapturedData> resultIntervals =
+        Iterable<IntervalOfCapturedDataImpl> resultIntervals =
                 DatabaseAccess.getDefaultDatabaseInstance().getAllCollectedPayload();
 
         // Compare:
         int numResultIntervals = 0;
         int numResultData = 0;
-        for (IntervalOfCapturedData resultInterval : resultIntervals) {
+        for (IntervalOfCapturedDataImpl resultInterval : resultIntervals) {
             numResultIntervals ++;
 
 
@@ -201,7 +201,7 @@ public class DatabaseTests {
         // Query:
         Iterable<TemporaryExposureKey_internal> resultTeks =
                 DatabaseAccess.getDefaultDatabaseInstance().getAllOwnTEKs();
-        Iterable<IntervalOfCapturedData> resultIntervals =
+        Iterable<IntervalOfCapturedDataImpl> resultIntervals =
                 DatabaseAccess.getDefaultDatabaseInstance().getAllCollectedPayload();
 
         // Compare:
@@ -216,7 +216,7 @@ public class DatabaseTests {
 
         int numResultIntervals = 0;
         int numResultData = 0;
-        for (IntervalOfCapturedData resultInterval : resultIntervals) {
+        for (IntervalOfCapturedDataImpl resultInterval : resultIntervals) {
             numResultIntervals ++;
 
             for (CapturedData resultData : resultInterval.getCapturedData()) {

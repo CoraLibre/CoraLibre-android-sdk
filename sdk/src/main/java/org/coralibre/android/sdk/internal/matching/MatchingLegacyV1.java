@@ -10,7 +10,7 @@ import org.coralibre.android.sdk.internal.datatypes.AssociatedEncryptedMetadataK
 import org.coralibre.android.sdk.internal.datatypes.AssociatedMetadata;
 import org.coralibre.android.sdk.internal.datatypes.CapturedData;
 import org.coralibre.android.sdk.internal.datatypes.DiagnosisKey;
-import org.coralibre.android.sdk.internal.datatypes.IntervalOfCapturedData;
+import org.coralibre.android.sdk.internal.datatypes.IntervalOfCapturedDataImpl;
 import org.coralibre.android.sdk.internal.datatypes.RollingProximityIdentifier;
 import org.coralibre.android.sdk.internal.datatypes.RollingProximityIdentifierKey;
 import org.coralibre.android.sdk.internal.device_info.DeviceInfo;
@@ -42,12 +42,12 @@ public class MatchingLegacyV1 {
      */
     public static boolean hasMatches(
         List<DiagnosisKey> diagnosisKeys,
-        Iterable<IntervalOfCapturedData> payloadIntevals
+        Iterable<IntervalOfCapturedDataImpl> payloadIntevals
     ) {
 
         for (DiagnosisKey diagKey : diagnosisKeys) {
             RollingProximityIdentifierKey rpik = CryptoModule.generateRPIK(diagKey.getKeyData());
-            for (IntervalOfCapturedData interval : payloadIntevals) {
+            for (IntervalOfCapturedDataImpl interval : payloadIntevals) {
                 RollingProximityIdentifier rpi = CryptoModule.generateRPI(rpik, interval.getInterval());
 
                 for (CapturedData capturedData : interval.getCapturedData()) {
@@ -74,7 +74,7 @@ public class MatchingLegacyV1 {
      */
     public static AllExposureInfo assembleAllExposureInfo(
         final List<DiagnosisKey> diagnosisKeys,
-        final Iterable<IntervalOfCapturedData> payloadIntevals,
+        final Iterable<IntervalOfCapturedDataImpl> payloadIntevals,
         final ExposureConfiguration exposureConfiguration,
         final DeviceInfo ownDeviceInfo
     ) {
@@ -89,7 +89,7 @@ public class MatchingLegacyV1 {
         for (DiagnosisKey diagKey : diagnosisKeys) {
             RollingProximityIdentifierKey rpik = CryptoModule.generateRPIK(diagKey.getKeyData());
             diagKeysByRpik.put(rpik, diagKey);
-            for (IntervalOfCapturedData interval : payloadIntevals) {
+            for (IntervalOfCapturedDataImpl interval : payloadIntevals) {
                 RollingProximityIdentifier rpi = CryptoModule.generateRPI(rpik, interval.getInterval());
 
                 for (CapturedData capturedData : interval.getCapturedData()) {

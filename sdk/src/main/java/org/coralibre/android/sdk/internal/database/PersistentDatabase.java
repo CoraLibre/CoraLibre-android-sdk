@@ -18,7 +18,6 @@ import org.coralibre.android.sdk.internal.database.persistent.entity.EntityToken
 import org.coralibre.android.sdk.internal.datatypes.CapturedData;
 import org.coralibre.android.sdk.internal.datatypes.DiagnosisKey;
 import org.coralibre.android.sdk.internal.datatypes.ENInterval;
-import org.coralibre.android.sdk.internal.datatypes.IntervalOfCapturedData;
 import org.coralibre.android.sdk.internal.datatypes.IntervalOfCapturedDataImpl;
 import org.coralibre.android.sdk.internal.datatypes.TemporaryExposureKey_internal;
 import org.coralibre.android.sdk.internal.datatypes.util.ENIntervalUtil;
@@ -189,17 +188,17 @@ public class PersistentDatabase implements Database {
     }
 
     @Override
-    public Iterable<IntervalOfCapturedData> getAllCollectedPayload() {
+    public Iterable<IntervalOfCapturedDataImpl> getAllCollectedPayload() {
         List<EntityCapturedData> allData = db.daoCapturedData().getAllData();
 
-        Map<ENInterval, IntervalOfCapturedData> collectedPackagesByInterval = new HashMap<>();
+        Map<ENInterval, IntervalOfCapturedDataImpl> collectedPackagesByInterval = new HashMap<>();
 
         for (EntityCapturedData e_payload : allData) {
             CapturedData payload = e_payload.toCapturedData();
             ENInterval interval = payload.getEnInterval();
 
             // find correct interval
-            IntervalOfCapturedData payloadPerInterval
+            IntervalOfCapturedDataImpl payloadPerInterval
                     = collectedPackagesByInterval.get(interval);
             if (payloadPerInterval == null) {
                 payloadPerInterval = new IntervalOfCapturedDataImpl(interval);
