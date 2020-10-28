@@ -3,6 +3,18 @@ name: Android Tests
 on: [push, pull_request]
 
 jobs:
+  spotless:
+    name: Run Spotless checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+      - name: Run checks
+        run: ./gradlew spotlessCheck
+
   test_target_api:
     name: "Run SDK Tests (target API level)"
     runs-on: macos-latest # enables hardware acceleration in the virtual machine
@@ -17,12 +29,12 @@ jobs:
       uses: reactivecircus/android-emulator-runner@v2
       with:
         api-level: 29
-        script: cd coralibre-sdk; ./gradlew connectedAndroidTest
+        script: ./gradlew connectedAndroidTest
     - uses: actions/upload-artifact@v2
       if: ${{ always() }}
       with:
         name: reports
-        path: coralibre-sdk/sdk/build/reports
+        path: sdk/build/reports
 
   test_min_api:
     name: "Run SDK Tests (min API level)"
@@ -38,9 +50,9 @@ jobs:
       uses: reactivecircus/android-emulator-runner@v2
       with:
         api-level: 26
-        script: cd coralibre-sdk; ./gradlew connectedAndroidTest
+        script: ./gradlew connectedAndroidTest
     - uses: actions/upload-artifact@v2
       if: ${{ always() }}
       with:
         name: reports
-        path: coralibre-sdk/sdk/build/reports
+        path: sdk/build/reports
