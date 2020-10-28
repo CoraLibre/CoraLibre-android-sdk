@@ -2,7 +2,7 @@
 
 buildscript {
 	ext.protobufVersion = '0.8.12'
-	ext.kotlin_version = '1.3.72'
+	ext.kotlin_version = '1.4.10'
 	
 	repositories {
 		google()
@@ -12,7 +12,7 @@ buildscript {
 		jcenter()
 	}
 	dependencies {
-		classpath 'com.android.tools.build:gradle:4.0.1'
+		classpath 'com.android.tools.build:gradle:4.1.0'
 			// Check that the gradle plugin's version is always equal to the version set in the
 			// CoraLibre app build script.
 		classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.5'

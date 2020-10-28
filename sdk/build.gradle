@@ -15,6 +15,7 @@ plugins {
 	id 'com.google.protobuf'
 }
 apply plugin: 'kotlin-android'
+apply plugin: 'org.jetbrains.kotlin.kapt'
 
 android {
 	compileSdkVersion 29
@@ -110,13 +111,13 @@ ext.readProperty = { paramName ->
 }
 
 dependencies {
-	implementation 'androidx.core:core:1.2.0'
+	implementation 'androidx.core:core-ktx:1.2.0'
 	implementation('androidx.security:security-crypto:1.0.0-rc02') {
 		exclude group: 'com.google.protobuf', module: "protobuf-javalite"
 		// See:
 		// https://stackoverflow.com/questions/61518039/androidx-security-with-google-protobuf
 	}
-	implementation 'androidx.work:work-runtime:2.3.4'
+	implementation 'androidx.work:work-runtime-ktx:2.3.4'
 
 	implementation 'com.squareup.retrofit2:retrofit:2.8.1'
 	implementation 'com.squareup.retrofit2:converter-gson:2.8.1'
@@ -137,16 +138,16 @@ dependencies {
 	androidTestImplementation 'androidx.test.ext:junit:1.1.1'
 	androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 	androidTestImplementation 'org.mockito:mockito-android:2.17.0'
-    implementation "androidx.core:core-ktx:+"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
 
 	// PERSISTENCE (based on CWA build.gradle to avoid version conflicts)
+
+	// Also see:
+	// https://developer.android.com/training/data-storage/room/#java
 	def room_version = "2.2.5"
 	implementation "androidx.room:room-runtime:$room_version"
-	annotationProcessor "androidx.room:room-compiler:$room_version"
-		// Also see:
-		// https://developer.android.com/training/data-storage/room/#java
+	kapt "androidx.room:room-compiler:$room_version"
 
 
 
