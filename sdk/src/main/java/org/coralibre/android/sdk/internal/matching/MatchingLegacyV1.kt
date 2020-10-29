@@ -41,7 +41,7 @@ object MatchingLegacyV1 {
             val rpik = CryptoModule.generateRPIK(diagKey.keyData)
             for (interval in payloadIntervals) {
                 val rpi = CryptoModule.generateRPI(rpik, interval.interval)
-                for (capturedData in interval.capturedData) {
+                for (capturedData in interval.getCapturedData()) {
                     if (capturedData.rpi == rpi) {
                         // Match found:
                         return true
@@ -79,7 +79,7 @@ object MatchingLegacyV1 {
             diagKeysByRpik[rpik] = diagKey
             for (interval in payloadIntevals) {
                 val rpi = CryptoModule.generateRPI(rpik, interval.interval)
-                for (capturedData in interval.capturedData) {
+                for (capturedData in interval.getCapturedData()) {
                     if (capturedData.rpi == rpi) {
                         val metadata = CryptoModule.decryptAEM(
                             capturedData.aem,

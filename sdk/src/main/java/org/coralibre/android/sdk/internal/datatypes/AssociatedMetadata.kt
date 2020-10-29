@@ -4,7 +4,12 @@ import org.coralibre.android.sdk.internal.EnFrameworkConstants
 import java.security.InvalidParameterException
 
 class AssociatedMetadata {
-    private val data = ByteArray(EnFrameworkConstants.AEM_LENGTH)
+    val data = ByteArray(EnFrameworkConstants.AEM_LENGTH)
+        get() {
+            val retVal = ByteArray(EnFrameworkConstants.AEM_LENGTH)
+            System.arraycopy(field, 0, retVal, 0, EnFrameworkConstants.AEM_LENGTH)
+            return retVal
+        }
 
     constructor(majorVersion: Int, minorVersion: Int, powerLevel: Int) {
         if (majorVersion < 0 || majorVersion >= 4) throw InvalidParameterException("Major version out of bound")
@@ -35,12 +40,6 @@ class AssociatedMetadata {
         get() = (data[VERSIONING_BYTE] shr MINOR_BIT_POS) and 3
     val transmitPowerLevel: Int
         get() = data[POWERLEVEL_BYTE].toInt()
-
-    fun getData(): ByteArray {
-        val retVal = ByteArray(EnFrameworkConstants.AEM_LENGTH)
-        System.arraycopy(data, 0, retVal, 0, EnFrameworkConstants.AEM_LENGTH)
-        return retVal
-    }
 
     companion object {
         private const val VERSIONING_BYTE = 0

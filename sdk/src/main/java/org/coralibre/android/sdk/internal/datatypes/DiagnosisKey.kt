@@ -11,7 +11,7 @@ class DiagnosisKey(
     val transmissionRiskLevel: Int
 ) {
     val keyData: ByteArray
-        get() = tek.getKey()
+        get() = tek.key
     val interval: ENInterval
         get() = tek.interval
 }
