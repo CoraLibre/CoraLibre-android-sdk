@@ -38,7 +38,7 @@ object PPCP {
     private fun executeInit(context: Context) {
         // TODO: Schedule the truncation to happen regularly and asynchronously instead of
         //  (only) performing it here.
-    DatabaseAccess.getDefaultDatabaseInstance().truncateLast14Days()
+        DatabaseAccess.getDefaultDatabaseInstance().truncateLast14Days()
         val appConfigManager = AppConfigManager.getInstance(context)
         val advertising = appConfigManager.isAdvertisingEnabled
         val receiving = appConfigManager.isReceivingEnabled

@@ -45,7 +45,7 @@ object ExposureUtils {
         val lastMatchTimestampMillis: Long = -1
         for (match in matchesSorted) {
             if (lastMatchTimestampMillis == -1L || match.captureTimestampMillis - lastMatchTimestampMillis
-                > EnFrameworkConstants.MAX_EXPOSURE_INTERPOLATION_DURATION_SECONDS * 1000
+            > EnFrameworkConstants.MAX_EXPOSURE_INTERPOLATION_DURATION_SECONDS * 1000
             ) {
                 matchesPerExposure.addLast(LinkedList())
             }
@@ -68,7 +68,8 @@ object ExposureUtils {
 
     // Based on the google sample code:
     private fun computePeriods(
-        timeAndAttenuations: LinkedList<TimeAndAttenuation>, scanInterval: Long
+        timeAndAttenuations: LinkedList<TimeAndAttenuation>,
+        scanInterval: Long
     ): List<Period> {
         // Add fake start and end boundary scans with the same attenuation as first and last ones.
         val timeMargin = (TracingService.SCAN_INTERVAL_MILLIS / 2).toInt()
@@ -111,7 +112,10 @@ object ExposureUtils {
     }
 
     private fun getTimeBelowBetweenAndAbove(
-        periods: List<Period>, thresholdLow: Int, thresholdHigh: Int, interpolate: Boolean
+        periods: List<Period>,
+        thresholdLow: Int,
+        thresholdHigh: Int,
+        interpolate: Boolean
     ): List<Int> {
         val timeBelowAndAboveOfLow = getTimeBelowAndAbove(periods, thresholdLow, interpolate)
         val timeBelowAndAboveOfHigh = getTimeBelowAndAbove(periods, thresholdHigh, interpolate)
@@ -131,7 +135,9 @@ object ExposureUtils {
      * values.
      */
     private fun getTimeBelowAndAbove(
-        periods: List<Period>, threshold: Int, interpolate: Boolean
+        periods: List<Period>,
+        threshold: Int,
+        interpolate: Boolean
     ): Pair<Int, Int> {
         var timeAboveThreshold = 0
         var timeBelowThreshold = 0
@@ -226,7 +232,7 @@ object ExposureUtils {
         }
 
         // TODO Fix log message:
-        //Log.log.atVerbose().log("%s Found exposure.", instanceLogTag);
+        // Log.log.atVerbose().log("%s Found exposure.", instanceLogTag);
         val millisSinceEpoch = diagnosisKey.interval.unixTime * 1000
         val timeNow = Date().time
         val daysSinceExposure = TimeUnit.MILLISECONDS.toDays(timeNow - millisSinceEpoch)

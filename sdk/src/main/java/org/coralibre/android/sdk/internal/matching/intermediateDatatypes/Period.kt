@@ -32,10 +32,10 @@ class Period(val scan1: TimeAndAttenuation, val scan2: TimeAndAttenuation) {
         if (interpolate && attenuationDiff() != 0) {
             // calculate the time at which the interpolated attenuation equals the threshold.
             timeCross = (
-                scan1.timeSeconds
-                    + (threshold - scan1.attenuation)
-                    / attenuationDiff().toDouble()
-                    * durationSeconds()
+                scan1.timeSeconds +
+                    (threshold - scan1.attenuation) /
+                    attenuationDiff().toDouble() *
+                    durationSeconds()
                 ).roundToInt()
         }
         return timeCross

@@ -100,7 +100,6 @@ object MatchingLegacyV1 {
             }
         }
 
-
         // Now, combine the different matches for each rpik to Exposure objects. Per rpik, multiple
         // Exposure object might be created:
         val allExposures: MutableList<Exposure> = LinkedList()
@@ -113,7 +112,6 @@ object MatchingLegacyV1 {
             )
             allExposures.addAll(exposures)
         }
-
 
         // Finally build ExposureInformation objects as well as an ExposureSummary, which are
         // then returned:
@@ -189,11 +187,9 @@ object MatchingLegacyV1 {
             accumulatedAttenuationDurationsMinutes[2] += attenuationDurationsMinutes[2]
         }
 
-
         if (daysSinceLastExposure < 0) {
             Log.e(TAG, "Invalid value for daysSinceLastExposures: $daysSinceLastExposure")
         }
-
 
         val exposureSummary = ExposureSummaryBuilder()
             .setDaysSinceLastExposure(daysSinceLastExposure)
