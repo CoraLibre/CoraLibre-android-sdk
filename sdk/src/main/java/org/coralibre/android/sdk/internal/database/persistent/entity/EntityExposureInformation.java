@@ -62,14 +62,14 @@ public class EntityExposureInformation {
             attenuationDurationBetween,
             attenuationDurationAbove
         };
-        return new ExposureInformation(
-            dateMillisSinceEpoch,
-            durationMinutes,
-            attenuationValue,
-            transmissionRiskLevel,
-            totalRiskScore,
-            attenuationDurations
-        );
+        return new ExposureInformation.ExposureInformationBuilder()
+            .setDateMillisSinceEpoch(dateMillisSinceEpoch)
+            .setDurationMinutes(durationMinutes)
+            .setAttenuationValue(attenuationValue)
+            .setTransmissionRiskLevel(transmissionRiskLevel)
+            .setTotalRiskScore(totalRiskScore)
+            .setAttenuationDurations(attenuationDurations)
+            .build();
     }
 
 
