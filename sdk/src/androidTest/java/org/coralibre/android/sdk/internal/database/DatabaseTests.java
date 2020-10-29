@@ -95,7 +95,7 @@ public class DatabaseTests {
         byte[] dumRssiArray = new byte[1];
         random.nextBytes(dumRssiArray);
         byte dumRssi = dumRssiArray[0];
-        Long dumCaptureTimestamp = 123545L;
+        long dumCaptureTimestamp = 123545L;
         CapturedData dumData = new CapturedData(
             dumCaptureTimestamp,
             dumRssi,
@@ -185,7 +185,7 @@ public class DatabaseTests {
         byte[] rssiKeepArray = new byte[1];
         random.nextBytes(rssiKeepArray);
         byte rssiKeep = rssiKeepArray[0];
-        Long timestampKeep = intervalKeep.getUnixTime();
+        long timestampKeep = intervalKeep.getUnixTime();
         CapturedData dataKeep = new CapturedData(
             timestampKeep,
             rssiKeep,
