@@ -4,7 +4,7 @@ import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
 import org.coralibre.android.sdk.internal.datatypes.ENInterval;
-import org.coralibre.android.sdk.internal.datatypes.TemporaryExposureKey_internal;
+import org.coralibre.android.sdk.internal.datatypes.InternalTemporaryExposureKey;
 
 
 @Entity
@@ -18,13 +18,13 @@ public class EntityTemporaryExposureKey {
 
     public EntityTemporaryExposureKey(){}
 
-    public EntityTemporaryExposureKey(TemporaryExposureKey_internal tek) {
+    public EntityTemporaryExposureKey(InternalTemporaryExposureKey tek) {
         interval = tek.getInterval();
         key = tek.getKey();
     }
 
-    public TemporaryExposureKey_internal toTemporaryExposureKey() {
-        return new TemporaryExposureKey_internal(
+    public InternalTemporaryExposureKey toTemporaryExposureKey() {
+        return new InternalTemporaryExposureKey(
                 interval,
                 key
         );

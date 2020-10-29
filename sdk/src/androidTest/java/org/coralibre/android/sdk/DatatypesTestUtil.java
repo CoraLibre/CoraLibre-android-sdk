@@ -6,7 +6,7 @@ import org.coralibre.android.sdk.internal.datatypes.CapturedData;
 import org.coralibre.android.sdk.internal.datatypes.DiagnosisKey;
 import org.coralibre.android.sdk.internal.datatypes.ENInterval;
 import org.coralibre.android.sdk.internal.datatypes.RollingProximityIdentifier;
-import org.coralibre.android.sdk.internal.datatypes.TemporaryExposureKey_internal;
+import org.coralibre.android.sdk.internal.datatypes.InternalTemporaryExposureKey;
 import org.coralibre.android.sdk.internal.datatypes.util.ENIntervalUtil;
 
 import java.util.Random;
@@ -22,7 +22,7 @@ public class DatatypesTestUtil {
         int transmissionRiskLevel = 0;
 
         return new DiagnosisKey(
-            new TemporaryExposureKey_internal(intervalNumber, keyData),
+            new InternalTemporaryExposureKey(intervalNumber, keyData),
             transmissionRiskLevel
         );
     }
@@ -47,22 +47,22 @@ public class DatatypesTestUtil {
         );
     }
 
-    public static TemporaryExposureKey_internal createDummyTemporaryExposureKey_internal(ENInterval interval) {
+    public static InternalTemporaryExposureKey createDummyTemporaryExposureKey(ENInterval interval) {
         Random random = new Random();
 
         byte[] dumTekBytes = new byte[16];
         random.nextBytes(dumTekBytes);
 
-        return new TemporaryExposureKey_internal(interval, dumTekBytes);
+        return new InternalTemporaryExposureKey(interval, dumTekBytes);
     }
 
-    public static TemporaryExposureKey_internal createDummyTemporaryExposureKey_internal() {
+    public static InternalTemporaryExposureKey createDummyTemporaryExposureKey() {
         Random random = new Random();
 
         byte[] dumTekBytes = new byte[16];
         random.nextBytes(dumTekBytes);
 
-        return new TemporaryExposureKey_internal(ENIntervalUtil.getCurrentInterval(), dumTekBytes);
+        return new InternalTemporaryExposureKey(ENIntervalUtil.getCurrentInterval(), dumTekBytes);
     }
 
 }

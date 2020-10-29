@@ -13,7 +13,7 @@ import org.coralibre.android.sdk.internal.datatypes.BluetoothPayload;
 import org.coralibre.android.sdk.internal.datatypes.ENInterval;
 import org.coralibre.android.sdk.internal.datatypes.RollingProximityIdentifier;
 import org.coralibre.android.sdk.internal.datatypes.RollingProximityIdentifierKey;
-import org.coralibre.android.sdk.internal.datatypes.TemporaryExposureKey_internal;
+import org.coralibre.android.sdk.internal.datatypes.InternalTemporaryExposureKey;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -148,14 +148,14 @@ public class CryptoModuleTests {
 
     @Test
     public void testGenerateRPIK() throws Exception {
-        TemporaryExposureKey_internal tek = new TemporaryExposureKey_internal(0L, TEK_VAL1);
+        InternalTemporaryExposureKey tek = new InternalTemporaryExposureKey(0L, TEK_VAL1);
         RollingProximityIdentifierKey rpik = CryptoModule.generateRPIK(tek);
         assertArrayEquals(RPIK_VAL1, rpik.getKey());
     }
 
     @Test
     public void testGenerateAEMK() throws Exception {
-        TemporaryExposureKey_internal tek = new TemporaryExposureKey_internal(0L, TEK_VAL1);
+        InternalTemporaryExposureKey tek = new InternalTemporaryExposureKey(0L, TEK_VAL1);
         AssociatedEncryptedMetadataKey aemk = CryptoModule.generateAEMK(tek);
         assertArrayEquals(AEMK_VAL1, aemk.getKey());
     }
@@ -185,7 +185,7 @@ public class CryptoModuleTests {
     @Test
     // See: https://github.com/corona-warn-app/cwa-app-android/issues/75#issuecomment-640114705
     public void testRoundtripExample1() throws Exception {
-        TemporaryExposureKey_internal tek = new TemporaryExposureKey_internal(0L, TEK_VAL2);
+        InternalTemporaryExposureKey tek = new InternalTemporaryExposureKey(0L, TEK_VAL2);
         RollingProximityIdentifierKey rpik = CryptoModule.generateRPIK(tek);
         assertArrayEquals(TEK_VAL2_RPIK, rpik.getKey());
         ENInterval enInterval = new ENInterval(2652091);
@@ -203,7 +203,7 @@ public class CryptoModuleTests {
     @Test
     // See: https://github.com/corona-warn-app/cwa-app-android/issues/75#issuecomment-640114705
     public void testRoundtripExample2() throws Exception {
-        TemporaryExposureKey_internal tek = new TemporaryExposureKey_internal(0L, TEK_VAL3);
+        InternalTemporaryExposureKey tek = new InternalTemporaryExposureKey(0L, TEK_VAL3);
         RollingProximityIdentifierKey rpik = CryptoModule.generateRPIK(tek);
         assertArrayEquals(TEK_VAL3_RPIK, rpik.getKey());
         ENInterval enInterval = new ENInterval(2649435);
@@ -223,7 +223,7 @@ public class CryptoModuleTests {
         Database db = DatabaseAccess.getDefaultDatabaseInstance();
         CryptoModule crypto = getMockedTimeCryptoModule(db, 1000);
         int i = 0;
-        for(TemporaryExposureKey_internal tek : db.getAllOwnTEKs())
+        for(InternalTemporaryExposureKey tek : db.getAllOwnTEKs())
             i++;
         assertEquals(1, i);
     }
@@ -235,7 +235,7 @@ public class CryptoModuleTests {
         setCurrentENNumber(crypto, 1100);
         crypto.updateTEK();
         int i = 0;
-        for(TemporaryExposureKey_internal tek : db.getAllOwnTEKs())
+        for(InternalTemporaryExposureKey tek : db.getAllOwnTEKs())
             i++;
         assertEquals(1, i);
     }
@@ -247,7 +247,7 @@ public class CryptoModuleTests {
         setCurrentENNumber(crypto, 1100);
         crypto.updateTEK();
         int i = 0;
-        for(TemporaryExposureKey_internal tek : db.getAllOwnTEKs())
+        for(InternalTemporaryExposureKey tek : db.getAllOwnTEKs())
             i++;
         assertEquals(2, i);
     }

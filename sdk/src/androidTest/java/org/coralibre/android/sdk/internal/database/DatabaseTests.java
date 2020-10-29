@@ -10,7 +10,7 @@ import org.coralibre.android.sdk.internal.datatypes.DiagnosisKey;
 import org.coralibre.android.sdk.internal.datatypes.ENInterval;
 import org.coralibre.android.sdk.internal.datatypes.IntervalOfCapturedData;
 import org.coralibre.android.sdk.internal.datatypes.RollingProximityIdentifier;
-import org.coralibre.android.sdk.internal.datatypes.TemporaryExposureKey_internal;
+import org.coralibre.android.sdk.internal.datatypes.InternalTemporaryExposureKey;
 import org.coralibre.android.sdk.internal.datatypes.util.ENIntervalUtil;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -57,19 +57,19 @@ public class DatabaseTests {
         random.nextBytes(dumTekBytes);
         ENInterval dumInterval =
             new ENInterval(ENIntervalUtil.getMidnight(2000l));
-        TemporaryExposureKey_internal dumTek = new TemporaryExposureKey_internal(dumInterval, dumTekBytes);
+        InternalTemporaryExposureKey dumTek = new InternalTemporaryExposureKey(dumInterval, dumTekBytes);
         DatabaseAccess.getDefaultDatabaseInstance().addGeneratedTEK(dumTek);
 
         // Query:
-        Iterable<TemporaryExposureKey_internal> resultTeks =
+        Iterable<InternalTemporaryExposureKey> resultTeks =
                 DatabaseAccess.getDefaultDatabaseInstance().getAllOwnTEKs();
 
-        TemporaryExposureKey_internal resultTekForInterval =
+        InternalTemporaryExposureKey resultTekForInterval =
                 DatabaseAccess.getDefaultDatabaseInstance().getOwnTEK(dumInterval);
 
         // Compare:
         int numResultTeks = 0;
-        for (TemporaryExposureKey_internal resultTek : resultTeks) {
+        for (InternalTemporaryExposureKey resultTek : resultTeks) {
             numResultTeks ++;
             assertArrayEquals(dumTekBytes, resultTek.getKey());
             assertEquals(dumInterval, resultTek.getInterval());
@@ -151,13 +151,13 @@ public class DatabaseTests {
         {
             byte[] tekRemoveBytes = new byte[16];
             random.nextBytes(tekRemoveBytes);
-            TemporaryExposureKey_internal tekRemove = new TemporaryExposureKey_internal(intervalRemove, tekRemoveBytes);
+            InternalTemporaryExposureKey tekRemove = new InternalTemporaryExposureKey(intervalRemove, tekRemoveBytes);
             DatabaseAccess.getDefaultDatabaseInstance().addGeneratedTEK(tekRemove);
         }
 
         byte[] tekKeepBytes = new byte[16];
         random.nextBytes(tekKeepBytes);
-        TemporaryExposureKey_internal tekKeep = new TemporaryExposureKey_internal(intervalKeep, tekKeepBytes);
+        InternalTemporaryExposureKey tekKeep = new InternalTemporaryExposureKey(intervalKeep, tekKeepBytes);
         DatabaseAccess.getDefaultDatabaseInstance().addGeneratedTEK(tekKeep);
 
         {
@@ -199,14 +199,14 @@ public class DatabaseTests {
         DatabaseAccess.getDefaultDatabaseInstance().truncateLast14Days();
 
         // Query:
-        Iterable<TemporaryExposureKey_internal> resultTeks =
+        Iterable<InternalTemporaryExposureKey> resultTeks =
                 DatabaseAccess.getDefaultDatabaseInstance().getAllOwnTEKs();
         Iterable<IntervalOfCapturedData> resultIntervals =
                 DatabaseAccess.getDefaultDatabaseInstance().getAllCollectedPayload();
 
         // Compare:
         int numResultTeks = 0;
-        for (TemporaryExposureKey_internal resultTek : resultTeks) {
+        for (InternalTemporaryExposureKey resultTek : resultTeks) {
             numResultTeks ++;
             assertArrayEquals(tekKeepBytes, resultTek.getKey());
             assertEquals(intervalKeep, resultTek.getInterval());

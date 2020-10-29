@@ -4,7 +4,7 @@ import org.coralibre.android.sdk.fakegms.nearby.exposurenotification.ExposureCon
 
 public class DiagnosisKey {
 
-    private final TemporaryExposureKey_internal tek;
+    private final InternalTemporaryExposureKey tek;
 
     /**
      * A number in range [0, 7]
@@ -12,7 +12,7 @@ public class DiagnosisKey {
      */
     private final int transmissionRiskLevel;
 
-    public DiagnosisKey(final TemporaryExposureKey_internal tek,
+    public DiagnosisKey(final InternalTemporaryExposureKey tek,
                         final int transmissionRiskLevel) {
         this.tek = tek;
         this.transmissionRiskLevel = transmissionRiskLevel;

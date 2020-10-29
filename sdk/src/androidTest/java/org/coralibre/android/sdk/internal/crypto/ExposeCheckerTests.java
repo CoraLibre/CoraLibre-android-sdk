@@ -7,7 +7,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import org.coralibre.android.sdk.internal.EnFrameworkConstants;
 import org.coralibre.android.sdk.internal.datatypes.ENInterval;
 import org.coralibre.android.sdk.internal.datatypes.RollingProximityIdentifier;
-import org.coralibre.android.sdk.internal.datatypes.TemporaryExposureKey_internal;
+import org.coralibre.android.sdk.internal.datatypes.InternalTemporaryExposureKey;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -25,9 +25,9 @@ public class ExposeCheckerTests {
         return new BigInteger(hex,16).toByteArray();
     }
 
-    private static TemporaryExposureKey_internal tek(long whichRollingPeriod, String hex) {
+    private static InternalTemporaryExposureKey tek(long whichRollingPeriod, String hex) {
         assertEquals(2 * EnFrameworkConstants.TEK_LENGTH, hex.length());
-        return new TemporaryExposureKey_internal(new ENInterval(whichRollingPeriod * EnFrameworkConstants.TEK_ROLLING_PERIOD),
+        return new InternalTemporaryExposureKey(new ENInterval(whichRollingPeriod * EnFrameworkConstants.TEK_ROLLING_PERIOD),
                 hex2byte(hex));
     }
 
@@ -47,7 +47,7 @@ public class ExposeCheckerTests {
         return new String(hexChars);
     }
 
-    private static final List<TemporaryExposureKey_internal> TEK_LIST =
+    private static final List<InternalTemporaryExposureKey> TEK_LIST =
             new ArrayList<>(Arrays.asList(
                     tek(10, "11111111111111111111111111111111"),
                     tek(11, "22222222222222222222222222222222"),
@@ -60,7 +60,7 @@ public class ExposeCheckerTests {
                     tek(18, "99999999999999999999999999999999"),
                     tek(19, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")));
 
-    private static final List<TemporaryExposureKey_internal> TEK_LIST_TWO_PER_DAY =
+    private static final List<InternalTemporaryExposureKey> TEK_LIST_TWO_PER_DAY =
             new ArrayList<>(Arrays.asList(
                     tek(10, "11111111111111111111111111111111"),
                     tek(10, "10101010101010101010101010101010"),
@@ -98,7 +98,7 @@ public class ExposeCheckerTests {
 
     @Test
     public void testGetAllRelatedTEKsDuringDay() {
-        List<TemporaryExposureKey_internal> tekSubSet =
+        List<InternalTemporaryExposureKey> tekSubSet =
                 ExposeChecker.getAllRelatedTEKs(TEK_LIST, MIDDLE_OF_DAY_14);
         assertEquals(1, tekSubSet.size());
         assertArrayEquals(TEK_LIST.get(3).getKey(), tekSubSet.get(0).getKey());
@@ -106,7 +106,7 @@ public class ExposeCheckerTests {
 
     @Test
     public void testGetAllRelatedTEKsAtBeginningOfDayTwoPerDay() {
-        List<TemporaryExposureKey_internal> tekSubSet =
+        List<InternalTemporaryExposureKey> tekSubSet =
                 ExposeChecker.getAllRelatedTEKs(TEK_LIST_TWO_PER_DAY, ONE_HOUR_INTO_DAY_15);
         assertEquals(4, tekSubSet.size());
         assertArrayEquals(TEK_LIST_TWO_PER_DAY.get(6).getKey(), tekSubSet.get(0).getKey());
@@ -117,7 +117,7 @@ public class ExposeCheckerTests {
 
     @Test
     public void testGetAllRelatedTEKsAtBeginningOfDay() {
-        List<TemporaryExposureKey_internal> tekSubSet =
+        List<InternalTemporaryExposureKey> tekSubSet =
                 ExposeChecker.getAllRelatedTEKs(TEK_LIST, ONE_HOUR_INTO_DAY_15);
         assertEquals(2, tekSubSet.size());
         assertArrayEquals(TEK_LIST.get(3).getKey(), tekSubSet.get(0).getKey());
@@ -177,7 +177,7 @@ public class ExposeCheckerTests {
 
     @Test
     public void testFindMatches() {
-        List<TemporaryExposureKey_internal> tekSubSet =
+        List<InternalTemporaryExposureKey> tekSubSet =
                 ExposeChecker.getAllRelatedTEKs(TEK_LIST_TWO_PER_DAY, MIDDLE_OF_DAY_14);
         List<RollingProximityIdentifier> genrpis =
                 ExposeChecker.generateRPIsForSlot(TEK_LIST_TWO_PER_DAY.get(6), MIDDLE_OF_DAY_14);
@@ -189,7 +189,7 @@ public class ExposeCheckerTests {
                         genrpis.get(5),
                         genrpis.get(27)));
 
-        List<Pair<TemporaryExposureKey_internal, RollingProximityIdentifier>> foundMatches
+        List<Pair<InternalTemporaryExposureKey, RollingProximityIdentifier>> foundMatches
                 = ExposeChecker.findMatches(TEK_LIST_TWO_PER_DAY, collectedRPIs);
 
         assertEquals(2, foundMatches.size());

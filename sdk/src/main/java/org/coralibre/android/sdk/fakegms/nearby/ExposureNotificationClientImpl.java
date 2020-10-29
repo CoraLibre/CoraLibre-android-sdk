@@ -20,7 +20,7 @@ import org.coralibre.android.sdk.internal.database.Database;
 import org.coralibre.android.sdk.internal.database.DatabaseAccess;
 import org.coralibre.android.sdk.internal.datatypes.DiagnosisKey;
 import org.coralibre.android.sdk.internal.datatypes.IntervalOfCapturedData;
-import org.coralibre.android.sdk.internal.datatypes.TemporaryExposureKey_internal;
+import org.coralibre.android.sdk.internal.datatypes.InternalTemporaryExposureKey;
 import org.coralibre.android.sdk.internal.datatypes.util.DiagnosisKeyUtil;
 import org.coralibre.android.sdk.internal.matching.MatchingLegacyV1;
 import org.coralibre.android.sdk.proto.TemporaryExposureKeyFile.TemporaryExposureKeyExport;
@@ -91,9 +91,9 @@ final class ExposureNotificationClientImpl implements ExposureNotificationClient
     @Override
     public Task<List<TemporaryExposureKey>> getTemporaryExposureKeyHistory() {
         return Tasks.call(() -> {
-            Iterable<TemporaryExposureKey_internal> dbTeks = database.getAllOwnTEKs();
+            Iterable<InternalTemporaryExposureKey> dbTeks = database.getAllOwnTEKs();
             List<TemporaryExposureKey> result = new LinkedList<TemporaryExposureKey>();
-            for (TemporaryExposureKey_internal dbTek : dbTeks) {
+            for (InternalTemporaryExposureKey dbTek : dbTeks) {
                 result.add(new TemporaryExposureKey(
                     dbTek.getKey(),
                     (int) dbTek.getInterval().get(),

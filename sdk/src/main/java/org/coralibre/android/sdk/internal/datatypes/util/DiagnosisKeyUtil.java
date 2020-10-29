@@ -2,7 +2,7 @@ package org.coralibre.android.sdk.internal.datatypes.util;
 
 import org.coralibre.android.sdk.internal.datatypes.DiagnosisKey;
 import org.coralibre.android.sdk.internal.datatypes.ENInterval;
-import org.coralibre.android.sdk.internal.datatypes.TemporaryExposureKey_internal;
+import org.coralibre.android.sdk.internal.datatypes.InternalTemporaryExposureKey;
 import org.coralibre.android.sdk.proto.TemporaryExposureKeyFile;
 
 import java.util.ArrayList;
@@ -24,7 +24,7 @@ public class DiagnosisKeyUtil {
 
             entityDiagnosisKeys.add(
                 new DiagnosisKey(
-                    new TemporaryExposureKey_internal(
+                    new InternalTemporaryExposureKey(
                         new ENInterval(tekProto.getRollingStartIntervalNumber()),
                         tekProto.getKeyData().toByteArray()),
                     tekProto.hasTransmissionRiskLevel() ? tekProto.getTransmissionRiskLevel() : 0)

@@ -34,21 +34,21 @@ public class TemporaryExposureKeyInternalTests {
     @Test
     public void testSetTEKWithENNumberInterval() {
         ENInterval i = new ENInterval(RAW_INPUT_ENNUMBER_VAL1);
-        TemporaryExposureKey_internal tek = new TemporaryExposureKey_internal(i, TEK_VAL1);
+        InternalTemporaryExposureKey tek = new InternalTemporaryExposureKey(i, TEK_VAL1);
         assertArrayEquals(TEK_VAL1, tek.getKey());
         assertEquals(RAW_OUTPUT_ENNUMBER_VAL1, tek.getInterval().get());
     }
 
     @Test
     public void testSetTEKFromRawData() {
-        TemporaryExposureKey_internal tek = new TemporaryExposureKey_internal(RAW_INPUT_ENNUMBER_VAL1, TEK_VAL1);
+        InternalTemporaryExposureKey tek = new InternalTemporaryExposureKey(RAW_INPUT_ENNUMBER_VAL1, TEK_VAL1);
         assertArrayEquals(TEK_VAL1, tek.getKey());
         assertEquals(RAW_OUTPUT_ENNUMBER_VAL1, tek.getInterval().get());
     }
 
     @Test
     public void testSetExactInterval() {
-        TemporaryExposureKey_internal tek = new TemporaryExposureKey_internal(RAW_OUTPUT_ENNUMBER_VAL1, TEK_VAL1);
+        InternalTemporaryExposureKey tek = new InternalTemporaryExposureKey(RAW_OUTPUT_ENNUMBER_VAL1, TEK_VAL1);
 
         assertArrayEquals(TEK_VAL1, tek.getKey());
         assertEquals(RAW_OUTPUT_ENNUMBER_VAL1, tek.getInterval().get());

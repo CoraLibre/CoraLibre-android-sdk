@@ -7,7 +7,7 @@ import org.coralibre.android.sdk.internal.datatypes.CapturedData;
 import org.coralibre.android.sdk.internal.datatypes.DiagnosisKey;
 import org.coralibre.android.sdk.internal.datatypes.ENInterval;
 import org.coralibre.android.sdk.internal.datatypes.IntervalOfCapturedData;
-import org.coralibre.android.sdk.internal.datatypes.TemporaryExposureKey_internal;
+import org.coralibre.android.sdk.internal.datatypes.InternalTemporaryExposureKey;
 
 import java.util.List;
 
@@ -17,15 +17,15 @@ public interface Database {
     //  BUT take care that empty data is handled correctly everywhere (since empty != non existent)
 
 
-    void addGeneratedTEK(TemporaryExposureKey_internal generatedTEK);
+    void addGeneratedTEK(InternalTemporaryExposureKey generatedTEK);
 
-    Iterable<TemporaryExposureKey_internal> getAllOwnTEKs();
+    Iterable<InternalTemporaryExposureKey> getAllOwnTEKs();
 
     /**
      * @param interval An interval for that a temporary exposure key exists
      * @throws StorageException if there is no key for that interval
      */
-    TemporaryExposureKey_internal getOwnTEK(ENInterval interval) throws StorageException;
+    InternalTemporaryExposureKey getOwnTEK(ENInterval interval) throws StorageException;
 
     boolean hasTEKForInterval(ENInterval interval);
 

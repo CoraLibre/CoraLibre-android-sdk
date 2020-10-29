@@ -19,7 +19,7 @@ import org.coralibre.android.sdk.internal.datatypes.CapturedData;
 import org.coralibre.android.sdk.internal.datatypes.DiagnosisKey;
 import org.coralibre.android.sdk.internal.datatypes.ENInterval;
 import org.coralibre.android.sdk.internal.datatypes.IntervalOfCapturedData;
-import org.coralibre.android.sdk.internal.datatypes.TemporaryExposureKey_internal;
+import org.coralibre.android.sdk.internal.datatypes.InternalTemporaryExposureKey;
 import org.coralibre.android.sdk.internal.datatypes.util.ENIntervalUtil;
 
 import java.util.HashMap;
@@ -60,7 +60,7 @@ public class PersistentDatabase implements Database {
 
 
     @Override
-    public void addGeneratedTEK(TemporaryExposureKey_internal generatedTEK) {
+    public void addGeneratedTEK(InternalTemporaryExposureKey generatedTEK) {
         db.daoTEK().insertTEK(new EntityTemporaryExposureKey(generatedTEK));
     }
 
@@ -106,7 +106,7 @@ public class PersistentDatabase implements Database {
         List<EntityDiagnosisKey> entities = db.daoDiagnosisKey().getDiagnosisKeys(token);
         for (EntityDiagnosisKey entity : entities) {
             DiagnosisKey diagnosisKey = new DiagnosisKey(
-                new TemporaryExposureKey_internal(
+                new InternalTemporaryExposureKey(
                     new ENInterval(entity.intervalNumber),
                     entity.keyData),
                 entity.transmissionRiskLevel
@@ -165,7 +165,7 @@ public class PersistentDatabase implements Database {
 
 
     @Override
-    public TemporaryExposureKey_internal getOwnTEK(ENInterval interval) {
+    public InternalTemporaryExposureKey getOwnTEK(ENInterval interval) {
         List<EntityTemporaryExposureKey> teks = db.daoTEK().getTekByEnNumber(interval);
         if (teks.size() != 1) {
             throw new StorageException("When attempting to query TEK for interval number " +
@@ -179,8 +179,8 @@ public class PersistentDatabase implements Database {
 
 
     @Override
-    public Iterable<TemporaryExposureKey_internal> getAllOwnTEKs() {
-        List<TemporaryExposureKey_internal> result = new LinkedList<>();
+    public Iterable<InternalTemporaryExposureKey> getAllOwnTEKs() {
+        List<InternalTemporaryExposureKey> result = new LinkedList<>();
         for (EntityTemporaryExposureKey e : db.daoTEK().getAllGeneratedTEKs()) {
             result.add(e.toTemporaryExposureKey());
         }
