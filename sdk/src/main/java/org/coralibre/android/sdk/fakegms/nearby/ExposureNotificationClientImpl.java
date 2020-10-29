@@ -42,25 +42,28 @@ final class ExposureNotificationClientImpl implements ExposureNotificationClient
     public static final String TAG = ExposureNotificationClientImpl.class.getSimpleName();
 
     private final Context context;
-    private boolean enabled = false;
     private Database database;
 
 
     ExposureNotificationClientImpl(@NonNull final Context context) {
         this.context = context;
+        // TODO the initialization should be called asynchronously
+        PPCP.init(context);
+    }
+
+    private boolean isPPCPEnabled() {
+        return PPCP.isStarted(context);
     }
 
     @Override
     public Task<Void> start() {
         return Tasks.call(() -> {
-            if (!enabled) {
+            if (!isPPCPEnabled()) {
                 PPCP.start(context);
 
                 // TODO: Change after refactoring database creation / factory
                 //database = new PersistentDatabase(context);
                 database = DatabaseAccess.getDefaultDatabaseInstance();
-
-                enabled = true;
             }
             return null;
         });
@@ -69,10 +72,9 @@ final class ExposureNotificationClientImpl implements ExposureNotificationClient
     @Override
     public Task<Void> stop() {
         return Tasks.call(() -> {
-            if (enabled) {
+            if (isPPCPEnabled()) {
                 PPCP.stop(context);
                 database = null;
-                enabled = false;
             }
             return null;
         });
@@ -80,7 +82,7 @@ final class ExposureNotificationClientImpl implements ExposureNotificationClient
 
     @Override
     public Task<Boolean> isEnabled() {
-        return Tasks.forResult(enabled);
+        return Tasks.forResult(isPPCPEnabled());
     }
 
     /**
