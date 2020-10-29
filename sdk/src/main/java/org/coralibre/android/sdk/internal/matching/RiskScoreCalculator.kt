@@ -14,43 +14,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.coralibre.android.sdk.internal.matching
 
-package org.coralibre.android.sdk.internal.matching;
-
-
-import org.coralibre.android.sdk.fakegms.nearby.exposurenotification.ExposureConfiguration;
-import org.coralibre.android.sdk.internal.matching.intermediateDatatypes.ExposureRecord;
-
-import static java.util.concurrent.TimeUnit.SECONDS;
+import org.coralibre.android.sdk.fakegms.nearby.exposurenotification.ExposureConfiguration
+import org.coralibre.android.sdk.internal.matching.intermediateDatatypes.ExposureRecord
+import java.util.concurrent.TimeUnit
 
 /**
  * Used to calculate risk score based on client configuration and exposures.
  */
-public class RiskScoreCalculator {
-
-
+object RiskScoreCalculator {
     /**
-     * Returns a V1 risk score. Returns 0 if calculated risk score is below {@link
-     * ExposureConfiguration#getMinimumRiskScore()}. Throws IllegalArgumentException on invalid input.
+     * Returns a V1 risk score. Returns 0 if calculated risk score is below [ ][ExposureConfiguration.getMinimumRiskScore]. Throws IllegalArgumentException on invalid input.
      */
-    protected static int calculateRiskScore(
-        final ExposureRecord exposureRecord,
-        final ExposureConfiguration configuration
-    ) {
-
-        final int riskScore = configuration.getRiskScore(
+    @JvmStatic
+    internal fun calculateRiskScore(
+        exposureRecord: ExposureRecord,
+        configuration: ExposureConfiguration
+    ): Int {
+        val riskScore = configuration.getRiskScore(
             exposureRecord.attenuationValue,
             exposureRecord.daysSinceExposure,
-            (int)SECONDS.toMinutes(exposureRecord.durationSeconds),
+            TimeUnit.SECONDS.toMinutes(exposureRecord.durationSeconds).toInt(),
             exposureRecord.transmissionRiskLevel
-        );
-
-        if (riskScore >= configuration.getMinimumRiskScore()) {
-            return riskScore;
-        } else {
-            return 0;
-        }
+        )
+        return if (riskScore < configuration.minimumRiskScore) 0
+        else riskScore
     }
-
-
 }
