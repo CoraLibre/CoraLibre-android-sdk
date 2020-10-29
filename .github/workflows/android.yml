@@ -3,44 +3,57 @@ name: Android Tests
 on: [push, pull_request]
 
 jobs:
-  test_target_api:
-    name: "Run SDK Tests (target API level)"
+  spotless:
+    name: Run Spotless checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+      - name: Run checks
+        run: ./gradlew spotlessCheck
+
+  local_tests:
+    name: "Run local tests"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+      - name: Run local unit tests
+        run: ./gradlew test
+      - uses: actions/upload-artifact@v2
+        if: ${{ always() }}
+        with:
+          name: reports
+          path: sdk/build/reports
+
+  emulator_tests:
+    name: Run Emulator Tests (API level ${{ matrix.api-level }})
     runs-on: macos-latest # enables hardware acceleration in the virtual machine
 
-    steps:
-    - uses: actions/checkout@v2
-    - name: set up JDK 1.8
-      uses: actions/setup-java@v1
-      with:
-        java-version: 1.8
-    - name: Run tests
-      uses: reactivecircus/android-emulator-runner@v2
-      with:
-        api-level: 29
-        script: cd coralibre-sdk; ./gradlew connectedAndroidTest
-    - uses: actions/upload-artifact@v2
-      if: ${{ always() }}
-      with:
-        name: reports
-        path: coralibre-sdk/sdk/build/reports
-
-  test_min_api:
-    name: "Run SDK Tests (min API level)"
-    runs-on: macos-latest # enables hardware acceleration in the virtual machine
+    strategy:
+      fail-fast: false
+      matrix:
+        api-level: [29, 26]
 
     steps:
-    - uses: actions/checkout@v2
-    - name: set up JDK 1.8
-      uses: actions/setup-java@v1
-      with:
-        java-version: 1.8
-    - name: Run tests
-      uses: reactivecircus/android-emulator-runner@v2
-      with:
-        api-level: 26
-        script: cd coralibre-sdk; ./gradlew connectedAndroidTest
-    - uses: actions/upload-artifact@v2
-      if: ${{ always() }}
-      with:
-        name: reports
-        path: coralibre-sdk/sdk/build/reports
+      - uses: actions/checkout@v2
+      - name: set up JDK 1.8
+        uses: actions/setup-java@v1
+        with:
+          java-version: 1.8
+      - name: Run tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ matrix.api-level }}
+          script: ./gradlew connectedAndroidTest
+      - uses: actions/upload-artifact@v2
+        if: ${{ always() }}
+        with:
+          name: reports (API ${{ matrix.api-level }})
+          path: sdk/build/reports

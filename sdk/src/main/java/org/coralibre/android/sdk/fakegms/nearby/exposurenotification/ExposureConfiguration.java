@@ -6,6 +6,7 @@ import android.os.Parcelable;
 import org.coralibre.android.sdk.internal.datatypes.CapturedData;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * Contains the parameters of the risk calculation algorithm. In particular:
@@ -290,6 +291,30 @@ public final class ExposureConfiguration implements Parcelable {
             * getDaysSinceLastExposureScore(daysSinceLastExposureValue)
             * getDurationScore(durationValue)
             * getTransmissionRiskScore(transmissionRiskValue);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ExposureConfiguration that = (ExposureConfiguration) o;
+        return minimumRiskScore == that.minimumRiskScore &&
+            Arrays.equals(attenuationScores, that.attenuationScores) &&
+            Arrays.equals(daysSinceLastExposureScores, that.daysSinceLastExposureScores) &&
+            Arrays.equals(durationScores, that.durationScores) &&
+            Arrays.equals(transmissionRiskScores, that.transmissionRiskScores) &&
+            Arrays.equals(durationAtAttenuationThresholds, that.durationAtAttenuationThresholds);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(minimumRiskScore);
+        result = 31 * result + Arrays.hashCode(attenuationScores);
+        result = 31 * result + Arrays.hashCode(daysSinceLastExposureScores);
+        result = 31 * result + Arrays.hashCode(durationScores);
+        result = 31 * result + Arrays.hashCode(transmissionRiskScores);
+        result = 31 * result + Arrays.hashCode(durationAtAttenuationThresholds);
+        return result;
     }
 
     public static final class ExposureConfigurationBuilder {

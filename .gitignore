@@ -101,3 +101,4 @@ lint/tmp/
 
 # macOS
 .DS_Store
+.java-version

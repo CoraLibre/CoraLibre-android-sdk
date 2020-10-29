@@ -136,8 +136,13 @@ public final class ExposureSummary implements Parcelable {
      *
      * @see <a href="https://developers.google.com/android/exposure-notifications/exposure-notifications-api#attenuationdurations">documentation on developers.google.com</a>
      */
-    public int[] getAttenuationDurations() {
+    public int[] getAttenuationDurationsInMinutes() {
         return attenuationDurations;
+    }
+
+    @Deprecated
+    public int[] getAttenuationDurations() {
+        return getAttenuationDurationsInMinutes();
     }
 
     /**
