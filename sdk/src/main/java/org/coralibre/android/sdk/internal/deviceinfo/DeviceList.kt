@@ -109,7 +109,7 @@ class DeviceList(context: Context, sharedPrefs: SharedPreferences) {
         device: String,
         model: String
     ): DeviceInfo {
-        //try to find oem/device oem/model match
+        // try to find oem/device oem/model match
         val findings = findingsInList(manufacturer, device, model)
         if (findings.oemDeviceFindings.size == 1) {
             return findings.oemDeviceFindings[0]
@@ -150,7 +150,8 @@ class DeviceList(context: Context, sharedPrefs: SharedPreferences) {
             val deviceInfo =
                 DeviceInfo(sharedPreferences.getString(DEVICE_INFO_KEY, DEFAULT_INFO.toString())!!)
             if (BuildConfig.DEBUG) Log.d(
-                TAG, "get from shared prefs: " +
+                TAG,
+                "get from shared prefs: " +
                     deviceInfo.toString()
             )
             return deviceInfo

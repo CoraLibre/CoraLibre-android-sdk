@@ -9,7 +9,7 @@ class DeviceInfo : Comparable<DeviceInfo> {
     val rssiCorrection: Int
     val tx: Int
     var calibrationConfidence: ConfidenceLevel
-    private set
+        private set
 
     constructor(
         manufacturer: String,
@@ -51,10 +51,13 @@ class DeviceInfo : Comparable<DeviceInfo> {
     override fun equals(otherInfo: Any?): Boolean {
         if (otherInfo!!.javaClass != javaClass) return false
         val otherDeviceInfo = otherInfo as DeviceInfo?
-        return (otherDeviceInfo!!.manufacturer.equals(manufacturer, ignoreCase = true)
-            && otherDeviceInfo.device.equals(device, ignoreCase = true)
-            && otherDeviceInfo.model.equals(model, ignoreCase = true)
-            && otherDeviceInfo.rssiCorrection == rssiCorrection && otherDeviceInfo.tx == tx && otherDeviceInfo.calibrationConfidence === calibrationConfidence)
+        return (
+            otherDeviceInfo!!.manufacturer.equals(manufacturer, ignoreCase = true) &&
+                otherDeviceInfo.device.equals(device, ignoreCase = true) &&
+                otherDeviceInfo.model.equals(model, ignoreCase = true) &&
+                otherDeviceInfo.rssiCorrection == rssiCorrection && otherDeviceInfo.tx == tx &&
+                otherDeviceInfo.calibrationConfidence === calibrationConfidence
+            )
     }
 
     // FIXME: implement hashCode
