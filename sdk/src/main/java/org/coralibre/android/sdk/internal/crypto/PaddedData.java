@@ -1,5 +1,7 @@
 package org.coralibre.android.sdk.internal.crypto;
 
+import org.coralibre.android.sdk.internal.datatypes.ENInterval;
+
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidParameterException;
 
@@ -9,9 +11,12 @@ public class PaddedData {
     public static final int TIMESTAMP_POS = 12;
     private byte[] data = new byte[PADDED_DATA_SIZE];
 
-    public PaddedData(ENNumber timestamp) {
+    //TODO In the following source file from the google code, padded data length is only 12?:
+    // https://github.com/google/exposure-notifications-internals/blob/main/exposurenotification/src/main/cpp/constants.h
+
+    public PaddedData(ENInterval timestamp) {
         System.arraycopy(RPI_INFO.getBytes(StandardCharsets.UTF_8), 0, data, 0, RPI_INFO.length());
-        System.arraycopy(timestamp.getBytes(), 0, data, TIMESTAMP_POS, ENNumber.INT_BYTES);
+        System.arraycopy(timestamp.getBytes(), 0, data, TIMESTAMP_POS, ENInterval.INT_BYTES);
     }
 
     public PaddedData(byte[] rawPaddedData) {
@@ -32,9 +37,9 @@ public class PaddedData {
         return (new String(extractedRpiInfo, StandardCharsets.UTF_8)).equals(RPI_INFO);
     }
 
-    public ENNumber getInterval() {
-        byte[] rawInterval = new byte[ENNumber.INT_BYTES];
-        System.arraycopy(data, TIMESTAMP_POS, rawInterval, 0, ENNumber.INT_BYTES);
-        return new ENNumber(rawInterval);
+    public ENInterval getInterval() {
+        byte[] rawInterval = new byte[ENInterval.INT_BYTES];
+        System.arraycopy(data, TIMESTAMP_POS, rawInterval, 0, ENInterval.INT_BYTES);
+        return new ENInterval(rawInterval);
     }
 }

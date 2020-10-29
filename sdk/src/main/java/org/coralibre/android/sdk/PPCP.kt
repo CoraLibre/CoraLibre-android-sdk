@@ -24,6 +24,7 @@ object PPCP {
     const val UPDATE_INTENT_ACTION = "org.coralibre.android.sdk.UPDATE_ACTION"
     private var isInitialized = false
 
+    @JvmStatic
     fun init(context: Context) {
         // TODO: there's no else branch, that's bad.
         if (ProcessUtil.isMainProcess(context)) {
@@ -51,10 +52,12 @@ object PPCP {
         check(isInitialized) { "You have to call PPCP.init() in your application onCreate()" }
     }
 
+    @JvmStatic
     fun start(context: Context) {
         start(context, advertise = true, receive = true)
     }
 
+    @JvmStatic
     internal fun start(context: Context, advertise: Boolean, receive: Boolean) {
         checkInit()
         val appConfigManager = AppConfigManager.getInstance(context)
@@ -68,12 +71,14 @@ object PPCP {
         BroadcastHelper.sendUpdateBroadcast(context)
     }
 
+    @JvmStatic
     fun isStarted(context: Context): Boolean {
         checkInit()
         val appConfigManager = AppConfigManager.getInstance(context)
         return appConfigManager.isAdvertisingEnabled || appConfigManager.isReceivingEnabled
     }
 
+    @JvmStatic
     fun stop(context: Context) {
         checkInit()
         val appConfigManager = AppConfigManager.getInstance(context)
@@ -85,9 +90,11 @@ object PPCP {
         BroadcastHelper.sendUpdateBroadcast(context)
     }
 
+    @JvmStatic
     val updateIntentFilter: IntentFilter
         get() = IntentFilter(UPDATE_INTENT_ACTION)
 
+    @JvmStatic
     fun clearData(context: Context, onDeleteListener: Runnable?) {
         checkInit()
         val appConfigManager = AppConfigManager.getInstance(context)

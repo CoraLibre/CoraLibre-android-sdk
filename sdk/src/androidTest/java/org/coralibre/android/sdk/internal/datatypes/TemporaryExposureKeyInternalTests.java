@@ -1,4 +1,4 @@
-package org.coralibre.android.sdk.internal.crypto;
+package org.coralibre.android.sdk.internal.datatypes;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
@@ -9,7 +9,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(AndroidJUnit4.class)
-public class TemporaryExposureKeyTests {
+public class TemporaryExposureKeyInternalTests {
     private static final byte[] TEK_VAL1 = new byte[] {
             (byte) 0x12,
             (byte) 0x34,
@@ -33,22 +33,22 @@ public class TemporaryExposureKeyTests {
 
     @Test
     public void testSetTEKWithENNumberInterval() {
-        ENNumber i = new ENNumber(RAW_INPUT_ENNUMBER_VAL1);
-        TemporaryExposureKey tek = new TemporaryExposureKey(i, TEK_VAL1);
+        ENInterval i = new ENInterval(RAW_INPUT_ENNUMBER_VAL1);
+        InternalTemporaryExposureKey tek = new InternalTemporaryExposureKey(i, TEK_VAL1);
         assertArrayEquals(TEK_VAL1, tek.getKey());
         assertEquals(RAW_OUTPUT_ENNUMBER_VAL1, tek.getInterval().get());
     }
 
     @Test
     public void testSetTEKFromRawData() {
-        TemporaryExposureKey tek = new TemporaryExposureKey(RAW_INPUT_ENNUMBER_VAL1, TEK_VAL1);
+        InternalTemporaryExposureKey tek = new InternalTemporaryExposureKey(RAW_INPUT_ENNUMBER_VAL1, TEK_VAL1);
         assertArrayEquals(TEK_VAL1, tek.getKey());
         assertEquals(RAW_OUTPUT_ENNUMBER_VAL1, tek.getInterval().get());
     }
 
     @Test
     public void testSetExactInterval() {
-        TemporaryExposureKey tek = new TemporaryExposureKey(RAW_OUTPUT_ENNUMBER_VAL1, TEK_VAL1);
+        InternalTemporaryExposureKey tek = new InternalTemporaryExposureKey(RAW_OUTPUT_ENNUMBER_VAL1, TEK_VAL1);
 
         assertArrayEquals(TEK_VAL1, tek.getKey());
         assertEquals(RAW_OUTPUT_ENNUMBER_VAL1, tek.getInterval().get());

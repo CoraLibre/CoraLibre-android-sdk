@@ -1,48 +1,52 @@
-package org.coralibre.android.sdk.internal.crypto;
+package org.coralibre.android.sdk.internal.datatypes;
+
+import org.coralibre.android.sdk.internal.datatypes.util.ENIntervalUtil;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.security.InvalidParameterException;
 import java.util.Objects;
 
-public class ENNumber {
+public class ENInterval {
     public static final long MAX_UINT_32 = 4294967295L;
-    public static final long UNIX_TIME_DEVIDER = 60*10; //10 minues
     public static final int LONG_BYTES = 8;
     public static final int INT_BYTES = 4;
 
-    private long val;
 
-    public ENNumber(ENNumber enNumber) {
-        this.val = enNumber.get();
+    private final long val;
+
+
+    public ENInterval(final ENInterval enInterval) {
+        this.val = enInterval.get();
     }
 
-    public ENNumber(long rawENNumber) {
-        set(rawENNumber, false);
+    public ENInterval(final long rawENNumber) {
+        val = toEnIntervalNumberChecked(rawENNumber, false);
     }
 
-    public ENNumber(long input, boolean isUnixTime) {
-        set(input, isUnixTime);
+    public ENInterval(final long input, final boolean isUnixTime) {
+        val = toEnIntervalNumberChecked(input, isUnixTime);
     }
 
-    public ENNumber(byte[] rawENNumber) {
+    public ENInterval(final byte[] rawENNumber) {
         if(rawENNumber.length != INT_BYTES)
             throw new InvalidParameterException("rawENNumber has wrong size");
         byte[] rawBuffer = new byte[LONG_BYTES];
         System.arraycopy(rawENNumber, 0, rawBuffer, 0, INT_BYTES);
         ByteBuffer buffer = ByteBuffer.wrap(rawBuffer);
         buffer.order(ByteOrder.LITTLE_ENDIAN);
-        set(buffer.getLong(), false);
+        val = toEnIntervalNumberChecked(buffer.getLong(), false);
     }
 
-    private void set(long input, boolean isUnixTime) {
+    private long toEnIntervalNumberChecked(long input, boolean isUnixTime) {
+        long result = input;
         if(isUnixTime)
-            input = input/UNIX_TIME_DEVIDER;
+            result = ENIntervalUtil.intervalNumberFromUnixTimestamp(input);
 
-        if(input < 0 || MAX_UINT_32 < input)
+        if(result < 0 || MAX_UINT_32 < result)
             throw new InvalidParameterException("ENIntervalTimestamp out of bound: "
-            + String.format("0x%X", input));
-        val = input;
+            + String.format("0x%X", result));
+        return result;
     }
 
     public long get() {
@@ -50,7 +54,7 @@ public class ENNumber {
     }
 
     public long getUnixTime() {
-        return val * UNIX_TIME_DEVIDER;
+        return ENIntervalUtil.intervalNumberToUnixTimestamp(val);
     }
 
     public byte[] getBytes() {
@@ -67,8 +71,8 @@ public class ENNumber {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        ENNumber enNumber = (ENNumber) o;
-        return val == enNumber.val;
+        ENInterval enInterval = (ENInterval) o;
+        return val == enInterval.val;
     }
 
     @Override

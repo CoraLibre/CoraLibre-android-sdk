@@ -56,9 +56,10 @@ public class TracingService extends Service {
 
     // The source of these Values is this a description on Googles API description:
     // https://developers.google.com/android/exposure-notifications/ble-attenuation-overview
-    public static final long SCAN_DURATION = 4 * 1000; // unit in milliseconds
-    public static final long SCAN_INTERVAL = 5 * 60 * 1000; // unit in milliseconds
-    public static final long MAC_ROTATION_PERIOD = 11 * 60 * 1000; // unit in milliseconds
+    public static final long SCAN_DURATION_MILLIS = 4 * 1000;
+    public static final long SCAN_INTERVAL_SECONDS = 5 * 60;
+    public static final long SCAN_INTERVAL_MILLIS = 1000 * SCAN_INTERVAL_SECONDS;
+    public static final long MAC_ROTATION_PERIOD_MILLIS = 11 * 60 * 1000;
 
     private Handler handler;
     private PowerManager.WakeLock wl;
@@ -250,8 +251,8 @@ public class TracingService extends Service {
 
         handler.postDelayed(() -> {
             stopScanning();
-            scheduleNextClientRestart(this, SCAN_INTERVAL);
-        }, SCAN_DURATION);
+            scheduleNextClientRestart(this, SCAN_INTERVAL_MILLIS);
+        }, SCAN_DURATION_MILLIS);
     }
 
     private void restartServer() {
@@ -279,7 +280,7 @@ public class TracingService extends Service {
 
     public static void scheduleNextServerRestart(Context context) {
         final long now = System.currentTimeMillis();
-        final long delay = MAC_ROTATION_PERIOD - (now % MAC_ROTATION_PERIOD);
+        final long delay = MAC_ROTATION_PERIOD_MILLIS - (now % MAC_ROTATION_PERIOD_MILLIS);
         final long nextAdvertiseChange = now + delay;
 
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);

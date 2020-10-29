@@ -3,16 +3,22 @@ package org.coralibre.android.sdk.internal.database;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
 
-import org.coralibre.android.sdk.internal.crypto.CryptoModule;
-import org.coralibre.android.sdk.internal.crypto.ENNumber;
-import org.coralibre.android.sdk.internal.database.model.CapturedData;
-import org.coralibre.android.sdk.internal.database.model.GeneratedTEK;
-import org.coralibre.android.sdk.internal.database.model.IntervalOfCapturedData;
+import org.coralibre.android.sdk.DatatypesTestUtil;
+import org.coralibre.android.sdk.internal.datatypes.AssociatedEncryptedMetadata;
+import org.coralibre.android.sdk.internal.datatypes.CapturedData;
+import org.coralibre.android.sdk.internal.datatypes.DiagnosisKey;
+import org.coralibre.android.sdk.internal.datatypes.ENInterval;
+import org.coralibre.android.sdk.internal.datatypes.IntervalOfCapturedData;
+import org.coralibre.android.sdk.internal.datatypes.RollingProximityIdentifier;
+import org.coralibre.android.sdk.internal.datatypes.InternalTemporaryExposureKey;
+import org.coralibre.android.sdk.internal.datatypes.util.ENIntervalUtil;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Random;
 
 import static org.junit.Assert.assertArrayEquals;
@@ -47,47 +53,58 @@ public class DatabaseTests {
 
         // Insert:
         Random random = new Random();
-        byte[] dumTekBytes = new byte[8];
+        byte[] dumTekBytes = new byte[16];
         random.nextBytes(dumTekBytes);
-        ENNumber dumIntervalNumber = new ENNumber(2000l);
-        GeneratedTEK dumTek = new GeneratedTEK(dumIntervalNumber, dumTekBytes);
+        ENInterval dumInterval =
+            new ENInterval(ENIntervalUtil.getMidnight(2000l));
+        InternalTemporaryExposureKey dumTek = new InternalTemporaryExposureKey(dumInterval, dumTekBytes);
         DatabaseAccess.getDefaultDatabaseInstance().addGeneratedTEK(dumTek);
 
         // Query:
-        Iterable<GeneratedTEK> resultTeks =
-                DatabaseAccess.getDefaultDatabaseInstance().getAllGeneratedTEKs();
+        Iterable<InternalTemporaryExposureKey> resultTeks =
+                DatabaseAccess.getDefaultDatabaseInstance().getAllOwnTEKs();
 
-        GeneratedTEK resultTekForInterval =
-                DatabaseAccess.getDefaultDatabaseInstance().getGeneratedTEK(dumIntervalNumber);
+        InternalTemporaryExposureKey resultTekForInterval =
+                DatabaseAccess.getDefaultDatabaseInstance().getOwnTEK(dumInterval);
 
         // Compare:
         int numResultTeks = 0;
-        for (GeneratedTEK resultTek : resultTeks) {
+        for (InternalTemporaryExposureKey resultTek : resultTeks) {
             numResultTeks ++;
             assertArrayEquals(dumTekBytes, resultTek.getKey());
-            assertEquals(dumIntervalNumber, resultTek.getInterval());
+            assertEquals(dumInterval, resultTek.getInterval());
         }
         assertEquals(1, numResultTeks);
 
         assertArrayEquals(dumTekBytes, resultTekForInterval.getKey());
-        assertEquals(dumIntervalNumber, resultTekForInterval.getInterval());
+        assertEquals(dumInterval, resultTekForInterval.getInterval());
     }
 
 
     @Test
-    public void testInsertCapturedData() {
+    public void testInsertCapturedData() throws Exception {
         DatabaseAccess.getDefaultDatabaseInstance().clearAllData();
 
 
         // Insert:
         Random random = new Random();
-        byte[] dumPayload = new byte[8];
-        random.nextBytes(dumPayload);
+        byte[] dumRpi = new byte[16];
+        random.nextBytes(dumRpi);
+        byte[] dumAem = new byte[4];
+        random.nextBytes(dumAem);
         byte[] dumRssiArray = new byte[1];
         random.nextBytes(dumRssiArray);
         byte dumRssi = dumRssiArray[0];
         Long dumCaptureTimestamp = 123545L;
-        CapturedData dumData = new CapturedData(dumCaptureTimestamp, dumRssi, dumPayload);
+        CapturedData dumData = new CapturedData(
+            dumCaptureTimestamp,
+            dumRssi,
+            new RollingProximityIdentifier(
+                dumRpi,
+                ENIntervalUtil.createFromUnixTimestamp(dumCaptureTimestamp)
+            ),
+            new AssociatedEncryptedMetadata(dumAem)
+        );
         DatabaseAccess.getDefaultDatabaseInstance().addCapturedPayload(dumData);
 
         // Query:
@@ -103,9 +120,10 @@ public class DatabaseTests {
 
             for (CapturedData resultData : resultInterval.getCapturedData()) {
                 numResultData ++;
-                assertArrayEquals(dumPayload, resultData.getPayload());
+                assertArrayEquals(dumRpi, resultData.getRpi().getData());
+                assertArrayEquals(dumAem, resultData.getAem().getData());
                 assertEquals(dumRssi, resultData.getRssi());
-                assertEquals(dumCaptureTimestamp, resultData.getCaptureTimestamp());
+                assertEquals(dumCaptureTimestamp, resultData.getCaptureTimestampMillis());
             }
         }
         assertEquals(1, numResultIntervals);
@@ -115,47 +133,65 @@ public class DatabaseTests {
 
 
     @Test
-    public void testTruncate() {
+    public void testTruncate() throws Exception {
         DatabaseAccess.getDefaultDatabaseInstance().clearAllData();
 
-        ENNumber now = CryptoModule.getCurrentInterval();
-        ENNumber intervalRemove = new ENNumber(now.get() - 24 * 6 * 14 - 1);
-        ENNumber intervalKeep = new ENNumber(now.get() - 24 * 6 * 14);
+        ENInterval now = ENIntervalUtil.getCurrentInterval();
+        ENInterval intervalRemove = ENIntervalUtil.getMidnight(
+            new ENInterval(now.get() - 24 * 6 * 14)
+        );
+        ENInterval intervalKeep = ENIntervalUtil.getMidnight(
+            new ENInterval(now.get() - 24 * 6 * 13)
+        );
 
 
         // Insert:
         Random random = new Random();
 
         {
-            byte[] tekRemoveBytes = new byte[8];
+            byte[] tekRemoveBytes = new byte[16];
             random.nextBytes(tekRemoveBytes);
-            GeneratedTEK tekRemove = new GeneratedTEK(intervalRemove, tekRemoveBytes);
+            InternalTemporaryExposureKey tekRemove = new InternalTemporaryExposureKey(intervalRemove, tekRemoveBytes);
             DatabaseAccess.getDefaultDatabaseInstance().addGeneratedTEK(tekRemove);
         }
 
-        byte[] tekKeepBytes = new byte[8];
+        byte[] tekKeepBytes = new byte[16];
         random.nextBytes(tekKeepBytes);
-        GeneratedTEK tekKeep = new GeneratedTEK(intervalKeep, tekKeepBytes);
+        InternalTemporaryExposureKey tekKeep = new InternalTemporaryExposureKey(intervalKeep, tekKeepBytes);
         DatabaseAccess.getDefaultDatabaseInstance().addGeneratedTEK(tekKeep);
 
         {
-            byte[] payloadRemove = new byte[8];
-            random.nextBytes(payloadRemove);
+            byte[] rpiRemove = new byte[16];
+            random.nextBytes(rpiRemove);
+            byte[] aemRemove = new byte[4];
+            random.nextBytes(aemRemove);
             byte[] rssiRemoveArray = new byte[1];
             random.nextBytes(rssiRemoveArray);
             byte rssiRemove = rssiRemoveArray[0];
             long timestampRemove = intervalRemove.getUnixTime();
-            CapturedData dataRemove = new CapturedData(timestampRemove, rssiRemove, payloadRemove);
+            CapturedData dataRemove = new CapturedData(
+                timestampRemove,
+                rssiRemove,
+                new RollingProximityIdentifier(rpiRemove, ENIntervalUtil.createFromUnixTimestamp(timestampRemove)),
+                new AssociatedEncryptedMetadata(aemRemove)
+            );
             DatabaseAccess.getDefaultDatabaseInstance().addCapturedPayload(dataRemove);
         }
 
-        byte[] payloadKeep = new byte[8];
-        random.nextBytes(payloadKeep);
+        byte[] rpiKeep = new byte[16];
+        random.nextBytes(rpiKeep);
+        byte[] aemKeep = new byte[4];
+        random.nextBytes(aemKeep);
         byte[] rssiKeepArray = new byte[1];
         random.nextBytes(rssiKeepArray);
         byte rssiKeep = rssiKeepArray[0];
         Long timestampKeep = intervalKeep.getUnixTime();
-        CapturedData dataKeep = new CapturedData(timestampKeep, rssiKeep, payloadKeep);
+        CapturedData dataKeep = new CapturedData(
+            timestampKeep,
+            rssiKeep,
+            new RollingProximityIdentifier(rpiKeep, intervalKeep),
+            new AssociatedEncryptedMetadata(aemKeep)
+        );
         DatabaseAccess.getDefaultDatabaseInstance().addCapturedPayload(dataKeep);
 
 
@@ -163,14 +199,14 @@ public class DatabaseTests {
         DatabaseAccess.getDefaultDatabaseInstance().truncateLast14Days();
 
         // Query:
-        Iterable<GeneratedTEK> resultTeks =
-                DatabaseAccess.getDefaultDatabaseInstance().getAllGeneratedTEKs();
+        Iterable<InternalTemporaryExposureKey> resultTeks =
+                DatabaseAccess.getDefaultDatabaseInstance().getAllOwnTEKs();
         Iterable<IntervalOfCapturedData> resultIntervals =
                 DatabaseAccess.getDefaultDatabaseInstance().getAllCollectedPayload();
 
         // Compare:
         int numResultTeks = 0;
-        for (GeneratedTEK resultTek : resultTeks) {
+        for (InternalTemporaryExposureKey resultTek : resultTeks) {
             numResultTeks ++;
             assertArrayEquals(tekKeepBytes, resultTek.getKey());
             assertEquals(intervalKeep, resultTek.getInterval());
@@ -185,9 +221,10 @@ public class DatabaseTests {
 
             for (CapturedData resultData : resultInterval.getCapturedData()) {
                 numResultData ++;
-                assertArrayEquals(payloadKeep, resultData.getPayload());
+                assertArrayEquals(rpiKeep, resultData.getRpi().getData());
+                assertArrayEquals(aemKeep, resultData.getAem().getData());
                 assertEquals(rssiKeep, resultData.getRssi());
-                assertEquals(timestampKeep, resultData.getCaptureTimestamp());
+                assertEquals(timestampKeep, resultData.getCaptureTimestampMillis());
             }
         }
         assertEquals(1, numResultIntervals);
@@ -196,5 +233,78 @@ public class DatabaseTests {
     }
 
 
+
+    @Test
+    public void testAddDiagnosisKeys() {
+        Database db = DatabaseAccess.getDefaultDatabaseInstance();
+        db.clearAllData();
+
+        LinkedList<DiagnosisKey> diagKeys = new LinkedList<DiagnosisKey>();
+
+        diagKeys.add(DatatypesTestUtil.createDummyDiagnosisKey());
+        String token0 = "token0";
+        db.addDiagnosisKeys(token0, diagKeys);
+
+        diagKeys.add(DatatypesTestUtil.createDummyDiagnosisKey());
+        diagKeys.add(DatatypesTestUtil.createDummyDiagnosisKey());
+        String token1 = "token1";
+        db.addDiagnosisKeys(token1, diagKeys);
+
+
+        // First verify that insertion with different tokens works:
+        {
+            List<DiagnosisKey> result0 = db.getDiagnosisKeys(token0);
+            assertEquals(1, result0.size());
+
+            List<DiagnosisKey> result1 = db.getDiagnosisKeys(token1);
+            assertEquals(3, result1.size());
+        }
+
+        // Now add additional keys for an existing token:
+        db.addDiagnosisKeys(token1, diagKeys);
+        {
+            List<DiagnosisKey> result0 = db.getDiagnosisKeys(token0);
+            assertEquals(1, result0.size());
+
+            List<DiagnosisKey> result1 = db.getDiagnosisKeys(token1);
+            assertEquals(6, result1.size());
+        }
+    }
+
+    @Test
+    public void testDeleteToken() {
+        Database db = DatabaseAccess.getDefaultDatabaseInstance();
+        db.clearAllData();
+
+        LinkedList<DiagnosisKey> diagKeys = new LinkedList<DiagnosisKey>();
+
+        diagKeys.add(DatatypesTestUtil.createDummyDiagnosisKey());
+        String token0 = "token0";
+        db.addDiagnosisKeys(token0, diagKeys);
+
+        diagKeys.add(DatatypesTestUtil.createDummyDiagnosisKey());
+        diagKeys.add(DatatypesTestUtil.createDummyDiagnosisKey());
+        String token1 = "token1";
+        db.addDiagnosisKeys(token1, diagKeys);
+
+        // Verify insertion worked as expected:
+        {
+            List<DiagnosisKey> result0 = db.getDiagnosisKeys(token0);
+            assertEquals(1, result0.size());
+
+            List<DiagnosisKey> result1 = db.getDiagnosisKeys(token1);
+            assertEquals(3, result1.size());
+        }
+
+        // Now delete token1 and check again:
+        db.deleteTokenWithData(token1);
+        {
+            List<DiagnosisKey> result0 = db.getDiagnosisKeys(token0);
+            assertEquals(1, result0.size());
+
+            List<DiagnosisKey> result1 = db.getDiagnosisKeys(token1);
+            assertEquals(0, result1.size());
+        }
+    }
 
 }

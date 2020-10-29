@@ -1,18 +1,19 @@
-package org.coralibre.android.sdk.internal.crypto;
+package org.coralibre.android.sdk.internal.datatypes;
 
 import java.security.InvalidParameterException;
 
+import static org.coralibre.android.sdk.internal.EnFrameworkConstants.AEM_LENGTH;
+
 public class AssociatedMetadata {
-    public static final int AEM_LENGTH = 4; //unit in bytes
-    public static final int VERSIONING_BYTE = 0;
-    public static final int POWERLEVEL_BYTE = 1;
-    public static final int MAJOR_BIT_POS = 6;
-    public static final int MINOR_BIT_POS = 4;
+    private static final int VERSIONING_BYTE = 0;
+    private static final int POWERLEVEL_BYTE = 1;
+    private static final int MAJOR_BIT_POS = 6;
+    private static final int MINOR_BIT_POS = 4;
 
 
-    private byte[] data = new byte[AEM_LENGTH];
+    private final byte[] data = new byte[AEM_LENGTH];
 
-    public AssociatedMetadata(int majorVersion, int minorVersion, int powerLevel) {
+    public AssociatedMetadata(final int majorVersion, final int minorVersion, final int powerLevel) {
         if(majorVersion < 0 || majorVersion >= 4)
             throw new InvalidParameterException("Major version out of bound");
         if(minorVersion < 0 || minorVersion >= 4)
@@ -25,7 +26,7 @@ public class AssociatedMetadata {
         data[POWERLEVEL_BYTE] = (byte) powerLevel;
     }
 
-    public AssociatedMetadata(byte[] rawAM) {
+    public AssociatedMetadata(final byte[] rawAM) {
         if(rawAM.length != AEM_LENGTH) throw new InvalidParameterException("rawAEM not the right length");
         System.arraycopy(rawAM, 0, data, 0, AEM_LENGTH);
     }

@@ -4,6 +4,10 @@ import android.util.Pair;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
+import org.coralibre.android.sdk.internal.EnFrameworkConstants;
+import org.coralibre.android.sdk.internal.datatypes.ENInterval;
+import org.coralibre.android.sdk.internal.datatypes.RollingProximityIdentifier;
+import org.coralibre.android.sdk.internal.datatypes.InternalTemporaryExposureKey;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -12,9 +16,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.coralibre.android.sdk.internal.crypto.RollingProximityIdentifier.RPI_LENGTH;
-import static org.coralibre.android.sdk.internal.crypto.TemporaryExposureKey.TEK_LENGTH;
-import static org.coralibre.android.sdk.internal.crypto.TemporaryExposureKey.TEK_ROLLING_PERIOD;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
@@ -24,15 +25,15 @@ public class ExposeCheckerTests {
         return new BigInteger(hex,16).toByteArray();
     }
 
-    private static TemporaryExposureKey tek(long whichRollingPeriod, String hex) {
-        assertEquals(2*TEK_LENGTH, hex.length());
-        return new TemporaryExposureKey(new ENNumber(whichRollingPeriod * TEK_ROLLING_PERIOD),
+    private static InternalTemporaryExposureKey tek(long whichRollingPeriod, String hex) {
+        assertEquals(2 * EnFrameworkConstants.TEK_LENGTH, hex.length());
+        return new InternalTemporaryExposureKey(new ENInterval(whichRollingPeriod * EnFrameworkConstants.TEK_ROLLING_PERIOD),
                 hex2byte(hex));
     }
 
     private static RollingProximityIdentifier rollingProximityIdentifier(long rawENNumber, String hex) {
-        assertEquals(2* RPI_LENGTH, hex.length());
-        return new RollingProximityIdentifier(hex2byte(hex), new ENNumber(rawENNumber));
+        assertEquals(2 * EnFrameworkConstants.RPI_LENGTH, hex.length());
+        return new RollingProximityIdentifier(hex2byte(hex), new ENInterval(rawENNumber));
     }
 
     private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
@@ -46,7 +47,7 @@ public class ExposeCheckerTests {
         return new String(hexChars);
     }
 
-    private static final List<TemporaryExposureKey> TEK_LIST =
+    private static final List<InternalTemporaryExposureKey> TEK_LIST =
             new ArrayList<>(Arrays.asList(
                     tek(10, "11111111111111111111111111111111"),
                     tek(11, "22222222222222222222222222222222"),
@@ -59,7 +60,7 @@ public class ExposeCheckerTests {
                     tek(18, "99999999999999999999999999999999"),
                     tek(19, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")));
 
-    private static final List<TemporaryExposureKey> TEK_LIST_TWO_PER_DAY =
+    private static final List<InternalTemporaryExposureKey> TEK_LIST_TWO_PER_DAY =
             new ArrayList<>(Arrays.asList(
                     tek(10, "11111111111111111111111111111111"),
                     tek(10, "10101010101010101010101010101010"),
@@ -82,22 +83,22 @@ public class ExposeCheckerTests {
                     tek(19, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
                     tek(19, "a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0")));
 
-    private static final ENNumber MIDDLE_OF_DAY_14 =
-            new ENNumber((long)(13.5 * TEK_ROLLING_PERIOD));
-    private static final ENNumber ONE_HOUR_INTO_DAY_15 =
-            new ENNumber((long)(14 * TEK_ROLLING_PERIOD + 6));
+    private static final ENInterval MIDDLE_OF_DAY_14 =
+            new ENInterval((long)(13.5 * EnFrameworkConstants.TEK_ROLLING_PERIOD));
+    private static final ENInterval ONE_HOUR_INTO_DAY_15 =
+            new ENInterval((long)(14 * EnFrameworkConstants.TEK_ROLLING_PERIOD + 6));
 
-    private static final long SLOTSTART_MIDDLE_OF_DAY_14 = (long)(13.5 * TEK_ROLLING_PERIOD - 12);
-    private static final long SLOTEND_MIDDLE_OF_DAY_14 = (long)(13.5 * TEK_ROLLING_PERIOD + 12);
+    private static final long SLOTSTART_MIDDLE_OF_DAY_14 = (long)(13.5 * EnFrameworkConstants.TEK_ROLLING_PERIOD - 12);
+    private static final long SLOTEND_MIDDLE_OF_DAY_14 = (long)(13.5 * EnFrameworkConstants.TEK_ROLLING_PERIOD + 12);
 
-    private static final long SLOTSTART_ONE_HOUR_INTO_DAY_15 = 14 * TEK_ROLLING_PERIOD;
-    private static final long SLOTEND_ONE_HOUR_INTO_DAY_15 = 14 * TEK_ROLLING_PERIOD + 6 + 12;
-    private static final long SLOTSTART_END_DAY_14 = 14 * TEK_ROLLING_PERIOD + 6 - 12;
+    private static final long SLOTSTART_ONE_HOUR_INTO_DAY_15 = 14 * EnFrameworkConstants.TEK_ROLLING_PERIOD;
+    private static final long SLOTEND_ONE_HOUR_INTO_DAY_15 = 14 * EnFrameworkConstants.TEK_ROLLING_PERIOD + 6 + 12;
+    private static final long SLOTSTART_END_DAY_14 = 14 * EnFrameworkConstants.TEK_ROLLING_PERIOD + 6 - 12;
     private static final long SLOTEND_END_DAY_14 = SLOTSTART_ONE_HOUR_INTO_DAY_15;
 
     @Test
     public void testGetAllRelatedTEKsDuringDay() {
-        List<TemporaryExposureKey> tekSubSet =
+        List<InternalTemporaryExposureKey> tekSubSet =
                 ExposeChecker.getAllRelatedTEKs(TEK_LIST, MIDDLE_OF_DAY_14);
         assertEquals(1, tekSubSet.size());
         assertArrayEquals(TEK_LIST.get(3).getKey(), tekSubSet.get(0).getKey());
@@ -105,7 +106,7 @@ public class ExposeCheckerTests {
 
     @Test
     public void testGetAllRelatedTEKsAtBeginningOfDayTwoPerDay() {
-        List<TemporaryExposureKey> tekSubSet =
+        List<InternalTemporaryExposureKey> tekSubSet =
                 ExposeChecker.getAllRelatedTEKs(TEK_LIST_TWO_PER_DAY, ONE_HOUR_INTO_DAY_15);
         assertEquals(4, tekSubSet.size());
         assertArrayEquals(TEK_LIST_TWO_PER_DAY.get(6).getKey(), tekSubSet.get(0).getKey());
@@ -116,7 +117,7 @@ public class ExposeCheckerTests {
 
     @Test
     public void testGetAllRelatedTEKsAtBeginningOfDay() {
-        List<TemporaryExposureKey> tekSubSet =
+        List<InternalTemporaryExposureKey> tekSubSet =
                 ExposeChecker.getAllRelatedTEKs(TEK_LIST, ONE_HOUR_INTO_DAY_15);
         assertEquals(2, tekSubSet.size());
         assertArrayEquals(TEK_LIST.get(3).getKey(), tekSubSet.get(0).getKey());
@@ -176,7 +177,7 @@ public class ExposeCheckerTests {
 
     @Test
     public void testFindMatches() {
-        List<TemporaryExposureKey> tekSubSet =
+        List<InternalTemporaryExposureKey> tekSubSet =
                 ExposeChecker.getAllRelatedTEKs(TEK_LIST_TWO_PER_DAY, MIDDLE_OF_DAY_14);
         List<RollingProximityIdentifier> genrpis =
                 ExposeChecker.generateRPIsForSlot(TEK_LIST_TWO_PER_DAY.get(6), MIDDLE_OF_DAY_14);
@@ -188,7 +189,7 @@ public class ExposeCheckerTests {
                         genrpis.get(5),
                         genrpis.get(27)));
 
-        List<Pair<TemporaryExposureKey, RollingProximityIdentifier>> foundMatches
+        List<Pair<InternalTemporaryExposureKey, RollingProximityIdentifier>> foundMatches
                 = ExposeChecker.findMatches(TEK_LIST_TWO_PER_DAY, collectedRPIs);
 
         assertEquals(2, foundMatches.size());

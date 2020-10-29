@@ -6,8 +6,8 @@ import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 
-import org.coralibre.android.sdk.internal.crypto.ENNumber;
-import org.coralibre.android.sdk.internal.database.model.entity.EntityGeneratedTEK;
+import org.coralibre.android.sdk.internal.database.persistent.entity.EntityTemporaryExposureKey;
+import org.coralibre.android.sdk.internal.datatypes.ENInterval;
 
 import java.util.List;
 
@@ -15,22 +15,22 @@ import java.util.List;
 public interface DaoTEK {
 
     @Insert(onConflict = OnConflictStrategy.ABORT)
-    public void insertTEK(EntityGeneratedTEK tek);
+    public void insertTEK(EntityTemporaryExposureKey tek);
 
 
-    @Query("SELECT * FROM EntityGeneratedTEK")
-    public List<EntityGeneratedTEK> getAllGeneratedTEKs();
+    @Query("SELECT * FROM EntityTemporaryExposureKey")
+    public List<EntityTemporaryExposureKey> getAllGeneratedTEKs();
 
 
-    @Query("DELETE FROM EntityGeneratedTEK WHERE interval < :minKeepENIntervalNumber")
+    @Query("DELETE FROM EntityTemporaryExposureKey WHERE interval < :minKeepENIntervalNumber")
     public void truncateOldData(long minKeepENIntervalNumber);
 
 
-    @Query("SELECT * FROM EntityGeneratedTEK WHERE interval = :interval")
-    public List<EntityGeneratedTEK> getTekByEnNumber(ENNumber interval);
+    @Query("SELECT * FROM EntityTemporaryExposureKey WHERE interval = :interval")
+    public List<EntityTemporaryExposureKey> getTekByEnNumber(ENInterval interval);
 
 
-    @Query("DELETE FROM EntityGeneratedTEK")
+    @Query("DELETE FROM EntityTemporaryExposureKey")
     public void clearAllData();
 
 }
