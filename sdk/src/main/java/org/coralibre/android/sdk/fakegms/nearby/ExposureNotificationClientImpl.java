@@ -19,8 +19,8 @@ import org.coralibre.android.sdk.internal.EnFrameworkConstants;
 import org.coralibre.android.sdk.internal.database.Database;
 import org.coralibre.android.sdk.internal.database.DatabaseAccess;
 import org.coralibre.android.sdk.internal.datatypes.DiagnosisKey;
-import org.coralibre.android.sdk.internal.datatypes.IntervalOfCapturedData;
 import org.coralibre.android.sdk.internal.datatypes.InternalTemporaryExposureKey;
+import org.coralibre.android.sdk.internal.datatypes.IntervalOfCapturedData;
 import org.coralibre.android.sdk.internal.datatypes.util.DiagnosisKeyUtil;
 import org.coralibre.android.sdk.internal.matching.MatchingLegacyV1;
 import org.coralibre.android.sdk.proto.TemporaryExposureKeyFile.TemporaryExposureKeyExport;
@@ -179,7 +179,12 @@ final class ExposureNotificationClientImpl implements ExposureNotificationClient
 
             // TODO use MatchingLegacyV1 to get ExposureSummary item
 
-            return null;
+            return new ExposureSummary.ExposureSummaryBuilder()
+                .setAttenuationDurations(new int[]{0, 0, 0})
+                .setMatchedKeyCount(0)
+                .setMaximumRiskScore(0)
+                .setSummationRiskScore(0)
+                .build();
         });
     }
 
