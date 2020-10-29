@@ -3,6 +3,7 @@ package org.coralibre.android.sdk.internal.error.old;
 
 import org.coralibre.android.sdk.R;
 
+@Deprecated
 public enum ErrorState {
 
     MISSING_LOCATION_PERMISSION(R.string.ppcp_sdk_service_notification_error_location_permission),
