@@ -40,7 +40,6 @@ import java.util.zip.ZipInputStream;
 
 final class ExposureNotificationClientImpl implements ExposureNotificationClient {
     public static final String TAG = ExposureNotificationClientImpl.class.getSimpleName();
-    private static Nearby instance = null;
 
     private final Context context;
     private boolean enabled = false;
