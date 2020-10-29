@@ -22,7 +22,7 @@ import static org.coralibre.android.sdk.internal.device_info.ConfidenceLevel.NON
 import static org.coralibre.android.sdk.internal.device_info.DeviceList.DEFAULT_INFO;
 import static org.coralibre.android.sdk.internal.device_info.DeviceList.DEVICE_INFO_KEY;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
@@ -109,7 +109,7 @@ public class DeviceListTest {
         for (DeviceInfo i : deviceList) {
             System.out.println(i);
             assertTrue("manufacturer seems to be empty", i.getManufacturer().length() > 0);
-            assertFalse("confidence may not be NONE", i.getCalibrationConfidence() == NONE);
+            assertNotSame("confidence may not be NONE", i.getCalibrationConfidence(), NONE);
         }
     }
 
@@ -152,10 +152,10 @@ public class DeviceListTest {
     @Test
     public void testGetAverageOfSamsungZaninDevice() throws Exception {
         DeviceList.FindingsResult findings =
-                runFindingsInList(deviceList, "samsung", "zanin", "unknown");
-        DeviceInfo oemAverage = runGetAverageOfFindings(deviceList, findings.manufacturerFindings);
-        DeviceInfo deviceAverage = runGetAverageOfFindings(deviceList, findings.oemDeviceFindings);
-        DeviceInfo modelAverage = runGetAverageOfFindings(deviceList, findings.oemModelFindings);
+            runFindingsInList(deviceList, "samsung", "zanin", "unknown");
+        DeviceInfo oemAverage = DeviceList.getAverageOfFindings(findings.manufacturerFindings);
+        DeviceInfo deviceAverage = DeviceList.getAverageOfFindings(findings.oemDeviceFindings);
+        DeviceInfo modelAverage = DeviceList.getAverageOfFindings(findings.oemModelFindings);
 
         assertEquals(5, oemAverage.getRssiCorrection());
         assertEquals(-23, oemAverage.getTx());
