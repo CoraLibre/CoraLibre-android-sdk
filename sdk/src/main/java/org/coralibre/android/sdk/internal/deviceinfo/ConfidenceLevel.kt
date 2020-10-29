@@ -1,4 +1,4 @@
-package org.coralibre.android.sdk.internal.device_info
+package org.coralibre.android.sdk.internal.deviceinfo
 
 enum class ConfidenceLevel {
     NONE, LOW, MEDIUM, HIGH;

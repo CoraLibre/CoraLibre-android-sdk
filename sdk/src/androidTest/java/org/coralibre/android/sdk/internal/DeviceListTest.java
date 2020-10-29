@@ -5,9 +5,9 @@ import android.content.SharedPreferences;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
-import org.coralibre.android.sdk.internal.device_info.ConfidenceLevel;
-import org.coralibre.android.sdk.internal.device_info.DeviceInfo;
-import org.coralibre.android.sdk.internal.device_info.DeviceList;
+import org.coralibre.android.sdk.internal.deviceinfo.ConfidenceLevel;
+import org.coralibre.android.sdk.internal.deviceinfo.DeviceInfo;
+import org.coralibre.android.sdk.internal.deviceinfo.DeviceList;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -16,11 +16,11 @@ import org.mockito.Mockito;
 import java.lang.reflect.Method;
 import java.util.List;
 
-import static org.coralibre.android.sdk.internal.device_info.ConfidenceLevel.HIGH;
-import static org.coralibre.android.sdk.internal.device_info.ConfidenceLevel.LOW;
-import static org.coralibre.android.sdk.internal.device_info.ConfidenceLevel.NONE;
-import static org.coralibre.android.sdk.internal.device_info.DeviceList.DEFAULT_INFO;
-import static org.coralibre.android.sdk.internal.device_info.DeviceList.DEVICE_INFO_KEY;
+import static org.coralibre.android.sdk.internal.deviceinfo.ConfidenceLevel.HIGH;
+import static org.coralibre.android.sdk.internal.deviceinfo.ConfidenceLevel.LOW;
+import static org.coralibre.android.sdk.internal.deviceinfo.ConfidenceLevel.NONE;
+import static org.coralibre.android.sdk.internal.deviceinfo.DeviceList.DEFAULT_INFO;
+import static org.coralibre.android.sdk.internal.deviceinfo.DeviceList.DEVICE_INFO_KEY;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;

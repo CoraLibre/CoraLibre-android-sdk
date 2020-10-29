@@ -1,6 +1,6 @@
-package org.coralibre.android.sdk.internal.device_info
+package org.coralibre.android.sdk.internal.deviceinfo
 
-import org.coralibre.android.sdk.internal.device_info.ConfidenceLevel.Companion.getConfidenceLevel
+import org.coralibre.android.sdk.internal.deviceinfo.ConfidenceLevel.Companion.getConfidenceLevel
 
 class DeviceInfo : Comparable<DeviceInfo> {
     val manufacturer: String

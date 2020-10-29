@@ -10,7 +10,7 @@ import org.coralibre.android.sdk.internal.datatypes.AssociatedEncryptedMetadataK
 import org.coralibre.android.sdk.internal.datatypes.DiagnosisKey
 import org.coralibre.android.sdk.internal.datatypes.IntervalOfCapturedData
 import org.coralibre.android.sdk.internal.datatypes.RollingProximityIdentifierKey
-import org.coralibre.android.sdk.internal.device_info.DeviceInfo
+import org.coralibre.android.sdk.internal.deviceinfo.DeviceInfo
 import org.coralibre.android.sdk.internal.matching.ExposureUtils.exposuresFromMatches
 import org.coralibre.android.sdk.internal.matching.intermediateDatatypes.Exposure
 import org.coralibre.android.sdk.internal.matching.intermediateDatatypes.Match

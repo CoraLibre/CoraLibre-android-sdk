@@ -5,7 +5,7 @@ import org.coralibre.android.sdk.fakegms.nearby.exposurenotification.ExposureCon
 import org.coralibre.android.sdk.internal.EnFrameworkConstants
 import org.coralibre.android.sdk.internal.TracingService
 import org.coralibre.android.sdk.internal.datatypes.DiagnosisKey
-import org.coralibre.android.sdk.internal.device_info.DeviceInfo
+import org.coralibre.android.sdk.internal.deviceinfo.DeviceInfo
 import org.coralibre.android.sdk.internal.matching.intermediateDatatypes.Exposure
 import org.coralibre.android.sdk.internal.matching.intermediateDatatypes.ExposureRecord
 import org.coralibre.android.sdk.internal.matching.intermediateDatatypes.Match

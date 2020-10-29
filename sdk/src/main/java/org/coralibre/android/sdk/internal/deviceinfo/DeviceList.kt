@@ -1,4 +1,4 @@
-package org.coralibre.android.sdk.internal.device_info
+package org.coralibre.android.sdk.internal.deviceinfo
 
 import android.content.Context
 import android.content.SharedPreferences

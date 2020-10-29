@@ -16,7 +16,7 @@
  */
 package org.coralibre.android.sdk.internal.matching.intermediateDatatypes
 
-import org.coralibre.android.sdk.internal.device_info.DeviceInfo
+import org.coralibre.android.sdk.internal.deviceinfo.DeviceInfo
 
 class TimeAndAttenuation(val timeSeconds: Int, val attenuation: Int) {
     companion object {

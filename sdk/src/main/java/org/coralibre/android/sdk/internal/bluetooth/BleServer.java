@@ -24,8 +24,8 @@ import org.coralibre.android.sdk.BuildConfig;
 import org.coralibre.android.sdk.internal.AppConfigManager;
 import org.coralibre.android.sdk.internal.crypto.CryptoModule;
 import org.coralibre.android.sdk.internal.datatypes.AssociatedMetadata;
-import org.coralibre.android.sdk.internal.device_info.DeviceInfo;
-import org.coralibre.android.sdk.internal.device_info.DeviceList;
+import org.coralibre.android.sdk.internal.deviceinfo.DeviceInfo;
+import org.coralibre.android.sdk.internal.deviceinfo.DeviceList;
 
 import java.io.IOException;
 import java.util.UUID;

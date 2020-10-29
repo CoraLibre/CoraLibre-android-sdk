@@ -1,6 +1,6 @@
 package org.coralibre.android.sdk.internal;
 
-import org.coralibre.android.sdk.internal.device_info.ConfidenceLevel;
+import org.coralibre.android.sdk.internal.deviceinfo.ConfidenceLevel;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
