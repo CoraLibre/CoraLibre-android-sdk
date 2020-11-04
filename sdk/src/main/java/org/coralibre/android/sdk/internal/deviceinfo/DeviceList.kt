@@ -222,7 +222,7 @@ class DeviceList(context: Context, sharedPrefs: SharedPreferences) {
 
         @JvmStatic
         @Throws(IOException::class)
-        fun getOwnDeviceInfo(context: Context): DeviceInfo? {
+        fun getOwnDeviceInfo(context: Context): DeviceInfo {
             return DeviceList(context, PreferenceManager.getDefaultSharedPreferences(context))
                 .getOwnDeviceInfo(Build.MANUFACTURER, Build.DEVICE, Build.MODEL)
         }

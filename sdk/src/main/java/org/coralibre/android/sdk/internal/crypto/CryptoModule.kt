@@ -136,17 +136,18 @@ class CryptoModule private constructor(
         const val RPIK_INFO = "EN-RPIK"
         const val AEMK_INFO = "EN-AEMK"
 
+        private var instance: CryptoModule? = null
+
         // TODO: use proper factory class
+        @Synchronized
         @JvmStatic
-        var instance: CryptoModule? = null
-            get() {
-                // TODO: use proper factory class
-                if (field == null) {
-                    field = CryptoModule(getDefaultDatabaseInstance())
-                }
-                return field
+        fun getInstance(): CryptoModule {
+            // TODO: use proper factory class
+            if (instance == null) {
+                instance = CryptoModule(getDefaultDatabaseInstance())
             }
-            private set
+            return instance!!
+        }
 
         @JvmStatic
         private fun generateHKDFBytes(tek: ByteArray, info: ByteArray, length: Int): ByteArray {

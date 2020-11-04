@@ -33,6 +33,9 @@ class BluetoothPayload {
 
     val interval: ENInterval
         get() = rpi.interval
+
+    // TODO: add data described in here:
+    // https://covid19-static.cdn-apple.com/applications/covid19/current/static/contact-tracing/pdf/ExposureNotification-BluetoothSpecificationv1.2.pdf
     val rawPayload: ByteArray
         get() {
             val payload = ByteArray(EnFrameworkConstants.BLE_PAYLOAD_LENGTH)
