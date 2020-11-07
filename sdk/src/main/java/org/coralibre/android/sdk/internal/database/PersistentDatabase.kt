@@ -21,6 +21,13 @@ import org.coralibre.android.sdk.internal.datatypes.util.ENIntervalUtil.currentI
 import java.util.HashMap
 import java.util.LinkedList
 
+// Note:
+// To get a database object, don't directly use the constructor of this class, but use
+// the DatabaseAccess.kt class next to this class. When implementing database tests,
+// look in the existing tests to see how that is done, if unsure.
+// This is not the most elegant way to do, but for now it is the way it is, and will be
+// refactored in the future.
+
 /**
  * @param context   The context for the database. This is usually the Application context.
  * @param inMemory  If true, an inMemoryDatabaseBuilder is used for creating, resulting in stored data disappearing when the process is killed. Otherwise, a databaseBuilder is used, for aan actually persistent database.
@@ -194,6 +201,9 @@ class PersistentDatabase @JvmOverloads constructor(
         // TODO truncate all data, not just teks and captured data
     }
 
+    // TODO The test we have does only verify that diagnosis keys for that token are
+    //  properly deleted. It needs to be extended to check that ExposureSummary and
+    //  ExposureInformation is deleted for the token as well
     override fun deleteTokenWithData(token: String) {
         db.daoToken().removeToken(token)
     }
