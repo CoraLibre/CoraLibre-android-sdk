@@ -129,7 +129,6 @@ object MatchingLegacyV1 {
         var maximumRiskScore = 0
         var summationRiskScore = 0
         var daysSinceLastExposure = -1
-        // TODO
         val accumulatedAttenuationDurationsMinutes = IntArray(3)
         val allExposureInformations: MutableList<ExposureInformation> = LinkedList()
         for ((millisSinceEpoch, durationSeconds, daysSinceExposure, attenuationValue, transmissionRiskLevel, riskScore, secondsBelowLowThreshold, secondsBetweenThresholds, secondsAboveHighThreshold) in allExposures) {
