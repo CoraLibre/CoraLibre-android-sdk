@@ -1,6 +1,7 @@
 package org.coralibre.android.sdk.internal.deviceinfo
 
 import org.coralibre.android.sdk.internal.deviceinfo.ConfidenceLevel.Companion.getConfidenceLevel
+import java.util.Locale
 
 class DeviceInfo : Comparable<DeviceInfo> {
     val manufacturer: String
@@ -48,29 +49,35 @@ class DeviceInfo : Comparable<DeviceInfo> {
         )
     }
 
-    override fun equals(otherInfo: Any?): Boolean {
-        if (otherInfo!!.javaClass != javaClass) return false
-        val otherDeviceInfo = otherInfo as DeviceInfo?
+    override fun equals(other: Any?): Boolean {
+        if (other?.javaClass != javaClass) return false
+        val otherDeviceInfo = other as DeviceInfo
         return (
-            otherDeviceInfo!!.manufacturer.equals(manufacturer, ignoreCase = true) &&
+            otherDeviceInfo.manufacturer.equals(manufacturer, ignoreCase = true) &&
                 otherDeviceInfo.device.equals(device, ignoreCase = true) &&
                 otherDeviceInfo.model.equals(model, ignoreCase = true) &&
-                otherDeviceInfo.rssiCorrection == rssiCorrection && otherDeviceInfo.tx == tx &&
+                otherDeviceInfo.rssiCorrection == rssiCorrection &&
+                otherDeviceInfo.tx == tx &&
                 otherDeviceInfo.calibrationConfidence === calibrationConfidence
             )
     }
 
-    // FIXME: implement hashCode
+    override fun hashCode(): Int {
+        val locale = Locale.ROOT
+        var result = manufacturer.toLowerCase(locale).hashCode()
+        result = 31 * result + device.toLowerCase(locale).hashCode()
+        result = 31 * result + model.toLowerCase(locale).hashCode()
+        result = 31 * result + rssiCorrection
+        result = 31 * result + tx
+        result = 31 * result + calibrationConfidence.hashCode()
+        return result
+    }
 
-    override fun compareTo(otherInfo: DeviceInfo): Int {
-        if (manufacturer.compareTo(otherInfo.manufacturer, ignoreCase = true) != 0) {
-            return manufacturer.compareTo(otherInfo.manufacturer, ignoreCase = true)
-        }
-        if (model.compareTo(otherInfo.model, ignoreCase = true) != 0) {
-            return model.compareTo(otherInfo.model, ignoreCase = true)
-        }
-        return if (device.compareTo(otherInfo.device, ignoreCase = true) != 0) {
-            device.compareTo(otherInfo.device, ignoreCase = true)
-        } else 0
+    override fun compareTo(other: DeviceInfo): Int {
+        return compareBy<DeviceInfo>(
+            { it.manufacturer.toLowerCase(Locale.ROOT) },
+            { it.model.toLowerCase(Locale.ROOT) },
+            { it.device.toLowerCase(Locale.ROOT) }
+        ).compare(this, other)
     }
 }
