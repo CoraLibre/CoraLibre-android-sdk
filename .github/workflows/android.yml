@@ -15,6 +15,14 @@ jobs:
       - name: Run checks
         run: ./gradlew spotlessCheck
 
+  editorconfig-checker:
+    name: Run Editorconfig-Checker
+    runs-on: ubuntu-latest
+    container: mstruebing/editorconfig-checker:latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: ec
+
   local_tests:
     name: "Run local tests"
     runs-on: ubuntu-latest
