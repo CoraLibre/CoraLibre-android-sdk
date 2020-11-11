@@ -25,7 +25,11 @@ object PPCP {
     private var isInitialized = false
 
     @JvmStatic
+    @Synchronized
     fun init(context: Context) {
+        if (isInitialized) {
+            return
+        }
         // TODO: there's no else branch, that's bad.
         if (ProcessUtil.isMainProcess(context)) {
             DatabaseAccess.init(context)
