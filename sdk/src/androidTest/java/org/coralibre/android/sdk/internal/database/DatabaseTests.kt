@@ -200,7 +200,6 @@ class DatabaseTests {
         val token1 = "token1"
         db.addDiagnosisKeys(token1, diagKeys)
 
-
         // First verify that insertion with different tokens works:
         run {
             val result0 = db.getDiagnosisKeys(token0)
