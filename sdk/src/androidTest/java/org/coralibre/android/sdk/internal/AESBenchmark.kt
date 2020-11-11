@@ -17,7 +17,6 @@ import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 import java.security.SecureRandom
 import java.util.ArrayList
-import java.util.Arrays
 import javax.crypto.Cipher
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
@@ -57,7 +56,7 @@ class AESBenchmark(private val size: Int) {
         val keyBytes = mac.doFinal()
         val emptyArray = ByteArray(16)
 
-        //generate EphIDs
+        // generate EphIDs
         val keySpec = SecretKeySpec(keyBytes, "AES")
         val cipher = Cipher.getInstance("AES/CTR/NoPadding")
         cipher.init(Cipher.ENCRYPT_MODE, keySpec, SecureRandom())
