@@ -67,15 +67,15 @@ class BleServer(private val context: Context) {
 
         // This allows to set the bluetooth parameters more detailed, however it seems
         // to only be available on phones with bluetooth 5.0 and API level 26+
-        /*
-		AdvertisingSetParameters advParameters = new AdvertisingSetParameters.Builder()
-				.setTxPowerLevel(TX_POWER_LOW)
-				.setInterval(INTERVAL_MEDIUM)
-				.setIncludeTxPower(false)
-				.setConnectable(false)
-				.build();
 
-		 */
+        /*
+        AdvertisingSetParameters advParameters = new AdvertisingSetParameters.Builder()
+            .setTxPowerLevel(TX_POWER_LOW)
+            .setInterval(INTERVAL_MEDIUM)
+            .setIncludeTxPower(false)
+            .setConnectable(false)
+            .build();
+        */
         val advSettings = AdvertiseSettings.Builder()
             .setTxPowerLevel(AdvertiseSettings.ADVERTISE_TX_POWER_LOW)
             .setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_BALANCED)
@@ -124,8 +124,10 @@ class BleServer(private val context: Context) {
         private const val PPCP_16_BIT_UUID = "FD6F"
         private const val PPCP_VERSION_MAJOR = 1
         private const val PPCP_VERSION_MINOR = 0
+
         @JvmStatic
         val SERVICE_UUID = UUID.fromString("0000$PPCP_16_BIT_UUID-0000-1000-8000-00805F9B34FB")
+
         @JvmStatic
         val TOTP_CHARACTERISTIC_UUID = UUID.fromString("8c8494e3-bab5-1848-40a0-1b06991c0001")
     }

@@ -113,13 +113,14 @@ public final class ExposureConfiguration implements Parcelable {
      */
     private final int[] durationAtAttenuationThresholds;
 
-    private ExposureConfiguration(final int minimumRiskScore,
-                                  final int[] attenuationScores,
-                                  final int[] daysSinceLastExposureScores,
-                                  final int[] durationScores,
-                                  final int[] transmissionRiskScores,
-                                  final int[] durationAtAttenuationThresholds) {
-
+    private ExposureConfiguration(
+        final int minimumRiskScore,
+        final int[] attenuationScores,
+        final int[] daysSinceLastExposureScores,
+        final int[] durationScores,
+        final int[] transmissionRiskScores,
+        final int[] durationAtAttenuationThresholds
+    ) {
         this.minimumRiskScore = minimumRiskScore;
         this.attenuationScores = attenuationScores;
         this.daysSinceLastExposureScores = daysSinceLastExposureScores;

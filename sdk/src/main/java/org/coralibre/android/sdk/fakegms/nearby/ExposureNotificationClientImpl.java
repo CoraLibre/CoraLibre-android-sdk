@@ -107,9 +107,11 @@ final class ExposureNotificationClientImpl implements ExposureNotificationClient
     }
 
     @Override
-    public Task<Void> provideDiagnosisKeys(final List<File> keyFiles,
-                                           @Nullable final ExposureConfiguration exposureConfiguration,
-                                           final String token) {
+    public Task<Void> provideDiagnosisKeys(
+        final List<File> keyFiles,
+        @Nullable final ExposureConfiguration exposureConfiguration,
+        final String token
+    ) {
         return Tasks.call(() -> {
 
             if (exposureConfiguration == null || token == null || token.isEmpty()) {
