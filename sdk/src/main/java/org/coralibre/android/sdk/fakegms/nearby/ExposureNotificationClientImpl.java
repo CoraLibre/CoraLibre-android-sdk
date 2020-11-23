@@ -43,21 +43,29 @@ final class ExposureNotificationClientImpl implements ExposureNotificationClient
 
     private final Context context;
     private Database database;
-
+    private Thread init;
 
     ExposureNotificationClientImpl(@NonNull final Context context) {
         this.context = context;
-        // TODO the initialization should be called asynchronously
-        PPCP.init(context);
+        this.init = new Thread(() -> {
+            PPCP.init(context);
+        });
+        init.start();
     }
 
     private boolean isPPCPEnabled() {
         return PPCP.isStarted(context);
     }
 
+    private void awaitInit() throws InterruptedException {
+        // pretty awful solution, but it works
+        init.join();
+    }
+
     @Override
     public Task<Void> start() {
         return Tasks.call(() -> {
+            awaitInit();
             if (!isPPCPEnabled()) {
                 PPCP.start(context);
 
@@ -72,6 +80,7 @@ final class ExposureNotificationClientImpl implements ExposureNotificationClient
     @Override
     public Task<Void> stop() {
         return Tasks.call(() -> {
+            awaitInit();
             if (isPPCPEnabled()) {
                 PPCP.stop(context);
                 database = null;
@@ -82,7 +91,10 @@ final class ExposureNotificationClientImpl implements ExposureNotificationClient
 
     @Override
     public Task<Boolean> isEnabled() {
-        return Tasks.forResult(isPPCPEnabled());
+        return Tasks.call(() -> {
+            awaitInit();
+            return isPPCPEnabled();
+        });
     }
 
     /**
@@ -91,6 +103,7 @@ final class ExposureNotificationClientImpl implements ExposureNotificationClient
     @Override
     public Task<List<TemporaryExposureKey>> getTemporaryExposureKeyHistory() {
         return Tasks.call(() -> {
+            awaitInit();
             Iterable<InternalTemporaryExposureKey> dbTeks = database.getAllOwnTEKs();
             List<TemporaryExposureKey> result = new LinkedList<TemporaryExposureKey>();
             for (InternalTemporaryExposureKey dbTek : dbTeks) {
@@ -113,6 +126,7 @@ final class ExposureNotificationClientImpl implements ExposureNotificationClient
         final String token
     ) {
         return Tasks.call(() -> {
+            awaitInit();
 
             if (exposureConfiguration == null || token == null || token.isEmpty()) {
                 throw new IllegalArgumentException("EN framework: Invalid parameter for 'provideDiagnosisKeys(...)'.");
@@ -178,6 +192,7 @@ final class ExposureNotificationClientImpl implements ExposureNotificationClient
     @Override
     public Task<ExposureSummary> getExposureSummary(String token) {
         return Tasks.call(() -> {
+            awaitInit();
 
             // TODO use MatchingLegacyV1 to get ExposureSummary item
 
@@ -193,6 +208,8 @@ final class ExposureNotificationClientImpl implements ExposureNotificationClient
     @Override
     public Task<List<ExposureInformation>> getExposureInformation(String token) {
         return Tasks.call(() -> {
+            awaitInit();
+
             // See src/deviceForTesters/java/de.rki.coronawarnapp/TestRiskLevelCalculation.kt
             List<ExposureInformation> result = new ArrayList<>();
 
