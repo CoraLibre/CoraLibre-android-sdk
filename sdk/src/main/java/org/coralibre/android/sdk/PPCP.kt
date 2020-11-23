@@ -17,7 +17,6 @@ import org.coralibre.android.sdk.internal.AppConfigManager
 import org.coralibre.android.sdk.internal.BroadcastHelper
 import org.coralibre.android.sdk.internal.TracingService
 import org.coralibre.android.sdk.internal.database.DatabaseAccess
-import org.coralibre.android.sdk.internal.util.ProcessUtil
 
 object PPCP {
     private const val TAG = "PPCP Interface"
@@ -30,13 +29,10 @@ object PPCP {
         if (isInitialized) {
             return
         }
-        // TODO: there's no else branch, that's bad.
-        if (ProcessUtil.isMainProcess(context)) {
-            DatabaseAccess.init(context)
-            // TODO check: is this indeed the app context?
-            executeInit(context)
-            isInitialized = true
-        }
+        DatabaseAccess.init(context)
+        // TODO check: is this indeed the app context?
+        executeInit(context)
+        isInitialized = true
     }
 
     private fun executeInit(context: Context) {
