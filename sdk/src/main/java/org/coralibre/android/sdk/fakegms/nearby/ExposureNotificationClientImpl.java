@@ -31,6 +31,10 @@ import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -42,15 +46,14 @@ final class ExposureNotificationClientImpl implements ExposureNotificationClient
     public static final String TAG = ExposureNotificationClientImpl.class.getSimpleName();
 
     private final Context context;
+    private final ExecutorService threadPool;
+    private final Future<?> init;
     private Database database;
-    private Thread init;
 
     ExposureNotificationClientImpl(@NonNull final Context context) {
         this.context = context;
-        this.init = new Thread(() -> {
-            PPCP.init(context);
-        });
-        init.start();
+        this.threadPool = Executors.newCachedThreadPool();
+        this.init = threadPool.submit(() -> PPCP.init(context));
     }
 
     private boolean isPPCPEnabled() {
@@ -58,13 +61,17 @@ final class ExposureNotificationClientImpl implements ExposureNotificationClient
     }
 
     private void awaitInit() throws InterruptedException {
-        // pretty awful solution, but it works
-        init.join();
+        // pretty weird solution, but it works
+        try {
+            init.get();
+        } catch (ExecutionException e) {
+            Log.e(TAG, "Error during ENF init", e);
+        }
     }
 
     @Override
     public Task<Void> start() {
-        return Tasks.call(() -> {
+        return Tasks.call(threadPool, () -> {
             awaitInit();
             if (!isPPCPEnabled()) {
                 PPCP.start(context);
@@ -79,7 +86,7 @@ final class ExposureNotificationClientImpl implements ExposureNotificationClient
 
     @Override
     public Task<Void> stop() {
-        return Tasks.call(() -> {
+        return Tasks.call(threadPool, () -> {
             awaitInit();
             if (isPPCPEnabled()) {
                 PPCP.stop(context);
@@ -91,7 +98,7 @@ final class ExposureNotificationClientImpl implements ExposureNotificationClient
 
     @Override
     public Task<Boolean> isEnabled() {
-        return Tasks.call(() -> {
+        return Tasks.call(threadPool, () -> {
             awaitInit();
             return isPPCPEnabled();
         });
@@ -102,7 +109,7 @@ final class ExposureNotificationClientImpl implements ExposureNotificationClient
      */
     @Override
     public Task<List<TemporaryExposureKey>> getTemporaryExposureKeyHistory() {
-        return Tasks.call(() -> {
+        return Tasks.call(threadPool, () -> {
             awaitInit();
             Iterable<InternalTemporaryExposureKey> dbTeks = database.getAllOwnTEKs();
             List<TemporaryExposureKey> result = new LinkedList<TemporaryExposureKey>();
@@ -125,7 +132,7 @@ final class ExposureNotificationClientImpl implements ExposureNotificationClient
         @Nullable final ExposureConfiguration exposureConfiguration,
         final String token
     ) {
-        return Tasks.call(() -> {
+        return Tasks.call(threadPool, () -> {
             awaitInit();
 
             if (exposureConfiguration == null || token == null || token.isEmpty()) {
@@ -191,7 +198,7 @@ final class ExposureNotificationClientImpl implements ExposureNotificationClient
 
     @Override
     public Task<ExposureSummary> getExposureSummary(String token) {
-        return Tasks.call(() -> {
+        return Tasks.call(threadPool, () -> {
             awaitInit();
 
             // TODO use MatchingLegacyV1 to get ExposureSummary item
@@ -207,7 +214,7 @@ final class ExposureNotificationClientImpl implements ExposureNotificationClient
 
     @Override
     public Task<List<ExposureInformation>> getExposureInformation(String token) {
-        return Tasks.call(() -> {
+        return Tasks.call(threadPool, () -> {
             awaitInit();
 
             // See src/deviceForTesters/java/de.rki.coronawarnapp/TestRiskLevelCalculation.kt
