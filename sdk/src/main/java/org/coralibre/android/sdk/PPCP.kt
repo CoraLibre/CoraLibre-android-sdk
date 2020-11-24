@@ -30,18 +30,13 @@ object PPCP {
             return
         }
         DatabaseAccess.init(context)
-        // TODO check: is this indeed the app context?
-        executeInit(context)
-        isInitialized = true
-    }
-
-    private fun executeInit(context: Context) {
         // TODO: Schedule the truncation to happen regularly and asynchronously instead of
         //  (only) performing it here.
         DatabaseAccess.getDefaultDatabaseInstance().truncateLast14Days()
         val appConfigManager = AppConfigManager.getInstance(context)
         val advertising = appConfigManager.isAdvertisingEnabled
         val receiving = appConfigManager.isReceivingEnabled
+        isInitialized = true
         if (advertising || receiving) {
             start(context, advertising, receiving)
         }

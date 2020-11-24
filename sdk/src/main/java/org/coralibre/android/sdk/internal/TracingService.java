@@ -163,7 +163,6 @@ public class TracingService extends Service {
         startAdvertising = intent.getBooleanExtra(EXTRA_ADVERTISE, true);
         startReceiving = intent.getBooleanExtra(EXTRA_RECEIVE, true);
 
-        // TODO all these start commands should be asynchronous
         if (ACTION_START.equals(intent.getAction())) {
             startForeground(NOTIFICATION_ID, createForegroundNotification());
             start();
