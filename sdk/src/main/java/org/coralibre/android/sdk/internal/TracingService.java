@@ -38,6 +38,10 @@ import org.coralibre.android.sdk.internal.bluetooth.BleServer;
 import org.coralibre.android.sdk.internal.bluetooth.BluetoothServiceStatus;
 import org.coralibre.android.sdk.internal.bluetooth.BluetoothState;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+// TODO this class is a bloated mess
 public class TracingService extends Service {
 
     private static final String TAG = "TracingService";
@@ -64,6 +68,7 @@ public class TracingService extends Service {
     private Handler handler;
     private PowerManager.WakeLock wl;
 
+    private ExecutorService bluetoothExecutor;
     private BleServer bleServer;
     private BleClient bleClient;
 
@@ -99,7 +104,7 @@ public class TracingService extends Service {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (BroadcastHelper.ACTION_UPDATE_ERRORS.equals(intent.getAction())) {
-                invalidateForegroundNotification();
+                showForegroundNotification();
             }
         }
     };
@@ -143,7 +148,7 @@ public class TracingService extends Service {
             PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
             assert pm != null;
             wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
-                    getPackageName() + ":TracingServiceWakeLock");
+                getPackageName() + ":TracingServiceWakeLock");
             //TODO: insert wakelock timeout
             // Remember google wrote on its website that the scan duration is ~4sec:
             // https://developers.google.com/android/exposure-notifications/ble-attenuation-overview
@@ -158,6 +163,7 @@ public class TracingService extends Service {
         startAdvertising = intent.getBooleanExtra(EXTRA_ADVERTISE, true);
         startReceiving = intent.getBooleanExtra(EXTRA_RECEIVE, true);
 
+        // TODO all these start commands should be asynchronous
         if (ACTION_START.equals(intent.getAction())) {
             startForeground(NOTIFICATION_ID, createForegroundNotification());
             start();
@@ -188,16 +194,16 @@ public class TracingService extends Service {
         }
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
-                .setOngoing(true)
-                .setSmallIcon(R.drawable.ic_coralibre)
-                .setContentIntent(contentIntent);
+            .setOngoing(true)
+            .setSmallIcon(R.drawable.ic_coralibre)
+            .setContentIntent(contentIntent);
 
         String text = getString(R.string.ppcp_sdk_service_notification_text);
         builder.setContentTitle(getString(R.string.ppcp_sdk_service_notification_title))
-                .setContentText(text)
-                .setStyle(new NotificationCompat.BigTextStyle().bigText(text))
-                .setPriority(NotificationCompat.PRIORITY_LOW)
-                .build();
+            .setContentText(text)
+            .setStyle(new NotificationCompat.BigTextStyle().bigText(text))
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .build();
 
         return builder.build();
     }
@@ -207,13 +213,13 @@ public class TracingService extends Service {
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         String channelName = getString(R.string.ppcp_sdk_service_notification_channel);
         NotificationChannel channel =
-                new NotificationChannel(NOTIFICATION_CHANNEL_ID, channelName, NotificationManager.IMPORTANCE_LOW);
+            new NotificationChannel(NOTIFICATION_CHANNEL_ID, channelName, NotificationManager.IMPORTANCE_LOW);
         channel.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
         assert notificationManager != null;
         notificationManager.createNotificationChannel(channel);
     }
 
-    private void invalidateForegroundNotification() {
+    private void showForegroundNotification() {
         if (isFinishing) {
             return;
         }
@@ -230,7 +236,7 @@ public class TracingService extends Service {
         }
         handler = new Handler();
 
-        invalidateForegroundNotification();
+        showForegroundNotification();
         restartClient();
         restartServer();
     }
@@ -239,30 +245,37 @@ public class TracingService extends Service {
         if (handler == null) {
             handler = new Handler();
         }
-        invalidateForegroundNotification();
+        if (bluetoothExecutor == null) {
+            bluetoothExecutor = Executors.newFixedThreadPool(2);
+        }
+        showForegroundNotification();
     }
 
     private void restartClient() {
-        BluetoothState bluetoothState = startClient();
-        if (bluetoothState == BluetoothState.NOT_SUPPORTED) {
-            Log.e(TAG, "bluetooth not supported");
-            return;
-        }
+        bluetoothExecutor.execute(() -> {
+            BluetoothState bluetoothState = startClient();
+            if (bluetoothState == BluetoothState.NOT_SUPPORTED) {
+                Log.e(TAG, "bluetooth not supported");
+                return;
+            }
 
-        handler.postDelayed(() -> {
-            stopScanning();
-            scheduleNextClientRestart(this, SCAN_INTERVAL_MILLIS);
-        }, SCAN_DURATION_MILLIS);
+            handler.postDelayed(() -> {
+                stopScanning();
+                scheduleNextClientRestart(this, SCAN_INTERVAL_MILLIS);
+            }, SCAN_DURATION_MILLIS);
+        });
     }
 
     private void restartServer() {
-        BluetoothState bluetoothState = startServer();
-        if (bluetoothState == BluetoothState.NOT_SUPPORTED) {
-            Log.e(TAG, "bluetooth not supported");
-            return;
-        }
+        bluetoothExecutor.execute(() -> {
+            BluetoothState bluetoothState = startServer();
+            if (bluetoothState == BluetoothState.NOT_SUPPORTED) {
+                Log.e(TAG, "bluetooth not supported");
+                return;
+            }
 
-        scheduleNextServerRestart(this);
+            scheduleNextServerRestart(this);
+        });
     }
 
     public static void scheduleNextClientRestart(Context context, long scanInterval) {
@@ -362,6 +375,10 @@ public class TracingService extends Service {
 
         if (handler != null) {
             handler.removeCallbacksAndMessages(null);
+        }
+        if (bluetoothExecutor != null) {
+            bluetoothExecutor.shutdown();
+            bluetoothExecutor = null;
         }
     }
 
