@@ -25,16 +25,10 @@ final class ExecutorTask<T> extends Task<T> {
     private final List<OnFailureListener> failureListeners;
 
     ExecutorTask(@NonNull Executor executor, @NonNull Callable<T> callable) {
-        this.task = execute(executor, callable);
         this.successListeners = new LinkedList<>();
         this.failureListeners = new LinkedList<>();
-    }
-
-    @NonNull
-    private FutureTask<T> execute(Executor executor, Callable<T> callable) {
-        FutureTask<T> result = new FutureTask<>(callable);
-        executor.execute(new ListenerInvoker(result));
-        return result;
+        this.task = new FutureTask<>(callable);
+        executor.execute(new ListenerInvoker(task));
     }
 
     @NonNull
