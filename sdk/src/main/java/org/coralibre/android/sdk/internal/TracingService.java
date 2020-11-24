@@ -234,6 +234,7 @@ public class TracingService extends Service {
             handler.removeCallbacksAndMessages(null);
         }
         handler = new Handler();
+        bluetoothExecutor = Executors.newFixedThreadPool(2);
 
         showForegroundNotification();
         restartClient();
