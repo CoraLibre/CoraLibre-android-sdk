@@ -1,3 +1,6 @@
+# CLOSED
+The development of coralibre is stuck. This is not bad as there is another implementation called [CCTG](https://codeberg.org/corona-contact-tracing-germany/cwa-android) that does exactly what we what we where trying to achieve with this project. You can download CCTG from [fdroid](https://f-droid.org/packages/de.corona.tracing/). The CCTG Project is also looking for contributors ;)
+
 # CoraLibre-android-sdk
 
 ![cora-libreicon](https://user-images.githubusercontent.com/1891273/85005834-9cda9d80-b159-11ea-83d9-52d8c662a31d.png)
