@@ -1,6 +1,3 @@
-# CLOSED
-The development of coralibre is stuck. This is not bad as there is another implementation called [CCTG](https://codeberg.org/corona-contact-tracing-germany/cwa-android) that does exactly what we what we where trying to achieve with this project. You can download CCTG from [fdroid](https://f-droid.org/packages/de.corona.tracing/). Also they are looking for contributors ;)
-
 # CoraLibre-android-sdk
 
 ![cora-libreicon](https://user-images.githubusercontent.com/1891273/85005834-9cda9d80-b159-11ea-83d9-52d8c662a31d.png)
@@ -8,6 +5,10 @@ The development of coralibre is stuck. This is not bad as there is another imple
 This code is based on the [DP-3T prestandard android-sdk code](https://github.com/DP-3T/dp3t-sdk-android/tree/prestandard).
 It aims to be compatible with the Apple/Google developed [Privacy-Preserving Contact Tracing](https://www.apple.com/covid19/contacttracing/) (PPCP) protocol.
 So far it is behaving more like DP-3T but we aim to transform it to be PPCP compatible. (We are making progress, the new CryptoModule seems to work right already.)
+
+## Note on development status
+
+The development of CoraLibre is stalled. There is another implementation called [CCTG](https://codeberg.org/corona-contact-tracing-germany/cwa-android), which does exactly what we what we where trying to achieve with this project. You can download CCTG from [the F-Droid store](https://f-droid.org/packages/de.corona.tracing/).
 
 ## Todo
 
