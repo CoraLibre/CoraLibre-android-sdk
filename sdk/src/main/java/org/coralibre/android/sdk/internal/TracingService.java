@@ -278,8 +278,8 @@ public class TracingService extends Service {
     private void restartClient() {
         bluetoothExecutor.execute(() -> {
             /*
-             TODO: this service shouldn't be calling CoraLibre.
-             Can be deleted after database refactor
+                TODO: this service shouldn't be calling CoraLibre.
+                Can be deleted after database refactor
             */
             CoraLibre.checkInit(getApplicationContext());
             BluetoothState bluetoothState = startClient();
@@ -297,8 +297,8 @@ public class TracingService extends Service {
     private void restartServer() {
         bluetoothExecutor.execute(() -> {
             /*
-             TODO: this service shouldn't be calling CoraLibre.
-             Can be deleted after database refactor
+                TODO: this service shouldn't be calling CoraLibre.
+                Can be deleted after database refactor
             */
             CoraLibre.checkInit(getApplicationContext());
             BluetoothState bluetoothState = startServer();

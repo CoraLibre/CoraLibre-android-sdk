@@ -1,7 +1,6 @@
 package org.coralibre.android.sdk.fakegms.nearby;
 
 import android.content.Context;
-import android.content.Intent;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -15,20 +14,11 @@ import org.coralibre.android.sdk.fakegms.nearby.exposurenotification.TemporaryEx
 import org.coralibre.android.sdk.fakegms.tasks.Task;
 import org.coralibre.android.sdk.fakegms.tasks.Tasks;
 import org.coralibre.android.sdk.internal.CoraLibre;
-import org.coralibre.android.sdk.internal.datatypes.DiagnosisKey;
-import org.coralibre.android.sdk.internal.datatypes.IntervalOfCapturedData;
-import org.coralibre.android.sdk.internal.datatypes.util.DiagnosisKeyUtil;
-import org.coralibre.android.sdk.internal.matching.MatchingLegacyV1;
 import org.coralibre.android.sdk.internal.util.IoExecutor;
-import org.coralibre.android.sdk.proto.TemporaryExposureKeyFile.TemporaryExposureKeyExport;
 
-import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 
 // TODO What happens with queries for tokens, for that no keys have been provided?
@@ -46,7 +36,7 @@ final class ExposureNotificationClientImpl implements ExposureNotificationClient
     @Override
     public Task<Void> start() {
         return Tasks.call(IoExecutor.INSTANCE, () -> {
-             if (!CoraLibre.isEnabled(context)) {
+            if (!CoraLibre.isEnabled(context)) {
                 Log.d(TAG, "Starting...");
                 CoraLibre.enable(context);
             }
