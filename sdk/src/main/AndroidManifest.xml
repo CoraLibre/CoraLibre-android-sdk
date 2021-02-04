@@ -19,7 +19,6 @@
 	<uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
 	<uses-permission android:name="android.permission.WAKE_LOCK" />
 	<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-	<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
 	<uses-feature
 		android:name="android.hardware.bluetooth"
@@ -36,7 +35,7 @@
 		<service
 			android:name="org.coralibre.android.sdk.internal.TracingService"
 			android:enabled="true"
-			android:foregroundServiceType="location" />
+			android:foregroundServiceType="location|connectedDevice|dataSync" />
 
 		<receiver
 			android:name="org.coralibre.android.sdk.internal.TracingServiceBroadcastReceiver"

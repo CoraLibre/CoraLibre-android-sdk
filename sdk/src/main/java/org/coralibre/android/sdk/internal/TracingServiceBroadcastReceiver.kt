@@ -19,11 +19,9 @@ import org.coralibre.android.sdk.BuildConfig
 class TracingServiceBroadcastReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, i: Intent) {
         if (BuildConfig.DEBUG) {
-            Log.d(TAG, "received broadcast to start service")
+            Log.w(TAG, "received broadcast to start service")
         }
         val intent = Intent(context, TracingService::class.java).setAction(i.action)
-        intent.putExtra(TracingService.EXTRA_ADVERTISE, true)
-        intent.putExtra(TracingService.EXTRA_RECEIVE, true)
         ContextCompat.startForegroundService(context, intent)
     }
 

@@ -14,7 +14,7 @@ interface Database {
     //  BUT take care that empty data is handled correctly everywhere (since empty != non existent)
 
     fun addGeneratedTEK(generatedTEK: InternalTemporaryExposureKey)
-    val allOwnTEKs: Iterable<InternalTemporaryExposureKey>
+    fun getAllOwnTEKs(): Iterable<InternalTemporaryExposureKey>
 
     /**
      * @param interval An interval for that a temporary exposure key exists
@@ -24,7 +24,7 @@ interface Database {
     fun getOwnTEK(interval: ENInterval): InternalTemporaryExposureKey
     fun hasTEKForInterval(interval: ENInterval): Boolean
     fun addCapturedPayload(collectedPayload: CapturedData)
-    val allCollectedPayload: Iterable<IntervalOfCapturedData>
+    fun getAllCollectedPayload(): Iterable<IntervalOfCapturedData>
 
     /**
      * @param token A token to identify the key set later on. If the token has already been used
@@ -88,4 +88,6 @@ interface Database {
     // TODO when is this method actually called?
     fun truncateLast14Days()
     fun clearAllData()
+
+    fun close() {}
 }

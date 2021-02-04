@@ -21,16 +21,11 @@ import org.coralibre.android.sdk.internal.datatypes.util.ENIntervalUtil.currentI
 import java.util.HashMap
 import java.util.LinkedList
 
-// Note:
-// To get a database object, don't directly use the constructor of this class, but use
-// the DatabaseAccess.kt class next to this class. When implementing database tests,
-// look in the existing tests to see how that is done, if unsure.
-// This is not the most elegant way to do, but for now it is the way it is, and will be
-// refactored in the future.
-
 /**
  * @param context   The context for the database. This is usually the Application context.
- * @param inMemory  If true, an inMemoryDatabaseBuilder is used for creating, resulting in stored data disappearing when the process is killed. Otherwise, a databaseBuilder is used, for aan actually persistent database.
+ * @param inMemory  If true, an inMemoryDatabaseBuilder is used for creating,
+ * resulting in stored data disappearing when the process is killed.
+ * Otherwise, a databaseBuilder is used, for an actually persistent database.
  */
 class PersistentDatabase @JvmOverloads constructor(
     context: Context,
@@ -162,35 +157,33 @@ class PersistentDatabase @JvmOverloads constructor(
         return teks[0].toTemporaryExposureKey()
     }
 
-    override val allOwnTEKs: Iterable<InternalTemporaryExposureKey>
-        get() {
-            val result: MutableList<InternalTemporaryExposureKey> = LinkedList()
-            for (e in db.daoTEK().allGeneratedTEKs) {
-                result.add(e.toTemporaryExposureKey())
-            }
-            return result
+    override fun getAllOwnTEKs(): Iterable<InternalTemporaryExposureKey> {
+        val result: MutableList<InternalTemporaryExposureKey> = LinkedList()
+        for (e in db.daoTEK().allGeneratedTEKs) {
+            result.add(e.toTemporaryExposureKey())
         }
+        return result
+    }
 
     // find correct interval
-    override val allCollectedPayload: Iterable<IntervalOfCapturedData>
-        get() {
-            val allData = db.daoCapturedData().allData
-            val collectedPackagesByInterval: MutableMap<ENInterval, IntervalOfCapturedData> =
-                HashMap()
-            for (e_payload in allData) {
-                val payload = e_payload.toCapturedData()
-                val interval = payload.enInterval
+    override fun getAllCollectedPayload(): Iterable<IntervalOfCapturedData> {
+        val allData = db.daoCapturedData().allData
+        val collectedPackagesByInterval: MutableMap<ENInterval, IntervalOfCapturedData> =
+            HashMap()
+        for (e_payload in allData) {
+            val payload = e_payload.toCapturedData()
+            val interval = payload.enInterval
 
-                // find correct interval
-                var payloadPerInterval = collectedPackagesByInterval[interval]
-                if (payloadPerInterval == null) {
-                    payloadPerInterval = IntervalOfCapturedData(interval)
-                    collectedPackagesByInterval[interval] = payloadPerInterval
-                }
-                payloadPerInterval.add(payload)
+            // find correct interval
+            var payloadPerInterval = collectedPackagesByInterval[interval]
+            if (payloadPerInterval == null) {
+                payloadPerInterval = IntervalOfCapturedData(interval)
+                collectedPackagesByInterval[interval] = payloadPerInterval
             }
-            return collectedPackagesByInterval.values
+            payloadPerInterval.add(payload)
         }
+        return collectedPackagesByInterval.values
+    }
 
     override fun truncateLast14Days() {
         val now = currentInterval
@@ -217,5 +210,9 @@ class PersistentDatabase @JvmOverloads constructor(
         db.daoToken().clearAllData()
 
         // TODO test clear/delete
+    }
+
+    override fun close() {
+        db.close()
     }
 }

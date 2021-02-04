@@ -15,7 +15,7 @@ class AssociatedMetadata {
     constructor(majorVersion: Int, minorVersion: Int, powerLevel: Int) {
         if (majorVersion < 0 || majorVersion >= 4) throw InvalidParameterException("Major version out of bound")
         if (minorVersion < 0 || minorVersion >= 4) throw InvalidParameterException("Minor version out of bound")
-        if (powerLevel < -127 || powerLevel > 127) throw InvalidParameterException("Power level out of bound")
+        if (powerLevel < -127 || powerLevel > 127) throw InvalidParameterException("Power level out of bound: $powerLevel")
         mutData[VERSIONING_BYTE] = (
             ((majorVersion and 3) shl MAJOR_BIT_POS) or ((minorVersion and 3) shl MINOR_BIT_POS)
             ).toByte()

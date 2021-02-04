@@ -11,22 +11,13 @@
 
 <resources>
 
-	<string name="ppcp_sdk_service_notification_channel">Corona-Tracer</string>
-	<string name="ppcp_sdk_service_notification_title">Corona-Tracer</string>
-	<string name="ppcp_sdk_service_notification_text">Looking for people nearby…</string>
-	<string name="ppcp_sdk_service_notification_errors">App can\'t function properly:</string>
-	<string name="ppcp_sdk_service_notification_error_location_permission">missing location permission</string>
-	<string name="ppcp_sdk_service_notification_error_location_service">location service disabled</string>
-	<string name="ppcp_sdk_service_notification_error_bluetooth_disabled">bluetooth is disabled</string>
-	<string name="ppcp_sdk_service_notification_error_battery_optimization">battery optimization enabled</string>
-	<string name="ppcp_sdk_service_notification_error_bluetooth_not_supported">bluetooth low-energy is not supported on this device</string>
-	<string name="ppcp_sdk_service_notification_error_bluetooth_internal_error">bluetooth system error, please restart device</string>
-	<string name="ppcp_sdk_service_notification_error_bluetooth_advertising_error">failing to broadcast with bluetooth</string>
-	<string name="ppcp_sdk_service_notification_error_bluetooth_scanner_error">failing to search for nearby bluetooth devices</string>
-	<string name="ppcp_sdk_service_notification_error_sync_server">failed to load new infection data (server error)</string>
-	<string name="ppcp_sdk_service_notification_error_sync_network">failed to load new infection data (network error)</string>
-	<string name="ppcp_sdk_service_notification_error_sync_database">failed to load new infection data (database error)</string>
-	<string name="ppcp_sdk_service_notification_error_sync_timing">device time does not match server time</string>
-	<string name="ppcp_sdk_service_notification_error_sync_signature">failed to load new infection data (invalid signature)</string>
+	<string name="ppcp_sdk_service_notification_channel">Tracing Service</string>
+	<string name="ppcp_sdk_service_notification_title">Tracing Service</string>
+	<string name="ppcp_sdk_service_notification_text">Contact tracing is active</string>
+    <string name="permission_dialog_title">Please grant necessary permissions</string>
+    <string name="permission_grant">Grant</string>
+	<string name="permission_name_fine_location">Access fine location</string>
+	<string name="permission_description_fine_location">Required to use the Bluetooth Low Energy mechanism for tracing. This permission will never be used to retrieve your actual location.</string>
+    <string name="permission_granted">Granted</string>
 
 </resources>

@@ -20,6 +20,8 @@ plugins {
 apply plugin: 'kotlin-android'
 apply plugin: 'org.jetbrains.kotlin.kapt'
 
+version = "0.3.0"
+
 android {
     compileSdkVersion 29
 
@@ -27,7 +29,7 @@ android {
         minSdkVersion 23
         targetSdkVersion 29
         versionCode 26
-        versionName "0.2.6"
+        versionName project.version
         testInstrumentationRunnerArgument 'androidx.benchmark.suppressErrors', 'EMULATOR,LOW-BATTERY,ACTIVITY-MISSING,DEBUGGABLE,UNLOCKED,UNSUSTAINED-ACTIVITY-MISSING'
         testInstrumentationRunner "androidx.benchmark.junit4.AndroidBenchmarkRunner"
 
@@ -49,6 +51,10 @@ android {
     compileOptions {
         sourceCompatibility = 1.8
         targetCompatibility = 1.8
+    }
+
+    buildFeatures {
+        viewBinding = true
     }
 }
 
@@ -99,12 +105,18 @@ afterEvaluate {
     publishing {
         publications {
             release(MavenPublication) {
-                from components.release
+                def component
+                if (System.getenv('ARTIFACT')) {
+                    component = components.release
+                } else {
+                    component = components.debug
+                }
+                from component
                 artifact androidSourcesJar
 
-                groupId = System.getenv('GROUP')
-                artifactId = System.getenv('ARTIFACT')
-                version = System.getenv('VERSION')
+                groupId = System.getenv('GROUP') ?: 'com.github.CoraLibre'
+                artifactId = System.getenv('ARTIFACT') ?: 'CoraLibre-android-sdk'
+                version = System.getenv('VERSION') ?: "${project.version}-SNAPSHOT"
             }
         }
     }
@@ -161,5 +173,7 @@ dependencies {
     implementation "androidx.room:room-runtime:$room_version"
     kapt "androidx.room:room-compiler:$room_version"
 
-
+    // UI
+    implementation "androidx.fragment:fragment-ktx:1.2.5"
+    implementation "androidx.recyclerview:recyclerview:1.1.0"
 }

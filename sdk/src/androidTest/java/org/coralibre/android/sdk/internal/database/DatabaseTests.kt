@@ -3,8 +3,6 @@ package org.coralibre.android.sdk.internal.database
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import org.coralibre.android.sdk.DatatypesTestUtil
-import org.coralibre.android.sdk.internal.database.DatabaseAccess.getDefaultDatabaseInstance
-import org.coralibre.android.sdk.internal.database.DatabaseAccess.init
 import org.coralibre.android.sdk.internal.datatypes.AssociatedEncryptedMetadata
 import org.coralibre.android.sdk.internal.datatypes.CapturedData
 import org.coralibre.android.sdk.internal.datatypes.DiagnosisKey
@@ -14,11 +12,10 @@ import org.coralibre.android.sdk.internal.datatypes.RollingProximityIdentifier
 import org.coralibre.android.sdk.internal.datatypes.util.ENIntervalUtil.createFromUnixTimestamp
 import org.coralibre.android.sdk.internal.datatypes.util.ENIntervalUtil.currentInterval
 import org.coralibre.android.sdk.internal.datatypes.util.ENIntervalUtil.getMidnight
-import org.junit.AfterClass
+import org.junit.After
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Before
-import org.junit.BeforeClass
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.util.LinkedList
@@ -26,9 +23,16 @@ import java.util.Random
 
 @RunWith(AndroidJUnit4::class)
 class DatabaseTests {
+    private lateinit var database: Database
+
     @Before
-    fun clearData() {
-        getDefaultDatabaseInstance().clearAllData()
+    fun initializeDatabase() {
+        database = PersistentDatabase(InstrumentationRegistry.getInstrumentation().context, true)
+    }
+
+    @After
+    fun closeDatabase() {
+        database.close()
     }
 
     @Test
@@ -39,11 +43,11 @@ class DatabaseTests {
         random.nextBytes(dumTekBytes)
         val dumInterval = ENInterval(getMidnight(2000L))
         val dumTek = InternalTemporaryExposureKey(dumInterval, dumTekBytes)
-        getDefaultDatabaseInstance().addGeneratedTEK(dumTek)
+        database.addGeneratedTEK(dumTek)
 
         // Query:
-        val resultTeks = getDefaultDatabaseInstance().allOwnTEKs
-        val resultTekForInterval = getDefaultDatabaseInstance().getOwnTEK(dumInterval)
+        val resultTeks = database.getAllOwnTEKs()
+        val resultTekForInterval = database.getOwnTEK(dumInterval)
 
         // Compare:
         var numResultTeks = 0
@@ -79,10 +83,10 @@ class DatabaseTests {
             ),
             AssociatedEncryptedMetadata(dumAem)
         )
-        getDefaultDatabaseInstance().addCapturedPayload(dumData)
+        database.addCapturedPayload(dumData)
 
         // Query:
-        val resultIntervals = getDefaultDatabaseInstance().allCollectedPayload
+        val resultIntervals = database.getAllCollectedPayload()
 
         // Compare:
         var numResultIntervals = 0
@@ -118,12 +122,12 @@ class DatabaseTests {
             val tekRemoveBytes = ByteArray(16)
             random.nextBytes(tekRemoveBytes)
             val tekRemove = InternalTemporaryExposureKey(intervalRemove, tekRemoveBytes)
-            getDefaultDatabaseInstance().addGeneratedTEK(tekRemove)
+            database.addGeneratedTEK(tekRemove)
         }
         val tekKeepBytes = ByteArray(16)
         random.nextBytes(tekKeepBytes)
         val tekKeep = InternalTemporaryExposureKey(intervalKeep, tekKeepBytes)
-        getDefaultDatabaseInstance().addGeneratedTEK(tekKeep)
+        database.addGeneratedTEK(tekKeep)
         run {
             val rpiRemove = ByteArray(16)
             random.nextBytes(rpiRemove)
@@ -139,7 +143,7 @@ class DatabaseTests {
                 RollingProximityIdentifier(rpiRemove, createFromUnixTimestamp(timestampRemove)),
                 AssociatedEncryptedMetadata(aemRemove)
             )
-            getDefaultDatabaseInstance().addCapturedPayload(dataRemove)
+            database.addCapturedPayload(dataRemove)
         }
         val rpiKeep = ByteArray(16)
         random.nextBytes(rpiKeep)
@@ -155,14 +159,14 @@ class DatabaseTests {
             RollingProximityIdentifier(rpiKeep, intervalKeep),
             AssociatedEncryptedMetadata(aemKeep)
         )
-        getDefaultDatabaseInstance().addCapturedPayload(dataKeep)
+        database.addCapturedPayload(dataKeep)
 
         // Truncate:
-        getDefaultDatabaseInstance().truncateLast14Days()
+        database.truncateLast14Days()
 
         // Query:
-        val resultTeks = getDefaultDatabaseInstance().allOwnTEKs
-        val resultIntervals = getDefaultDatabaseInstance().allCollectedPayload
+        val resultTeks = database.getAllOwnTEKs()
+        val resultIntervals = database.getAllCollectedPayload()
 
         // Compare:
         var numResultTeks = 0
@@ -190,77 +194,59 @@ class DatabaseTests {
 
     @Test
     fun testAddDiagnosisKeys() {
-        val db = getDefaultDatabaseInstance()
         val diagKeys = LinkedList<DiagnosisKey>()
         diagKeys.add(DatatypesTestUtil.createDummyDiagnosisKey())
         val token0 = "token0"
-        db.addDiagnosisKeys(token0, diagKeys)
+        database.addDiagnosisKeys(token0, diagKeys)
         diagKeys.add(DatatypesTestUtil.createDummyDiagnosisKey())
         diagKeys.add(DatatypesTestUtil.createDummyDiagnosisKey())
         val token1 = "token1"
-        db.addDiagnosisKeys(token1, diagKeys)
+        database.addDiagnosisKeys(token1, diagKeys)
 
         // First verify that insertion with different tokens works:
         run {
-            val result0 = db.getDiagnosisKeys(token0)
+            val result0 = database.getDiagnosisKeys(token0)
             assertEquals(1, result0.size.toLong())
-            val result1 = db.getDiagnosisKeys(token1)
+            val result1 = database.getDiagnosisKeys(token1)
             assertEquals(3, result1.size.toLong())
         }
 
         // Now add additional keys for an existing token:
-        db.addDiagnosisKeys(token1, diagKeys)
+        database.addDiagnosisKeys(token1, diagKeys)
         run {
-            val result0 = db.getDiagnosisKeys(token0)
+            val result0 = database.getDiagnosisKeys(token0)
             assertEquals(1, result0.size.toLong())
-            val result1 = db.getDiagnosisKeys(token1)
+            val result1 = database.getDiagnosisKeys(token1)
             assertEquals(6, result1.size.toLong())
         }
     }
 
     @Test
     fun testDeleteToken() {
-        val db = getDefaultDatabaseInstance()
         val diagKeys = LinkedList<DiagnosisKey>()
         diagKeys.add(DatatypesTestUtil.createDummyDiagnosisKey())
         val token0 = "token0"
-        db.addDiagnosisKeys(token0, diagKeys)
+        database.addDiagnosisKeys(token0, diagKeys)
         diagKeys.add(DatatypesTestUtil.createDummyDiagnosisKey())
         diagKeys.add(DatatypesTestUtil.createDummyDiagnosisKey())
         val token1 = "token1"
-        db.addDiagnosisKeys(token1, diagKeys)
+        database.addDiagnosisKeys(token1, diagKeys)
 
         // Verify insertion worked as expected:
         run {
-            val result0 = db.getDiagnosisKeys(token0)
+            val result0 = database.getDiagnosisKeys(token0)
             assertEquals(1, result0.size.toLong())
-            val result1 = db.getDiagnosisKeys(token1)
+            val result1 = database.getDiagnosisKeys(token1)
             assertEquals(3, result1.size.toLong())
         }
 
         // Now delete token1 and check again:
-        db.deleteTokenWithData(token1)
+        database.deleteTokenWithData(token1)
         run {
-            val result0 = db.getDiagnosisKeys(token0)
+            val result0 = database.getDiagnosisKeys(token0)
             assertEquals(1, result0.size.toLong())
-            val result1 = db.getDiagnosisKeys(token1)
+            val result1 = database.getDiagnosisKeys(token1)
             assertEquals(0, result1.size.toLong())
-        }
-    }
-
-    companion object {
-        @BeforeClass
-        @JvmStatic
-        fun initGlobal() {
-            init(InstrumentationRegistry.getInstrumentation().context)
-        }
-
-        @AfterClass
-        @JvmStatic
-        fun deInit() {
-            // If this call is not performed, tests from other classes where the database's init is
-            // called might not run, since db reinitialization would throw an exception:
-            DatabaseAccess.deInit()
         }
     }
 }

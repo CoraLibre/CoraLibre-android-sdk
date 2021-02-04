@@ -11,13 +11,12 @@ package org.coralibre.android.sdk.internal
 
 import android.content.Context
 import android.content.Intent
-import org.coralibre.android.sdk.PPCP
 
 object BroadcastHelper {
     const val ACTION_UPDATE_ERRORS = "org.coralibre.android.sdk.internal.ACTION_UPDATE_ERRORS"
 
     fun sendUpdateBroadcast(context: Context) {
-        val intent = Intent(PPCP.UPDATE_INTENT_ACTION)
+        val intent = Intent(CoraLibre.UPDATE_INTENT_ACTION)
         context.sendBroadcast(intent)
     }
 

@@ -23,14 +23,14 @@ import org.coralibre.android.sdk.BuildConfig
 import org.coralibre.android.sdk.internal.AppConfigManager
 import org.coralibre.android.sdk.internal.BroadcastHelper.sendErrorUpdateBroadcast
 import org.coralibre.android.sdk.internal.bluetooth.BluetoothServiceStatus.Companion.getInstance
-import org.coralibre.android.sdk.internal.database.DatabaseAccess.getDefaultDatabaseInstance
+import org.coralibre.android.sdk.internal.database.Database
 import org.coralibre.android.sdk.internal.datatypes.BluetoothPayload
 import org.coralibre.android.sdk.internal.datatypes.CapturedData
 import org.coralibre.android.sdk.internal.datatypes.util.ENIntervalUtil.currentInterval
 import org.coralibre.android.sdk.internal.util.ByteToHex.toString
 import java.util.ArrayList
 
-class BleClient(private val context: Context) {
+class BleClient(private val context: Context, private val database: Database) {
     private var bleScanner: BluetoothLeScanner? = null
     private var bleScanCallback: ScanCallback? = null
 
@@ -47,7 +47,8 @@ class BleClient(private val context: Context) {
         val bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
         if (bluetoothAdapter == null || !bluetoothAdapter.isEnabled) {
             sendErrorUpdateBroadcast(context)
-            return if (bluetoothAdapter == null) BluetoothState.NOT_SUPPORTED else BluetoothState.DISABLED
+            return if (bluetoothAdapter == null) BluetoothState.NOT_SUPPORTED
+            else BluetoothState.DISABLED
         }
         bleScanner = bluetoothAdapter.bluetoothLeScanner
         if (bleScanner == null) {
@@ -83,6 +84,9 @@ class BleClient(private val context: Context) {
             val TAG = "ScanCallback"
             override fun onScanResult(callbackType: Int, result: ScanResult) {
                 bluetoothServiceStatus.updateScanStatus(BluetoothServiceStatus.SCAN_OK)
+                if (BuildConfig.DEBUG) {
+                    Log.d(TAG, "onScanResult()")
+                }
                 if (result.scanRecord != null) {
                     onDeviceFound(result)
                 }
@@ -91,7 +95,7 @@ class BleClient(private val context: Context) {
             override fun onBatchScanResults(results: List<ScanResult>) {
                 bluetoothServiceStatus.updateScanStatus(BluetoothServiceStatus.SCAN_OK)
                 if (BuildConfig.DEBUG) {
-                    Log.d(TAG, "Batch size " + results.size)
+                    Log.d(TAG, "onBatchScanResults(), size: ${results.size}")
                 }
                 for (result in results) {
                     onScanResult(0, result)
@@ -160,7 +164,6 @@ class BleClient(private val context: Context) {
     @Synchronized
     fun stop() {
         stopScan()
-        val database = getDefaultDatabaseInstance()
         for (data in collectedData) {
             database.addCapturedPayload(
                 CapturedData(

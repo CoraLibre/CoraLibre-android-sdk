@@ -59,7 +59,7 @@ class BleServer(private val context: Context) {
             return BluetoothState.NOT_SUPPORTED
         }
         mAdapter = mManager.adapter
-        mLeAdvertiser = mAdapter!!.getBluetoothLeAdvertiser()
+        mLeAdvertiser = mAdapter!!.bluetoothLeAdvertiser
         if (mLeAdvertiser == null) {
             return BluetoothState.NOT_SUPPORTED
         }
@@ -88,9 +88,9 @@ class BleServer(private val context: Context) {
         } catch (e: IOException) {
             throw RuntimeException(e)
         }
-        val txPowerLevel = deviceInfo.tx.toChar()
+        val txPowerLevel = deviceInfo.tx
         CryptoModule.getInstance().metadata =
-            AssociatedMetadata(PPCP_VERSION_MAJOR, PPCP_VERSION_MINOR, txPowerLevel.toInt())
+            AssociatedMetadata(PPCP_VERSION_MAJOR, PPCP_VERSION_MINOR, txPowerLevel)
         cryptoModule.renewPayload()
         val advData = AdvertiseData.Builder()
             .setIncludeDeviceName(false)
@@ -102,7 +102,7 @@ class BleServer(private val context: Context) {
         if (BuildConfig.DEBUG) {
             Log.d(
                 TAG,
-                "started advertising (only advertiseData), powerLevel: ${txPowerLevel.toInt()}"
+                "started advertising (only advertiseData), powerLevel: $txPowerLevel"
             )
         }
         return BluetoothState.ENABLED

@@ -12,12 +12,14 @@ package org.coralibre.android.sdk
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.util.Log
 import androidx.core.content.ContextCompat
 import org.coralibre.android.sdk.internal.AppConfigManager
 import org.coralibre.android.sdk.internal.BroadcastHelper
 import org.coralibre.android.sdk.internal.TracingService
 import org.coralibre.android.sdk.internal.database.DatabaseAccess
 
+@Deprecated("Use CoraLibre instead")
 object PPCP {
     private const val TAG = "PPCP Interface"
     const val UPDATE_INTENT_ACTION = "org.coralibre.android.sdk.UPDATE_ACTION"
@@ -26,6 +28,7 @@ object PPCP {
     @JvmStatic
     @Synchronized
     fun init(context: Context) {
+        Log.e(TAG, "Deprecated method has been called", Exception())
         if (isInitialized) {
             return
         }
@@ -60,8 +63,6 @@ object PPCP {
         appConfigManager.isReceivingEnabled = receive
         val intent = Intent(context, TracingService::class.java)
             .setAction(TracingService.ACTION_START)
-            .putExtra(TracingService.EXTRA_ADVERTISE, advertise)
-            .putExtra(TracingService.EXTRA_RECEIVE, receive)
         ContextCompat.startForegroundService(context, intent)
         BroadcastHelper.sendUpdateBroadcast(context)
     }
@@ -87,10 +88,14 @@ object PPCP {
 
     @JvmStatic
     val updateIntentFilter: IntentFilter
-        get() = IntentFilter(UPDATE_INTENT_ACTION)
+        get() {
+            Log.e(TAG, "Deprecated method has been called", Exception())
+            return IntentFilter(UPDATE_INTENT_ACTION)
+        }
 
     @JvmStatic
     fun clearData(context: Context, onDeleteListener: Runnable?) {
+        Log.e(TAG, "Deprecated method has been called", Exception())
         checkInit()
         val appConfigManager = AppConfigManager.getInstance(context)
         check(!(appConfigManager.isAdvertisingEnabled || appConfigManager.isReceivingEnabled)) { "Tracking must be stopped for clearing the local data" }

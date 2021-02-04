@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ppcp_sdk_service_notification_channel">Tracing-Service</string>
+    <string name="ppcp_sdk_service_notification_title">Tracing-Service</string>
+    <string name="ppcp_sdk_service_notification_text">Kontaktverfolgung ist aktiv</string>
+    <string name="permission_dialog_title">Bitte erteilen Sie die benötigten Berechtigungen</string>
+    <string name="permission_grant">Erlauben</string>
+    <string name="permission_name_fine_location">Zugriff auf genauen Standort</string>
+    <string name="permission_description_fine_location">Wird für die Nutzung von Bluetooth Low Energy benötigt. Diese Berechtigung wird niemals genutzt, um Ihren tatsächlichen Standort zu erfassen.</string>
+    <string name="permission_granted">Erteilt</string>
+</resources>

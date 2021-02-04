@@ -7,29 +7,22 @@ object DatabaseAccess {
     // Use this class whenever access to the database is required.
     // TODO: Use a proper factory for database creation.
     private var defaultDatabaseInstance: Database? = null
-    private var isInitialized = false
-    private fun createDefaultDatabaseInstance(appContext: Context) {
-        // To change (default) database type, only change the following line:
-        defaultDatabaseInstance = PersistentDatabase(appContext, true)
-        // TODO: Set inMemoryMock parameter to false to use real persistent database.
-    }
 
-    // Public interface:
+    @Synchronized
     @JvmStatic
     fun init(appContext: Context) {
-        if (isInitialized) {
+        if (defaultDatabaseInstance == null) {
+            // To change (default) database type, only change the following line:
+            defaultDatabaseInstance = PersistentDatabase(appContext, false)
+        } else {
             throw StorageException("Attempt to reinitialize database.")
         }
-        createDefaultDatabaseInstance(appContext)
-        isInitialized = true
     }
 
     @JvmStatic
     fun getDefaultDatabaseInstance(): Database {
-        if (!isInitialized) {
-            throw StorageException("Cannot access database. Database not initialized yet.")
-        }
-        return defaultDatabaseInstance!!
+        return defaultDatabaseInstance
+            ?: throw StorageException("Cannot access database. Database not initialized yet.")
     }
 
     /**
@@ -37,12 +30,12 @@ object DatabaseAccess {
      * unit tests, so that the next tests can initialize a fresh db without an exception being
      * thrown.
      */
+    @Synchronized
     @JvmStatic
     fun deInit() {
-        if (!isInitialized) {
+        if (defaultDatabaseInstance == null) {
             throw StorageException("Cannot forget database that is not known/existent.")
         }
         defaultDatabaseInstance = null
-        isInitialized = false
     }
 }

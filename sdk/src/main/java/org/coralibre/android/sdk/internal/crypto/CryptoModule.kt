@@ -1,6 +1,7 @@
 package org.coralibre.android.sdk.internal.crypto
 
 import android.annotation.SuppressLint
+import android.util.Log
 import com.google.crypto.tink.subtle.Hkdf
 import org.coralibre.android.sdk.internal.EnFrameworkConstants
 import org.coralibre.android.sdk.internal.database.Database
@@ -83,16 +84,13 @@ class CryptoModule private constructor(
     }
 
     fun updateTEK() {
-        println(getMidnight((if (testMode) currentIntervalForTesting else currentInterval)!!).get())
-        if (!currentTekDay.equals(
-                getMidnight((if (testMode) currentIntervalForTesting else currentInterval)!!)
-            )
-        ) {
+        val midnight = getMidnight((if (testMode) currentIntervalForTesting else currentInterval)!!)
+        Log.d(TAG, "Midnight: ${midnight.get()}")
+        if (currentTekDay != midnight) {
             val currentTek = getNewRandomTEK()
             currentTekDay = currentTek.interval
             currentRPIK = generateRPIK(currentTek)
             currentAEMK = generateAEMK(currentTek)
-            val database = getDefaultDatabaseInstance()
             database.addGeneratedTEK(InternalTemporaryExposureKey(currentTekDay, currentTek.key))
         }
     }
@@ -138,7 +136,6 @@ class CryptoModule private constructor(
 
         private var instance: CryptoModule? = null
 
-        // TODO: use proper factory class
         @Synchronized
         @JvmStatic
         fun getInstance(): CryptoModule {
